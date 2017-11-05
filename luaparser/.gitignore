@@ -1,0 +1,4 @@
+# Compiled python modules.
+*.pyc
+
+LuaListener.py

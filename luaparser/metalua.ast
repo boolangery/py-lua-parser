@@ -1,0 +1,6 @@
+local myTable = {
+    abc = "hello",
+    yes = 42
+}
+
+{ `Local{ { `Id "myTable" }, { `Table{ `Pair{ `String "abc", `String "hello" }, `Pair{ `String "yes", `Number "42" } } } } }
