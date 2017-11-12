@@ -65,6 +65,9 @@ class ParseTreeVisitor(LuaVisitor):
         # 'function' funcname funcbody
         return SetStat(self.visitChildren(ctx))
 
+    def visitLocalfunc(self, ctx):
+        return LocalRecStat(self.visitChildren(ctx))
+
     def visitFuncbody(self, ctx):
         return FunctionExpr(self.visitChildren(ctx))
 

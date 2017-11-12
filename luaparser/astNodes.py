@@ -99,6 +99,10 @@ class InvokeStat(Statement):
     def __init__(self, childs):
         super(InvokeStat, self).__init__('Invoke', childs)
 
+class LocalRecStat(Statement):
+    """Lua local function statement"""
+    def __init__(self, childs):
+        super(LocalRecStat, self).__init__('Localrec', childs)
 
 '''
 Lua Expression nodes.

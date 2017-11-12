@@ -3,8 +3,28 @@ Work in progress
 
 A Lua and LDoc parser written in Python.
 
+
+Usage
+=====
+
+.. code:: python
+    from luaparser import Parser
+    from luaparser import Printer
+
+
+    parser = Parser()
+
+    ast = parser.fileToAST('local var = 42')
+
+    print('** Default AST ***')
+    print(Printer.toStr(ast, Printer.Style.DEFAULT))
+
+    print('** Metalua AST ***')
+    print(Printer.toStr(ast, Printer.Style.METALUA))
+
+
 To generate parser
-==================
+------------------
 
 http://www.antlr.org/download/antlr-4.7-complete.jar
 
