@@ -32,11 +32,14 @@ class MetaluaVisitor():
         """
         return '{ `' + node.name + self.pprint_wrap(self.pprint_childsWrap(node)) + ' }'
 
-    def pprint_fullNodeW(self, node):
+    def pprint_fullNodeW(self, node, wrap=True):
         """ Pretty print a node with no wrapping for children.
             { `name ... }
         """
-        return '{ `' + node.name + self.pprint_wrap(self.pprint_childs(node)) + ' }'
+        if wrap:
+            return '{ `' + node.name + self.pprint_wrap(self.pprint_childs(node)) + ' }'
+        else:
+            return '`' + node.name + self.pprint_wrap(self.pprint_childsWrap(node))
 
     def pprint_fullNode(self, node):
         """ Pretty print a node with no wrapping .
@@ -58,6 +61,10 @@ class MetaluaVisitor():
         if node.startswith('"') and node.endswith('"'):
             node = node[1:-1]
         return '"' + str(node) + '"'
+
+    @visitor(list)
+    def visit(self, node):
+        return 'list'
 
     @visitor(Node)
     def visit(self, node):
@@ -89,7 +96,11 @@ class MetaluaVisitor():
 
     @visitor(IndexExpr)
     def visit(self, node):
-        return self.pprint_fullNode(node)
+        return self.pprint_fullNodeW(node)
+
+    @visitor(FunctionExpr)
+    def visit(self, node):
+        return self.pprint_fullNodeW(node, False)
 
     @visitor(NumberExpr)
     def visit(self, node):

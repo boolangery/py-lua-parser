@@ -61,6 +61,13 @@ class ParseTreeVisitor(LuaVisitor):
     def visitForin(self, ctx):
         return ForinStat(self.visitChildren(ctx))
 
+    def visitFunc(self, ctx):
+        # 'function' funcname funcbody
+        return SetStat(self.visitChildren(ctx))
+
+    def visitFuncbody(self, ctx):
+        return FunctionExpr(self.visitChildren(ctx))
+
 
     ''' Visiting expressions.
     '''
