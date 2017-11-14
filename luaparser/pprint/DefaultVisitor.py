@@ -20,16 +20,20 @@ class DefaultVisitor():
 
     @visitor(Node)
     def visit(self, node):
-        res = '`' + node.name + '{ '
-        if self.indent:
-            self.currentIndent += self.indentValue
-            res += '\n' + ' ' * self.currentIndent
-        if len(node.childs)>0:
-            for child in node.childs:
-                res += self.visit(child) + ', '
-            res = res[:-2]
-        if self.indent:
-            self.currentIndent -= self.indentValue
-            res += '\n' + ' ' * self.currentIndent
-        return res + ' }'
+        if node.isTerm():
+            res = '`' + node.name + ' "' + node.getText() + '"'
+        else:
+            res = '`' + node.name + '{ '
+            if self.indent:
+                self.currentIndent += self.indentValue
+                res += '\n' + ' ' * self.currentIndent
+            if len(node.childs)>0:
+                for child in node.childs:
+                    res += self.visit(child) + ', '
+                res = res[:-2]
+            if self.indent:
+                self.currentIndent -= self.indentValue
+                res += '\n' + ' ' * self.currentIndent
+            res += ' }'
+        return res
 

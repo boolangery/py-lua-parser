@@ -28,7 +28,10 @@ class Node(object):
         :return: true if the node is terminal
         :rtype: bool
         """
-        return (len(self.childs)==0)
+        return (len(self.childs)==0) or isinstance(self.childs[0], str)
+
+    def getText(self):
+        return self.childs[0]
 
 class Chunk(Node):
     """Define a Lua chunk"""
