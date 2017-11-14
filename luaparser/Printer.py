@@ -10,7 +10,6 @@
 """
 from enum import Enum
 from luaparser.pprint.DefaultVisitor import DefaultVisitor
-from luaparser.pprint.MetaluaVisitor import MetaluaVisitor
 
 
 class PrinterException(Exception):
@@ -23,10 +22,10 @@ class Printer():
         METALUA = 1
 
     @staticmethod
-    def toStr(ast, style = Style.DEFAULT):
+    def toStr(ast, style = Style.DEFAULT, indent=False, indentValue=2):
         visitor = None
         if style == Printer.Style.DEFAULT:
-            visitor = DefaultVisitor()
+            visitor = DefaultVisitor(indent, indentValue)
         elif style == Printer.Style.METALUA:
             visitor = MetaluaVisitor()
         else:
