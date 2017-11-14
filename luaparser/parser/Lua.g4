@@ -139,15 +139,17 @@ exp
     | exp '/' exp                               # opFloatDiv
     | exp '%' exp                               # opFloorDiv
     | exp '//' exp                              # opMod
+    | exp '&' exp                               # bitOpAnd
+    | exp '|' exp                               # bitOpOr
+    | exp '~' exp                               # bitOpXor
+    | exp '>>' exp                              # bitOpShiftR
+    | exp '<<' exp                              # bitOpShiftL
     | <assoc=right> exp '^' exp                 # opExpo
     | <assoc=right> exp operatorStrcat exp      # todo_3
     | exp operatorComparison exp                # todo_4
     | exp operatorAnd exp                       # todo_5
     | exp operatorOr exp                        # todo_6
-    | exp operatorBitwise exp                   # todo_7
     ;
-
-
 
 prefixexp
     : varOrExp nameAndArgs*
@@ -226,9 +228,6 @@ operatorComparison
 
 operatorStrcat
 	: '..';
-
-operatorBitwise
-	: '&' | '|' | '~' | '<<' | '>>';
 
 string
     : NORMALSTRING | CHARSTRING | LONGSTRING

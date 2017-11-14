@@ -176,40 +176,80 @@ class OpExpr(Expression):
     """Base class for operators"""
     pass
 
-class AddOpExpr(OpExpr):
+'''
+Arithmetic Operators    
+'''
+class AriOpExpr(OpExpr):
+    """Base class for Arithmetic Operators """
+    pass
+
+class AddOpExpr(AriOpExpr):
     """+ operator"""
     def __init__(self, childs):
-        super(AddOpExpr, self).__init__('Add', childs)
+        super(AddOpExpr, self).__init__('OpAdd', childs)
 
-class SubOpExpr(OpExpr):
+class SubOpExpr(AriOpExpr):
     """- operator"""
     def __init__(self, childs):
-        super(SubOpExpr, self).__init__('Sub', childs)
+        super(SubOpExpr, self).__init__('OpSub', childs)
 
-class MultOpExpr(OpExpr):
-    """- operator"""
+class MultOpExpr(AriOpExpr):
+    """* operator"""
     def __init__(self, childs):
-        super(MultOpExpr, self).__init__('Mult', childs)
+        super(MultOpExpr, self).__init__('OpMult', childs)
 
-class FloatDivOpExpr(OpExpr):
-    """- operator"""
+class FloatDivOpExpr(AriOpExpr):
+    """/ operator"""
     def __init__(self, childs):
-        super(FloatDivOpExpr, self).__init__('FloatDiv', childs)
+        super(FloatDivOpExpr, self).__init__('OpFloatDiv', childs)
 
-class FloorDivOpExpr(OpExpr):
-    """- operator"""
+class FloorDivOpExpr(AriOpExpr):
+    """// operator"""
     def __init__(self, childs):
-        super(FloorDivOpExpr, self).__init__('FloorDiv', childs)
+        super(FloorDivOpExpr, self).__init__('OpFloorDiv', childs)
 
-class ModOpExpr(OpExpr):
-    """- operator"""
+class ModOpExpr(AriOpExpr):
+    """# operator"""
     def __init__(self, childs):
-        super(ModOpExpr, self).__init__('Mod', childs)
+        super(ModOpExpr, self).__init__('OpMod', childs)
 
-class ExpoOpExpr(OpExpr):
-    """- operator"""
+class ExpoOpExpr(AriOpExpr):
+    """^ operator"""
     def __init__(self, childs):
-        super(ExpoOpExpr, self).__init__('Expo', childs)
+        super(ExpoOpExpr, self).__init__('OpExpo', childs)
+
+'''
+Bitwise Operators
+'''
+class BitOpExpr(OpExpr):
+    """Base class for Bitwise Operators"""
+    pass
+
+class AndOpExpr(BitOpExpr):
+    """And operator"""
+    def __init__(self, childs):
+        super(AndOpExpr, self).__init__('OpAnd', childs)
+
+class OrOpExpr(BitOpExpr):
+    """And operator"""
+    def __init__(self, childs):
+        super(OrOpExpr, self).__init__('OpOr', childs)
+
+class XorOpExpr(BitOpExpr):
+    """And operator"""
+    def __init__(self, childs):
+        super(XorOpExpr, self).__init__('OpXor', childs)
+
+class ShiftROpExpr(BitOpExpr):
+    """And operator"""
+    def __init__(self, childs):
+        super(ShiftROpExpr, self).__init__('OpShiftR', childs)
+
+class ShiftLOpExpr(BitOpExpr):
+    """And operator"""
+    def __init__(self, childs):
+        super(ShiftLOpExpr, self).__init__('OpShiftL', childs)
+
 
 '''
 Unitary Operators.

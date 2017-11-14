@@ -115,7 +115,7 @@ class ParseTreeVisitor(LuaVisitor):
         return ExprsExpr(self.visitChildren(ctx))
 
     '''
-    Visiting operator expressions
+    Visiting arithmetic operator expressions
     '''
     def visitOpAdd(self, ctx):
         return AddOpExpr(self.visitChildren(ctx))
@@ -137,3 +137,21 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitOpExpo(self, ctx):
         return ExpoOpExpr(self.visitChildren(ctx))
+
+    '''
+    Visiting Bitwise operator expressions
+    '''
+    def visitBitOpAnd(self, ctx):
+        return AndOpExpr(self.visitChildren(ctx))
+
+    def visitBitOpOr(self, ctx):
+        return OrOpExpr(self.visitChildren(ctx))
+
+    def visitBitOpXor(self, ctx):
+        return XorOpExpr(self.visitChildren(ctx))
+
+    def visitBitOpShiftR(self, ctx):
+        return ShiftROpExpr(self.visitChildren(ctx))
+
+    def visitBitOpShiftL(self, ctx):
+        return ShiftLOpExpr(self.visitChildren(ctx))
