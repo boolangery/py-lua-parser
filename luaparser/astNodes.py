@@ -186,6 +186,31 @@ class SubOpExpr(OpExpr):
     def __init__(self, childs):
         super(SubOpExpr, self).__init__('Sub', childs)
 
+class MultOpExpr(OpExpr):
+    """- operator"""
+    def __init__(self, childs):
+        super(MultOpExpr, self).__init__('Mult', childs)
+
+class FloatDivOpExpr(OpExpr):
+    """- operator"""
+    def __init__(self, childs):
+        super(FloatDivOpExpr, self).__init__('FloatDiv', childs)
+
+class FloorDivOpExpr(OpExpr):
+    """- operator"""
+    def __init__(self, childs):
+        super(FloorDivOpExpr, self).__init__('FloorDiv', childs)
+
+class ModOpExpr(OpExpr):
+    """- operator"""
+    def __init__(self, childs):
+        super(ModOpExpr, self).__init__('Mod', childs)
+
+class ExpoOpExpr(OpExpr):
+    """- operator"""
+    def __init__(self, childs):
+        super(ExpoOpExpr, self).__init__('Expo', childs)
+
 '''
 Unitary Operators.
 '''

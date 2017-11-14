@@ -119,3 +119,21 @@ class ParseTreeVisitor(LuaVisitor):
     '''
     def visitOpAdd(self, ctx):
         return AddOpExpr(self.visitChildren(ctx))
+
+    def visitOpMin(self, ctx):
+        return MinOpExpr(self.visitChildren(ctx))
+
+    def visitOpMult(self, ctx):
+        return MultOpExpr(self.visitChildren(ctx))
+
+    def visitOpFloatDiv(self, ctx):
+        return FloatDivOpExpr(self.visitChildren(ctx))
+
+    def visitOpFloorDiv(self, ctx):
+        return FloorDivOpExpr(self.visitChildren(ctx))
+
+    def visitOpMod(self, ctx):
+        return ModOpExpr(self.visitChildren(ctx))
+
+    def visitOpExpo(self, ctx):
+        return ExpoOpExpr(self.visitChildren(ctx))

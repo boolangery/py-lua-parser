@@ -129,20 +129,24 @@ exp
     | functiondef                               # todo5
     | prefixexp                                 # todo6
     | tableconstructor                          # todo7
-    | <assoc=right> exp operatorPower exp       # todo8
     | 'not' exp                                 # unOpNot
     | '#' exp                                   # unOpLength
     | '-' exp                                   # unOpMin
     | '~' exp                                   # unOpBitNot
-    | exp operatorMulDivMod exp                 # todo_1
     | exp '+' exp                               # opAdd
     | exp '-' exp                               # opSub
+    | exp '*' exp                               # opMult
+    | exp '/' exp                               # opFloatDiv
+    | exp '%' exp                               # opFloorDiv
+    | exp '//' exp                              # opMod
+    | <assoc=right> exp '^' exp                 # opExpo
     | <assoc=right> exp operatorStrcat exp      # todo_3
     | exp operatorComparison exp                # todo_4
     | exp operatorAnd exp                       # todo_5
     | exp operatorOr exp                        # todo_6
     | exp operatorBitwise exp                   # todo_7
     ;
+
 
 
 prefixexp
@@ -223,17 +227,8 @@ operatorComparison
 operatorStrcat
 	: '..';
 
-operatorAddSub
-	: '+' | '-';
-
-operatorMulDivMod
-	: '*' | '/' | '%' | '//';
-
 operatorBitwise
 	: '&' | '|' | '~' | '<<' | '>>';
-
-operatorPower
-    : '^';
 
 string
     : NORMALSTRING | CHARSTRING | LONGSTRING

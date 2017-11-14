@@ -139,18 +139,8 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#unOpNot.
-    def visitUnOpNot(self, ctx:LuaParser.UnOpNotContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LuaParser#unOpLength.
     def visitUnOpLength(self, ctx:LuaParser.UnOpLengthContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#unOpMin.
-    def visitUnOpMin(self, ctx:LuaParser.UnOpMinContext):
         return self.visitChildren(ctx)
 
 
@@ -159,18 +149,8 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo8.
-    def visitTodo8(self, ctx:LuaParser.Todo8Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo_1.
-    def visitTodo_1(self, ctx:LuaParser.Todo_1Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo6.
-    def visitTodo6(self, ctx:LuaParser.Todo6Context):
+    # Visit a parse tree produced by LuaParser#opExpo.
+    def visitOpExpo(self, ctx:LuaParser.OpExpoContext):
         return self.visitChildren(ctx)
 
 
@@ -179,18 +159,13 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo7.
-    def visitTodo7(self, ctx:LuaParser.Todo7Context):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LuaParser#todo_3.
     def visitTodo_3(self, ctx:LuaParser.Todo_3Context):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#false.
-    def visitFalse(self, ctx:LuaParser.FalseContext):
+    # Visit a parse tree produced by LuaParser#opMult.
+    def visitOpMult(self, ctx:LuaParser.OpMultContext):
         return self.visitChildren(ctx)
 
 
@@ -214,8 +189,48 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#opFloorDiv.
+    def visitOpFloorDiv(self, ctx:LuaParser.OpFloorDivContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#number.
     def visitNumber(self, ctx:LuaParser.NumberContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#unOpNot.
+    def visitUnOpNot(self, ctx:LuaParser.UnOpNotContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#unOpMin.
+    def visitUnOpMin(self, ctx:LuaParser.UnOpMinContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#opFloatDiv.
+    def visitOpFloatDiv(self, ctx:LuaParser.OpFloatDivContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo6.
+    def visitTodo6(self, ctx:LuaParser.Todo6Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo7.
+    def visitTodo7(self, ctx:LuaParser.Todo7Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#false.
+    def visitFalse(self, ctx:LuaParser.FalseContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#opMod.
+    def visitOpMod(self, ctx:LuaParser.OpModContext):
         return self.visitChildren(ctx)
 
 
@@ -334,23 +349,8 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#operatorAddSub.
-    def visitOperatorAddSub(self, ctx:LuaParser.OperatorAddSubContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#operatorMulDivMod.
-    def visitOperatorMulDivMod(self, ctx:LuaParser.OperatorMulDivModContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LuaParser#operatorBitwise.
     def visitOperatorBitwise(self, ctx:LuaParser.OperatorBitwiseContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#operatorPower.
-    def visitOperatorPower(self, ctx:LuaParser.OperatorPowerContext):
         return self.visitChildren(ctx)
 
 
