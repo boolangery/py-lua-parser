@@ -151,20 +151,37 @@ class TableExpr(Expression):
     def __init__(self, childs):
         super(TableExpr, self).__init__('Table', childs)
 
-class ArgsExpr(Node):
+class ArgsExpr(Expression):
     """Define a Lua arg list expression"""
     def __init__(self, childs):
         super(ArgsExpr, self).__init__('Args', childs)
 
-class VarsExpr(Node):
+class VarsExpr(Expression):
     """Define a Lua var list expression"""
     def __init__(self, childs):
         super(VarsExpr, self).__init__('Vars', childs)
 
-class ExprsExpr(Node):
+class ExprsExpr(Expression):
     """Define a Lua expression list expression"""
     def __init__(self, childs):
         super(ExprsExpr, self).__init__('Exprs', childs)
+
+'''
+Operators
+'''
+class OpExpr(Expression):
+    """Base class for operators"""
+    pass
+
+class AddOpExpr(OpExpr):
+    """+ operator"""
+    def __init__(self, childs):
+        super(AddOpExpr, self).__init__('Add', childs)
+
+class SubOpExpr(OpExpr):
+    """- operator"""
+    def __init__(self, childs):
+        super(SubOpExpr, self).__init__('Sub', childs)
 
 '''
 Unitary Operators.

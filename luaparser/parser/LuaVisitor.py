@@ -129,28 +129,13 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#exp.
-    def visitExp(self, ctx:LuaParser.ExpContext):
+    # Visit a parse tree produced by LuaParser#todo_6.
+    def visitTodo_6(self, ctx:LuaParser.Todo_6Context):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#nil.
-    def visitNil(self, ctx:LuaParser.NilContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#false.
-    def visitFalse(self, ctx:LuaParser.FalseContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#true.
-    def visitTrue(self, ctx:LuaParser.TrueContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#number.
-    def visitNumber(self, ctx:LuaParser.NumberContext):
+    # Visit a parse tree produced by LuaParser#todo_5.
+    def visitTodo_5(self, ctx:LuaParser.Todo_5Context):
         return self.visitChildren(ctx)
 
 
@@ -169,8 +154,98 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#todo_7.
+    def visitTodo_7(self, ctx:LuaParser.Todo_7Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo8.
+    def visitTodo8(self, ctx:LuaParser.Todo8Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo_1.
+    def visitTodo_1(self, ctx:LuaParser.Todo_1Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo6.
+    def visitTodo6(self, ctx:LuaParser.Todo6Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo_4.
+    def visitTodo_4(self, ctx:LuaParser.Todo_4Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo7.
+    def visitTodo7(self, ctx:LuaParser.Todo7Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo_3.
+    def visitTodo_3(self, ctx:LuaParser.Todo_3Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#false.
+    def visitFalse(self, ctx:LuaParser.FalseContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#unOpBitNot.
     def visitUnOpBitNot(self, ctx:LuaParser.UnOpBitNotContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#opSub.
+    def visitOpSub(self, ctx:LuaParser.OpSubContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#nil.
+    def visitNil(self, ctx:LuaParser.NilContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#opAdd.
+    def visitOpAdd(self, ctx:LuaParser.OpAddContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#number.
+    def visitNumber(self, ctx:LuaParser.NumberContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#true.
+    def visitTrue(self, ctx:LuaParser.TrueContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo4.
+    def visitTodo4(self, ctx:LuaParser.Todo4Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo5.
+    def visitTodo5(self, ctx:LuaParser.Todo5Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo2.
+    def visitTodo2(self, ctx:LuaParser.Todo2Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo3.
+    def visitTodo3(self, ctx:LuaParser.Todo3Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#todo1.
+    def visitTodo1(self, ctx:LuaParser.Todo1Context):
         return self.visitChildren(ctx)
 
 

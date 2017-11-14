@@ -113,3 +113,9 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitExplist(self, ctx):
         return ExprsExpr(self.visitChildren(ctx))
+
+    '''
+    Visiting operator expressions
+    '''
+    def visitOpAdd(self, ctx):
+        return AddOpExpr(self.visitChildren(ctx))

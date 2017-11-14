@@ -118,39 +118,31 @@ explist
     ;
 
 exp
-    : nil
-    | false
-    | true
-    | number
-    | string
-    | '...'
-    | call
-    | invoke
-    | functiondef
-    | prefixexp
-    | tableconstructor
-    | <assoc=right> exp operatorPower exp
-    | unOpNot
-    | unOpLength
-    | unOpMin
-    | unOpBitNot
-    | exp operatorMulDivMod exp
-    | exp operatorAddSub exp
-    | <assoc=right> exp operatorStrcat exp
-    | exp operatorComparison exp
-    | exp operatorAnd exp
-    | exp operatorOr exp
-    | exp operatorBitwise exp
+    : 'nil'                                     # nil
+    | 'false'                                   # false
+    | 'true'                                    # true
+    | (INT | HEX | FLOAT | HEX_FLOAT)           # number
+    | string                                    # todo1
+    | '...'                                     # todo2
+    | call                                      # todo3
+    | invoke                                    # todo4
+    | functiondef                               # todo5
+    | prefixexp                                 # todo6
+    | tableconstructor                          # todo7
+    | <assoc=right> exp operatorPower exp       # todo8
+    | 'not' exp                                 # unOpNot
+    | '#' exp                                   # unOpLength
+    | '-' exp                                   # unOpMin
+    | '~' exp                                   # unOpBitNot
+    | exp operatorMulDivMod exp                 # todo_1
+    | exp '+' exp                               # opAdd
+    | exp '-' exp                               # opSub
+    | <assoc=right> exp operatorStrcat exp      # todo_3
+    | exp operatorComparison exp                # todo_4
+    | exp operatorAnd exp                       # todo_5
+    | exp operatorOr exp                        # todo_6
+    | exp operatorBitwise exp                   # todo_7
     ;
-
-nil         : 'nil' ;
-false       : 'false' ;
-true        : 'true' ;
-number      : (INT | HEX | FLOAT | HEX_FLOAT) ;
-unOpNot     : 'not' exp ;
-unOpLength  : '#' exp ;
-unOpMin     : '-' exp ;
-unOpBitNot  : '~' exp ;
 
 
 prefixexp
