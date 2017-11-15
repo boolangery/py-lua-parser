@@ -16,7 +16,7 @@ from luaparser.LuaAstBuilder import ParseTreeVisitor
 
 
 class Parser():
-    def strToParseTree(self, str):
+    def srcToParseTree(self, str):
         """
         Convert Lua source string to antlr4 parse tree.
         :param str: Lua source
@@ -42,7 +42,7 @@ class Parser():
         :param str: Lua source
         :return: builded AST
         """
-        parseTree = self.strToParseTree(str)
+        parseTree = self.srcToParseTree(str)
         astVisitor = ParseTreeVisitor()
         return astVisitor.visit(parseTree)
 

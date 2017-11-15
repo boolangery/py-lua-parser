@@ -100,7 +100,6 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitVar(self, ctx):
         # : (name | '(' exp ')' varSuffix) varSuffix*
-        print(vars(ctx))
         # if name varSuffix*
         if len(ctx.children)>1 and isinstance(ctx.children[1], LuaParser.VarSuffixContext):
             child = IndexExpr([self.visit(ctx.children[0]), self.visit(ctx.children[0])])
