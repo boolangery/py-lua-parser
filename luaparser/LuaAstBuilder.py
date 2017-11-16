@@ -41,7 +41,7 @@ class ParseTreeVisitor(LuaVisitor):
         return SetStat(self.visitChildren(ctx))
 
     def visitLocalset(self, ctx):
-        return LocalStat(self.visitChildren(ctx))
+        return LocalSetStat(self.visitChildren(ctx))
 
     def visitWhileStat(self, ctx):
         return WhileStat(self.visitChildren(ctx))

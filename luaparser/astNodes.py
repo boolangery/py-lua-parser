@@ -33,6 +33,10 @@ class Node(object):
     def getText(self):
         return self.childs[0]
 
+    def addChild(self, child):
+        self.childs.append(child)
+
+
 class Chunk(Node):
     """Define a Lua chunk"""
     def __init__(self, childs):
@@ -87,10 +91,10 @@ class ForinStat(Statement):
     def __init__(self, childs):
         super(ForinStat, self).__init__('Forin', childs)
 
-class LocalStat(Statement):
+class LocalSetStat(Statement):
     """Define the 'Local' lua statement"""
     def __init__(self, childs):
-        super(LocalStat, self).__init__('Local', childs)
+        super(LocalSetStat, self).__init__('LocalSet', childs)
 
 class CallStat(Statement):
     """Define the 'Call' lua statement"""
