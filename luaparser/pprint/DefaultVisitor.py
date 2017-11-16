@@ -16,7 +16,7 @@ class DefaultVisitor():
 
     @visitor(list)
     def visit(self, node):
-        return 'list'
+        return '[notHandled: ' + str(node) +  ']'
 
     @visitor(Node)
     def visit(self, node):

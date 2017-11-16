@@ -31,7 +31,10 @@ class Node(object):
         return (len(self.childs)==0) or isinstance(self.childs[0], str)
 
     def getText(self):
-        return self.childs[0]
+        if len(self.childs)==0:
+            return ''
+        else:
+            return self.childs[0]
 
     def addChild(self, child):
         self.childs.append(child)
