@@ -105,7 +105,7 @@ class ParseTreeVisitor(LuaVisitor):
         # : (name | '(' exp ')' varSuffix) varSuffix*
         # if name varSuffix*
         if len(ctx.children)>1 and isinstance(ctx.children[1], LuaParser.VarSuffixContext):
-            child = IndexExpr([self.visit(ctx.children[0]), self.visit(ctx.children[0])])
+            child = IndexExpr([self.visit(ctx.children[0]), self.visit(ctx.children[1])])
             for i in range(2, len(ctx.children)):
                 root = IndexExpr([child, self.visit(ctx.children[i])])
                 child = root
