@@ -7,7 +7,7 @@ setup(name='luaparser',
       author='Eliott Dumeix',
       author_email='',
       license='MIT',
-      packages=['luaparser', 'luaparser.pprint', 'luaparser.parser'],
+      packages=['luaparser', 'luaparser.pprint', 'luaparser.parser', 'luaparser.tests'],
       zip_safe=False,
 
       classifiers=[
