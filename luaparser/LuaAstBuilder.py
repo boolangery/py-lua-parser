@@ -98,6 +98,9 @@ class ParseTreeVisitor(LuaVisitor):
     def visitVarlist(self, ctx):
         return VarsExpr(self.visitChildren(ctx))
 
+    def visitNamelist(self, ctx):
+        return VarsExpr(self.visitChildren(ctx))
+
     def visitVar(self, ctx):
         # : (name | '(' exp ')' varSuffix) varSuffix*
         # if name varSuffix*
