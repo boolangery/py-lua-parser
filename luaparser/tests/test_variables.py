@@ -3,7 +3,7 @@ from luaparser import Parser, Printer
 from luaparser.astNodes import *
 
 
-class SimpleWidgetTestCase(tests.TestCase):
+class VariablesTestCase(tests.TestCase):
     def setUp(self):
         self.parser = Parser()
 
