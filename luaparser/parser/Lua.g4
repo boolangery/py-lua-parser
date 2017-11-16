@@ -57,7 +57,7 @@ block
     ;
 
 stat
-    : ';'
+    : BLOCK_SEP
     | comment_rule
     | setStat
     | call
@@ -346,5 +346,9 @@ WS
 
 SHEBANG
     : '#' '!' ~('\n'|'\r')* -> channel(HIDDEN)
+    ;
+
+BLOCK_SEP
+    : ';' -> channel(HIDDEN)
     ;
 
