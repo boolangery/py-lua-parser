@@ -8,6 +8,7 @@
     Contains all Ast Node definitions.
 """
 import ast
+import re
 
 from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astNodes import *
@@ -87,7 +88,23 @@ class ParseTreeVisitor(LuaVisitor):
         return NumberExpr(number)
 
     def visitString(self, ctx):
-        return StringExpr(ctx.children[0].getText())
+        luaStr = ctx.children[0].getText()
+        p = re.compile('^\[=+\[(.*)\]=+\]') # nested quote pattern
+        # try remove double quote:
+        if luaStr.startswith('"') and luaStr.endswith('"'):
+            luaStr = luaStr[1:-1]
+        # try remove single quote:
+        elif luaStr.startswith("'") and luaStr.endswith("'"):
+            luaStr = luaStr[1:-1]
+        # try remove double square bracket:
+        elif luaStr.startswith("[[") and luaStr.endswith("]]"):
+            luaStr = luaStr[2:-2]
+        # nested quote
+        elif p.match(luaStr):
+            luaStr = p.search(luaStr).group(1)
+
+
+        return StringExpr(luaStr)
 
     def visitTrue(self, ctx):
         return TrueExpr(self.visitChildren(ctx))
