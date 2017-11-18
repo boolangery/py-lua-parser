@@ -290,5 +290,4 @@ class IdExpr(LhsExpr):
 class IndexExpr(LhsExpr):
     """Define a Lua Index expression"""
     def __init__(self, childs):
-        print('>>>>>>>>>>>>>>>> IndexExpr')
         super(IndexExpr, self).__init__('Index', childs)
