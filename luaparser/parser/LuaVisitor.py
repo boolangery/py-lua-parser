@@ -274,13 +274,13 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo3.
-    def visitTodo3(self, ctx:LuaParser.Todo3Context):
+    # Visit a parse tree produced by LuaParser#stringExp.
+    def visitStringExp(self, ctx:LuaParser.StringExpContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo1.
-    def visitTodo1(self, ctx:LuaParser.Todo1Context):
+    # Visit a parse tree produced by LuaParser#todo3.
+    def visitTodo3(self, ctx:LuaParser.Todo3Context):
         return self.visitChildren(ctx)
 
 

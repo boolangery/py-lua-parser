@@ -122,7 +122,7 @@ exp
     | 'false'                                   # false
     | 'true'                                    # true
     | (INT | HEX | FLOAT | HEX_FLOAT)           # number
-    | string                                    # todo1
+    | string                                    # stringExp
     | '...'                                     # todo2
     | call                                      # todo3
     | invoke                                    # todo4

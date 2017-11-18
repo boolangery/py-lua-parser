@@ -2811,6 +2811,31 @@ class LuaParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
+    class StringExpContext(ExpContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.ExpContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def string(self):
+            return self.getTypedRuleContext(LuaParser.StringContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterStringExp" ):
+                listener.enterStringExp(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitStringExp" ):
+                listener.exitStringExp(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStringExp" ):
+                return visitor.visitStringExp(self)
+            else:
+                return visitor.visitChildren(self)
+
+
     class Todo3Context(ExpContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.ExpContext
@@ -2832,31 +2857,6 @@ class LuaParser ( Parser ):
         def accept(self, visitor:ParseTreeVisitor):
             if hasattr( visitor, "visitTodo3" ):
                 return visitor.visitTodo3(self)
-            else:
-                return visitor.visitChildren(self)
-
-
-    class Todo1Context(ExpContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.ExpContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def string(self):
-            return self.getTypedRuleContext(LuaParser.StringContext,0)
-
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterTodo1" ):
-                listener.enterTodo1(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitTodo1" ):
-                listener.exitTodo1(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitTodo1" ):
-                return visitor.visitTodo1(self)
             else:
                 return visitor.visitChildren(self)
 
@@ -2914,7 +2914,7 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 5:
-                localctx = LuaParser.Todo1Context(self, localctx)
+                localctx = LuaParser.StringExpContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 269
