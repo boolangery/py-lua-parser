@@ -14,7 +14,7 @@ class AssignmentTestCase(tests.TestCase):
 
     def test_set_string(self):
         ast = self.parser.srcToAST('i="foo bar"')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("i")), ExprsExpr(StringExpr('"foo bar"'))])))
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("i")), ExprsExpr(StringExpr('foo bar'))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_array_index(self):
