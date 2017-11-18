@@ -30,7 +30,7 @@ class Node(object):
         """
         return (len(self.childs)==0) or isinstance(self.childs[0], str)
 
-    def getText(self):
+    def getValue(self):
         if len(self.childs)==0:
             return ''
         else:
@@ -121,6 +121,9 @@ class Expression(Node):
     """Define a Lua generic expression"""
     pass
 
+'''
+Types and values
+'''
 class NilExpr(Expression):
     """Define the Lua 'nil' expression"""
     def __init__(self, childs):

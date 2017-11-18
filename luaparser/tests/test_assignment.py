@@ -9,7 +9,7 @@ class AssignmentTestCase(tests.TestCase):
 
     def test_set_number(self):
         ast = self.parser.srcToAST("i=3")
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("i")), ExprsExpr(NumberExpr("3"))])))
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("i")), ExprsExpr(NumberExpr(3))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_string(self):
@@ -19,7 +19,7 @@ class AssignmentTestCase(tests.TestCase):
 
     def test_set_array_index(self):
         ast = self.parser.srcToAST('a[i] = 42')
-        exp = Chunk(Block(SetStat([VarsExpr(IndexExpr([IdExpr("a"), IdExpr("i")])), ExprsExpr(NumberExpr('42'))])))
+        exp = Chunk(Block(SetStat([VarsExpr(IndexExpr([IdExpr("a"), IdExpr("i")])), ExprsExpr(NumberExpr(42))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_table_index(self):

@@ -14,6 +14,14 @@ class DefaultVisitor():
             node = node[1:-1]
         return '"' + node + '"'
 
+    @visitor(float)
+    def visit(self, node):
+        return str(node)
+
+    @visitor(int)
+    def visit(self, node):
+        return str(node)
+
     @visitor(list)
     def visit(self, node):
         return '[notHandled: ' + str(node) +  ']'
@@ -21,7 +29,7 @@ class DefaultVisitor():
     @visitor(Node)
     def visit(self, node):
         if node.isTerm():
-            res = '`' + node.name + ' "' + node.getText() + '"'
+            res = '`' + node.name + ' "' + node.getValue() + '"'
         else:
             res = '`' + node.name + '{ '
             if self.indent:

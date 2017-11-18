@@ -7,10 +7,10 @@
 
     Contains all Ast Node definitions.
 """
+import ast
 
 from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astNodes import *
-
 from luaparser.parser.LuaParser import LuaParser
 
 
@@ -72,16 +72,19 @@ class ParseTreeVisitor(LuaVisitor):
         return FunctionExpr(self.visitChildren(ctx))
 
 
-    ''' Visiting expressions.
+    ''' 
+    Visiting expressions.
     '''
-    def visitName(self, ctx):
-        return IdExpr(ctx.children[0].getText())
-
-    def visitArgs(self, ctx):
-        return ArgsExpr(self.visitChildren(ctx))
+    ''' 
+    Types and values
+    '''
+    def visitNil(self, ctx):
+        return NilExpr(self.visitChildren(ctx))
 
     def visitNumber(self, ctx):
-        return NumberExpr(ctx.children[0].getText())
+        # using python number eval to parse lua number:
+        number = ast.literal_eval(ctx.children[0].getText())
+        return NumberExpr(number)
 
     def visitString(self, ctx):
         return StringExpr(ctx.children[0].getText())
@@ -91,6 +94,13 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitFalse(self, ctx):
         return FalseExpr(self.visitChildren(ctx))
+
+
+    def visitName(self, ctx):
+        return IdExpr(ctx.children[0].getText())
+
+    def visitArgs(self, ctx):
+        return ArgsExpr(self.visitChildren(ctx))
 
     def visitUnOpMin(self, ctx):
         return UnOpMinExpr(self.visitChildren(ctx))
