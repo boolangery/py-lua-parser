@@ -140,7 +140,7 @@ class ParseTreeVisitor(LuaVisitor):
         return ArgsExpr(self.visitChildren(ctx))
 
     def visitUnOpMin(self, ctx):
-        return UnOpMinExpr(self.visitChildren(ctx))
+        return UnOpNegExpr(self.visitChildren(ctx))
 
     def visitVarlist(self, ctx):
         return VarsExpr(self.visitChildren(ctx))
@@ -169,8 +169,11 @@ class ParseTreeVisitor(LuaVisitor):
     def visitOpAdd(self, ctx):
         return AddOpExpr(self.visitChildren(ctx))
 
+    def visitOpSub(self, ctx):
+        return SubOpExpr(self.visitChildren(ctx))
+
     def visitOpMin(self, ctx):
-        return MinOpExpr(self.visitChildren(ctx))
+        return NegOpExpr(self.visitChildren(ctx))
 
     def visitOpMult(self, ctx):
         return MultOpExpr(self.visitChildren(ctx))

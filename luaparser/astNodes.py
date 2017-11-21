@@ -285,10 +285,10 @@ class UnOpNotExpr(UnOpExpr):
     def __init__(self, childs):
         super(UnOpNotExpr, self).__init__('UnOpNot', childs)
 
-class UnOpMinExpr(UnOpExpr):
-    """Lua minus unitary operator expression"""
+class UnOpNegExpr(UnOpExpr):
+    """Lua negation unitary operator expression"""
     def __init__(self, childs):
-        super(UnOpMinExpr, self).__init__('UnOpMin', childs)
+        super(UnOpNegExpr, self).__init__('UnOpNeg', childs)
 
 '''
 Left Hand Side expression.
