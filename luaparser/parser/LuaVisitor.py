@@ -144,6 +144,11 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#relOpLessEq.
+    def visitRelOpLessEq(self, ctx:LuaParser.RelOpLessEqContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#bitOpOr.
     def visitBitOpOr(self, ctx:LuaParser.BitOpOrContext):
         return self.visitChildren(ctx)
@@ -154,8 +159,8 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo_4.
-    def visitTodo_4(self, ctx:LuaParser.Todo_4Context):
+    # Visit a parse tree produced by LuaParser#relOpGreaterEq.
+    def visitRelOpGreaterEq(self, ctx:LuaParser.RelOpGreaterEqContext):
         return self.visitChildren(ctx)
 
 
@@ -219,6 +224,21 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#relOpEq.
+    def visitRelOpEq(self, ctx:LuaParser.RelOpEqContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#relOpGreater.
+    def visitRelOpGreater(self, ctx:LuaParser.RelOpGreaterContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#relOpLess.
+    def visitRelOpLess(self, ctx:LuaParser.RelOpLessContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#table.
     def visitTable(self, ctx:LuaParser.TableContext):
         return self.visitChildren(ctx)
@@ -261,6 +281,11 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#todo4.
     def visitTodo4(self, ctx:LuaParser.Todo4Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#relOpNotEq.
+    def visitRelOpNotEq(self, ctx:LuaParser.RelOpNotEqContext):
         return self.visitChildren(ctx)
 
 
@@ -361,11 +386,6 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#operatorAnd.
     def visitOperatorAnd(self, ctx:LuaParser.OperatorAndContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#operatorComparison.
-    def visitOperatorComparison(self, ctx:LuaParser.OperatorComparisonContext):
         return self.visitChildren(ctx)
 
 

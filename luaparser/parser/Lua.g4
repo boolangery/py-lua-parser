@@ -146,7 +146,12 @@ exp
     | exp '<<' exp                              # bitOpShiftL
     | <assoc=right> exp '^' exp                 # opExpo
     | <assoc=right> exp operatorStrcat exp      # todo_3
-    | exp operatorComparison exp                # todo_4
+    | exp '<' exp                               # relOpLess
+    | exp '>' exp                               # relOpGreater
+    | exp '<=' exp                              # relOpLessEq
+    | exp '>=' exp                              # relOpGreaterEq
+    | exp '~=' exp                              # relOpNotEq
+    | exp '==' exp                              # relOpEq
     | exp operatorAnd exp                       # todo_5
     | exp operatorOr exp                        # todo_6
     ;
@@ -226,9 +231,6 @@ operatorOr
 
 operatorAnd
 	: 'and';
-
-operatorComparison
-	: '<' | '>' | '<=' | '>=' | '~=' | '==';
 
 operatorStrcat
 	: '..';
