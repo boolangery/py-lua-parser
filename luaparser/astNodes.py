@@ -241,6 +241,38 @@ class ExpoOpExpr(AriOpExpr):
         super(ExpoOpExpr, self).__init__('OpExpo', childs)
 
 '''
+Relational Operators
+'''
+class RelOpExpr(OpExpr):
+    """Base class for Relational Operators """
+    pass
+
+class LessThanOpExpr(RelOpExpr):
+    def __init__(self, childs):
+        super(LessThanOpExpr, self).__init__('OpLess', childs)
+
+class GreaterThanOpExpr(RelOpExpr):
+    def __init__(self, childs):
+        super(GreaterThanOpExpr, self).__init__('OpGreater', childs)
+
+class LessOrEqThanOpExpr(RelOpExpr):
+    def __init__(self, childs):
+        super(LessOrEqThanOpExpr, self).__init__('OpLessEq', childs)
+
+class GreaterOrEqThanOpExpr(RelOpExpr):
+    def __init__(self, childs):
+        super(GreaterOrEqThanOpExpr, self).__init__('OpGreatEq', childs)
+
+class EqToOpExpr(RelOpExpr):
+    def __init__(self, childs):
+        super(EqToOpExpr, self).__init__('OpEq', childs)
+
+class NotEqToOpExpr(RelOpExpr):
+    def __init__(self, childs):
+        super(NotEqToOpExpr, self).__init__('OpNotEq', childs)
+
+
+'''
 Bitwise Operators
 '''
 class BitOpExpr(OpExpr):

@@ -191,6 +191,28 @@ class ParseTreeVisitor(LuaVisitor):
         return ExpoOpExpr(self.visitChildren(ctx))
 
     '''
+    Relational Operators
+    '''
+    def visitRelOpLess(self, ctx):
+        return LessThanOpExpr(self.visitChildren(ctx))
+
+    def visitRelOpGreater(self, ctx):
+        return GreaterThanOpExpr(self.visitChildren(ctx))
+
+    def visitRelOpLessEq(self, ctx):
+        return LessOrEqThanOpExpr(self.visitChildren(ctx))
+
+    def visitRelOpGreaterEq(self, ctx):
+        return GreaterOrEqThanOpExpr(self.visitChildren(ctx))
+
+    def visitRelOpNotEq(self, ctx):
+        return NotEqToOpExpr(self.visitChildren(ctx))
+
+    def visitRelOpEq(self, ctx):
+        return EqToOpExpr(self.visitChildren(ctx))
+
+
+    '''
     Visiting Bitwise operator expressions
     '''
     def visitBitOpAnd(self, ctx):
