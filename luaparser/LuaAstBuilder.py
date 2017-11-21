@@ -82,6 +82,12 @@ class ParseTreeVisitor(LuaVisitor):
     def visitNil(self, ctx):
         return NilExpr(self.visitChildren(ctx))
 
+    def visitTrue(self, ctx):
+        return TrueExpr(self.visitChildren(ctx))
+
+    def visitFalse(self, ctx):
+        return FalseExpr(self.visitChildren(ctx))
+
     def visitNumber(self, ctx):
         # using python number eval to parse lua number:
         number = ast.literal_eval(ctx.children[0].getText())
@@ -102,16 +108,30 @@ class ParseTreeVisitor(LuaVisitor):
         # nested quote
         elif p.match(luaStr):
             luaStr = p.search(luaStr).group(1)
-
-
         return StringExpr(luaStr)
 
-    def visitTrue(self, ctx):
-        return TrueExpr(self.visitChildren(ctx))
-
-    def visitFalse(self, ctx):
-        return FalseExpr(self.visitChildren(ctx))
-
+    def visitTableconstructor(self, ctx):
+        # table      : '{' (field (fieldsep field)* fieldsep?)? '}'
+        # field      : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
+        # tableKey   : exp | name
+        # tableValue : exp
+        keys    = KeysExpr(None)
+        values  = ValuesExpr(None)
+        index   = 1 # lua array start index
+        for field in ctx.children:
+            if isinstance(field, LuaParser.FieldContext):
+                hasKey = False
+                for tblElem in field.children:
+                    if isinstance(tblElem, LuaParser.TableKeyContext):
+                        keys.addChild(self.visitChildren(tblElem))
+                        hasKey = True
+                    elif isinstance(tblElem, LuaParser.TableValueContext):
+                        values.addChild(self.visitChildren(tblElem))
+                # if no index found, create an integer key:
+                if not hasKey:
+                    keys.addChild(NumberExpr(index))
+                    index += 1
+        return TableExpr([keys, values])
 
     def visitName(self, ctx):
         return IdExpr(ctx.children[0].getText())
