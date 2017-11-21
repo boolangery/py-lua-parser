@@ -129,11 +129,6 @@ class NilExpr(Expression):
     def __init__(self, childs):
         super(NilExpr, self).__init__('Nil', childs)
 
-class DotsExpr(Expression):
-    """Define the Lua dots (...) expression"""
-    def __init__(self, childs):
-        super(DotsExpr, self).__init__('Dots', childs)
-
 class TrueExpr(Expression):
     """Define the Lua 'true' expression"""
     def __init__(self, childs):
@@ -154,15 +149,32 @@ class StringExpr(Expression):
     def __init__(self, childs):
         super(StringExpr, self).__init__('String', childs)
 
-class FunctionExpr(Expression):
-    """Define the Lua function expression"""
+class DotsExpr(Expression):
+    """Define the Lua dots (...) expression"""
     def __init__(self, childs):
-        super(FunctionExpr, self).__init__('Function', childs)
+        super(DotsExpr, self).__init__('Dots', childs)
 
 class TableExpr(Expression):
     """Define the Lua table expression"""
     def __init__(self, childs):
         super(TableExpr, self).__init__('Table', childs)
+
+class KeysExpr(Expression):
+    """Table keys"""
+    def __init__(self, childs):
+        super(KeysExpr, self).__init__('Keys', childs)
+
+class ValuesExpr(Expression):
+    """Table values"""
+    def __init__(self, childs):
+        super(ValuesExpr, self).__init__('Values', childs)
+
+
+
+class FunctionExpr(Expression):
+    """Define the Lua function expression"""
+    def __init__(self, childs):
+        super(FunctionExpr, self).__init__('Function', childs)
 
 class ArgsExpr(Expression):
     """Define a Lua arg list expression"""
