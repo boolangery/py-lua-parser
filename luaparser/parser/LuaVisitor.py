@@ -219,6 +219,11 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#table.
+    def visitTable(self, ctx:LuaParser.TableContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#unOpNot.
     def visitUnOpNot(self, ctx:LuaParser.UnOpNotContext):
         return self.visitChildren(ctx)
@@ -236,11 +241,6 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#todo6.
     def visitTodo6(self, ctx:LuaParser.Todo6Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo7.
-    def visitTodo7(self, ctx:LuaParser.Todo7Context):
         return self.visitChildren(ctx)
 
 
@@ -334,13 +334,18 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#fieldlist.
-    def visitFieldlist(self, ctx:LuaParser.FieldlistContext):
+    # Visit a parse tree produced by LuaParser#field.
+    def visitField(self, ctx:LuaParser.FieldContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#field.
-    def visitField(self, ctx:LuaParser.FieldContext):
+    # Visit a parse tree produced by LuaParser#tableKey.
+    def visitTableKey(self, ctx:LuaParser.TableKeyContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tableValue.
+    def visitTableValue(self, ctx:LuaParser.TableValueContext):
         return self.visitChildren(ctx)
 
 

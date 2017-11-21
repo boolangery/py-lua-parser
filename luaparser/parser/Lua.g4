@@ -128,7 +128,7 @@ exp
     | invoke                                    # todo4
     | functiondef                               # todo5
     | prefixexp                                 # todo6
-    | tableconstructor                          # todo7
+    | tableconstructor                          # table
     | 'not' exp                                 # unOpNot
     | '#' exp                                   # unOpLength
     | '-' exp                                   # unOpMin
@@ -202,15 +202,19 @@ parlist
     ;
 
 tableconstructor
-    : '{' fieldlist? '}'
-    ;
-
-fieldlist
-    : field (fieldsep field)* fieldsep?
+    : '{' (field (fieldsep field)* fieldsep?)? '}'
     ;
 
 field
-    : '[' exp ']' '=' exp | name '=' exp | exp
+    : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
+    ;
+
+tableKey
+    : exp | name
+    ;
+
+tableValue
+    : exp
     ;
 
 fieldsep
@@ -351,4 +355,3 @@ SHEBANG
 BLOCK_SEP
     : ';' -> channel(HIDDEN)
     ;
-

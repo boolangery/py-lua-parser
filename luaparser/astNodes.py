@@ -126,17 +126,17 @@ Types and values
 '''
 class NilExpr(Expression):
     """Define the Lua 'nil' expression"""
-    def __init__(self, childs):
+    def __init__(self, childs=None):
         super(NilExpr, self).__init__('Nil', childs)
 
 class TrueExpr(Expression):
     """Define the Lua 'true' expression"""
-    def __init__(self, childs):
+    def __init__(self, childs=None):
         super(TrueExpr, self).__init__('True', childs)
 
 class FalseExpr(Expression):
     """Define the Lua 'false' expression"""
-    def __init__(self, childs):
+    def __init__(self, childs=None):
         super(FalseExpr, self).__init__('False', childs)
 
 class NumberExpr(Expression):
@@ -151,7 +151,7 @@ class StringExpr(Expression):
 
 class DotsExpr(Expression):
     """Define the Lua dots (...) expression"""
-    def __init__(self, childs):
+    def __init__(self, childs=None):
         super(DotsExpr, self).__init__('Dots', childs)
 
 class TableExpr(Expression):
