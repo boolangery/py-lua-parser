@@ -250,3 +250,9 @@ class ParseTreeVisitor(LuaVisitor):
     ''' ----------------------------------------------------------------------- '''
     def visitConcat(self, ctx):
         return ConcatExpr(self.visitChildren(ctx))
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.7 – The Length Operator                                             '''
+    ''' ----------------------------------------------------------------------- '''
+    def visitUnOpLength(self, ctx):
+        return LengthExpr(self.visitChildren(ctx))

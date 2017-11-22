@@ -138,11 +138,19 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(NotLoOpExpr(NumberExpr(5)))])))
         self.assertAstEqual(exp, ast)
 
-    '''
-    3.4.6 – Concatenation
-    '''
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.6 – Concatenation                                                   '''
+    ''' ----------------------------------------------------------------------- '''
     def test_concatenation(self):
         ast = self.parser.srcToAST(r'str = "begin".."end"')
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("str")), ExprsExpr(ConcatExpr([StringExpr('begin'), StringExpr('end')]))])))
-        print(Printer.toStr(ast))
+        self.assertAstEqual(exp, ast)
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.7 – The Length Operator                                             '''
+    ''' ----------------------------------------------------------------------- '''
+    def test_length_op(self):
+        ast = self.parser.srcToAST(r'len = #t')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("len")), ExprsExpr(LengthExpr(IdExpr('t')))])))
+        #print(Printer.toStr(ast))
         self.assertAstEqual(exp, ast)

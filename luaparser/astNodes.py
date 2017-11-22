@@ -335,6 +335,12 @@ class ConcatExpr(Expression):
     def __init__(self, childs):
         super(ConcatExpr, self).__init__('Concat', childs)
 
+''' ----------------------------------------------------------------------- '''
+''' 3.4.7 – The Length Operator                                             '''
+''' ----------------------------------------------------------------------- '''
+class LengthExpr(Expression):
+    def __init__(self, childs):
+        super(LengthExpr, self).__init__('Length', childs)
 
 '''
 Unitary Operators.
