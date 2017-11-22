@@ -253,5 +253,16 @@ class ExpressionsTestCase(tests.TestCase):
     def test_function_call_args(self):
         ast = self.parser.srcToAST(r'print("hello",  42)')
         exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(ExprsExpr([StringExpr('hello'), NumberExpr(42)]))])))
+        self.assertAstEqual(exp, ast)
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.11 – Function Definitions                                           '''
+    ''' ----------------------------------------------------------------------- '''
+    def test_function_definition(self):
+        ast = self.parser.srcToAST(r'f = function() print("hello") end')
+        exp = Chunk(Block(SetStat([
+            VarsExpr(IdExpr('f')),
+            ExprsExpr(FunctionExpr(Block(CallStat([IdExpr('print'), ArgsExpr(ExprsExpr(StringExpr('hello')))]))))
+        ])))
         #print(Printer.toStr(ast))
         self.assertAstEqual(exp, ast)
