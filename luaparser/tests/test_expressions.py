@@ -53,6 +53,38 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ExpoOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
+    """
+    3.4.2 – Bitwise Operators
+    """
+    def test_bitwise_and(self):
+        ast = self.parser.srcToAST(r'a = 3&5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(AndOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_bitwise_or(self):
+        ast = self.parser.srcToAST(r'a = 3|5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(OrOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_bitwise_exclusive_or(self):
+        ast = self.parser.srcToAST(r'a = 3 ~ 5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(XorOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_bitwise_right_shift(self):
+        ast = self.parser.srcToAST(r'a = 3 >> 5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ShiftROpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_bitwise_right_left(self):
+        ast = self.parser.srcToAST(r'a = 3 << 5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ShiftLOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_bitwise_unary_not(self):
+        ast = self.parser.srcToAST(r'a = ~5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(UnOpNotExpr(NumberExpr(5)))])))
+        self.assertAstEqual(exp, ast)
 
     """
     3.2 – Relational Operators

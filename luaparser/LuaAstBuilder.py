@@ -213,7 +213,7 @@ class ParseTreeVisitor(LuaVisitor):
 
 
     '''
-    Visiting Bitwise operator expressions
+    3.4.2 – Bitwise Operators
     '''
     def visitBitOpAnd(self, ctx):
         return AndOpExpr(self.visitChildren(ctx))
@@ -229,3 +229,6 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitBitOpShiftL(self, ctx):
         return ShiftLOpExpr(self.visitChildren(ctx))
+
+    def visitUnOpBitNot(self, ctx):
+        return UnOpNotExpr(self.visitChildren(ctx))

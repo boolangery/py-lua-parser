@@ -273,7 +273,7 @@ class NotEqToOpExpr(RelOpExpr):
 
 
 '''
-Bitwise Operators
+3.4.2 – Bitwise Operators
 '''
 class BitOpExpr(OpExpr):
     """Base class for Bitwise Operators"""
