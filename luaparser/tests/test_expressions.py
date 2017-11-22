@@ -4,9 +4,11 @@ from luaparser.astNodes import *
 import textwrap
 
 
-class ArithmeticOperatorsTestCase(tests.TestCase):
+# https://www.lua.org/manual/5.3/manual.html#3.4
+
+class ExpressionsTestCase(tests.TestCase):
     """
-    3.1 – Arithmetic Operators
+    3.4.1 – Arithmetic Operators
     """
     def setUp(self):
         self.parser = Parser()
@@ -26,9 +28,19 @@ class ArithmeticOperatorsTestCase(tests.TestCase):
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(MultOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
-    def test_division(self):
+    def test_float_division(self):
         ast = self.parser.srcToAST(r'a = 1 / 0.2')
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(FloatDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_floor_division(self):
+        ast = self.parser.srcToAST(r'a = 1 // 0.2')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(FloorDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_mod_division(self):
+        ast = self.parser.srcToAST(r'a = 1 % 0.2')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ModOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_negation(self):
@@ -42,13 +54,9 @@ class ArithmeticOperatorsTestCase(tests.TestCase):
         self.assertAstEqual(exp, ast)
 
 
-class ArithmeticOperatorsTestCase(tests.TestCase):
     """
     3.2 – Relational Operators
     """
-    def setUp(self):
-        self.parser = Parser()
-
     def test_less_than(self):
         ast = self.parser.srcToAST(r'res = (1 < 2)')
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(LessThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
@@ -78,3 +86,14 @@ class ArithmeticOperatorsTestCase(tests.TestCase):
         ast = self.parser.srcToAST(r'res = 1 ~= 2')
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(NotEqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
+
+
+    """
+    3.3 – Logical Operators
+    """
+    def test_less_or_eq_than(self):
+        ast = self.parser.srcToAST(r'res = 4 and 5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(LessOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        #print(Printer.toStr(ast))
+        #self.assertAstEqual(exp, ast)
+
