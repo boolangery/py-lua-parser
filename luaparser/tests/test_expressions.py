@@ -154,3 +154,80 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("len")), ExprsExpr(LengthExpr(IdExpr('t')))])))
         #print(Printer.toStr(ast))
         self.assertAstEqual(exp, ast)
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.9 – Table Constructors                                              '''
+    ''' ----------------------------------------------------------------------- '''
+    def test_dict(self):
+        ast = self.parser.srcToAST(r'a = {foo = "bar", bar = "foo"}')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(TableExpr([
+            KeysExpr([IdExpr("foo"), IdExpr("bar")]),
+            ValuesExpr([StringExpr("bar"), StringExpr("foo")])
+        ]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_nested_dict(self):
+        ast = self.parser.srcToAST(textwrap.dedent(r'''
+            foo = {
+              car = {
+                name = 'bmw'
+              },
+              options = { radio = true }
+            };
+            '''))
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("foo")), ExprsExpr(TableExpr([
+            KeysExpr([IdExpr("car"),
+                      IdExpr("options")]),
+            ValuesExpr([
+                TableExpr([KeysExpr(IdExpr('name')), ValuesExpr(StringExpr('bmw'))]),
+                TableExpr([KeysExpr(IdExpr('radio')), ValuesExpr(TrueExpr())])
+            ])
+        ]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_array(self):
+        ast = self.parser.srcToAST(textwrap.dedent(r'''
+        foo = {
+          1,    2,      4,
+          8,    16,     32,
+          64,   128,    256,
+          512,  1024,   2048
+        }
+        '''))
+
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("foo")), ExprsExpr(TableExpr([
+            KeysExpr([
+                NumberExpr(1),    NumberExpr(2),    NumberExpr(3),
+                NumberExpr(4),    NumberExpr(5),    NumberExpr(6),
+                NumberExpr(7),    NumberExpr(8),    NumberExpr(9),
+                NumberExpr(10),   NumberExpr(11),   NumberExpr(12)
+            ]),
+            ValuesExpr([
+                NumberExpr(1),    NumberExpr(2),    NumberExpr(4),
+                NumberExpr(8),    NumberExpr(16),   NumberExpr(32),
+                NumberExpr(64),   NumberExpr(128),  NumberExpr(256),
+                NumberExpr(512),  NumberExpr(1024), NumberExpr(2048)
+            ])
+        ]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_mix_dict_array(self):
+        ast = self.parser.srcToAST(textwrap.dedent(r'''
+        foo = {
+          options = { radio = true },
+          "enabled",
+          157
+        };
+        '''))
+
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("foo")), ExprsExpr(TableExpr([
+            KeysExpr([
+                IdExpr('options'), NumberExpr(1), NumberExpr(2)
+            ]),
+            ValuesExpr([
+                TableExpr([KeysExpr(IdExpr('radio')), ValuesExpr(TrueExpr())]),
+                StringExpr('enabled'),
+                NumberExpr(157)
+            ])
+        ]))])))
+        self.assertAstEqual(exp, ast)

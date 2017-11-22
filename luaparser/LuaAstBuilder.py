@@ -110,29 +110,6 @@ class ParseTreeVisitor(LuaVisitor):
             luaStr = p.search(luaStr).group(1)
         return StringExpr(luaStr)
 
-    def visitTableconstructor(self, ctx):
-        # table      : '{' (field (fieldsep field)* fieldsep?)? '}'
-        # field      : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
-        # tableKey   : exp | name
-        # tableValue : exp
-        keys    = KeysExpr(None)
-        values  = ValuesExpr(None)
-        index   = 1 # lua array start index
-        for field in ctx.children:
-            if isinstance(field, LuaParser.FieldContext):
-                hasKey = False
-                for tblElem in field.children:
-                    if isinstance(tblElem, LuaParser.TableKeyContext):
-                        keys.addChild(self.visitChildren(tblElem))
-                        hasKey = True
-                    elif isinstance(tblElem, LuaParser.TableValueContext):
-                        values.addChild(self.visitChildren(tblElem))
-                # if no index found, create an integer key:
-                if not hasKey:
-                    keys.addChild(NumberExpr(index))
-                    index += 1
-        return TableExpr([keys, values])
-
     def visitName(self, ctx):
         return IdExpr(ctx.children[0].getText())
 
@@ -256,3 +233,29 @@ class ParseTreeVisitor(LuaVisitor):
     ''' ----------------------------------------------------------------------- '''
     def visitUnOpLength(self, ctx):
         return LengthExpr(self.visitChildren(ctx))
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.9 – Table Constructors                                              '''
+    ''' ----------------------------------------------------------------------- '''
+    def visitTableconstructor(self, ctx):
+        # table      : '{' (field (fieldsep field)* fieldsep?)? '}'
+        # field      : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
+        # tableKey   : exp | name
+        # tableValue : exp
+        keys    = KeysExpr(None)
+        values  = ValuesExpr(None)
+        index   = 1 # lua array start index
+        for field in ctx.children:
+            if isinstance(field, LuaParser.FieldContext):
+                hasKey = False
+                for tblElem in field.children:
+                    if isinstance(tblElem, LuaParser.TableKeyContext):
+                        keys.addChild(self.visitChildren(tblElem))
+                        hasKey = True
+                    elif isinstance(tblElem, LuaParser.TableValueContext):
+                        values.addChild(self.visitChildren(tblElem))
+                # if no index found, create an integer key:
+                if not hasKey:
+                    keys.addChild(NumberExpr(index))
+                    index += 1
+        return TableExpr([keys, values])
