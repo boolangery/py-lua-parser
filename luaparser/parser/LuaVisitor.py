@@ -129,16 +129,6 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo_6.
-    def visitTodo_6(self, ctx:LuaParser.Todo_6Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo_5.
-    def visitTodo_5(self, ctx:LuaParser.Todo_5Context):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LuaParser#unOpLength.
     def visitUnOpLength(self, ctx:LuaParser.UnOpLengthContext):
         return self.visitChildren(ctx)
@@ -181,6 +171,11 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#bitOpShiftL.
     def visitBitOpShiftL(self, ctx:LuaParser.BitOpShiftLContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#loOpOr.
+    def visitLoOpOr(self, ctx:LuaParser.LoOpOrContext):
         return self.visitChildren(ctx)
 
 
@@ -266,6 +261,11 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#false.
     def visitFalse(self, ctx:LuaParser.FalseContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#loOpAnd.
+    def visitLoOpAnd(self, ctx:LuaParser.LoOpAndContext):
         return self.visitChildren(ctx)
 
 
@@ -376,16 +376,6 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#fieldsep.
     def visitFieldsep(self, ctx:LuaParser.FieldsepContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#operatorOr.
-    def visitOperatorOr(self, ctx:LuaParser.OperatorOrContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#operatorAnd.
-    def visitOperatorAnd(self, ctx:LuaParser.OperatorAndContext):
         return self.visitChildren(ctx)
 
 

@@ -137,8 +137,8 @@ exp
     | exp '-' exp                               # opSub
     | exp '*' exp                               # opMult
     | exp '/' exp                               # opFloatDiv
-    | exp '%' exp                               # opFloorDiv
-    | exp '//' exp                              # opMod
+    | exp '//' exp                              # opFloorDiv
+    | exp '%' exp                               # opMod
     | exp '&' exp                               # bitOpAnd
     | exp '|' exp                               # bitOpOr
     | exp '~' exp                               # bitOpXor
@@ -152,8 +152,8 @@ exp
     | exp '>=' exp                              # relOpGreaterEq
     | exp '~=' exp                              # relOpNotEq
     | exp '==' exp                              # relOpEq
-    | exp operatorAnd exp                       # todo_5
-    | exp operatorOr exp                        # todo_6
+    | exp 'and' exp                             # loOpAnd
+    | exp 'or' exp                              # loOpOr
     ;
 
 prefixexp
@@ -225,12 +225,6 @@ tableValue
 fieldsep
     : ',' | ';'
     ;
-
-operatorOr
-	: 'or';
-
-operatorAnd
-	: 'and';
 
 operatorStrcat
 	: '..';
