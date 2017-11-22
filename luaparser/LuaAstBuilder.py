@@ -244,3 +244,9 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitUnOpNot(self, ctx):
         return NotLoOpExpr(self.visitChildren(ctx))
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.6 – Concatenation                                                   '''
+    ''' ----------------------------------------------------------------------- '''
+    def visitConcat(self, ctx):
+        return ConcatExpr(self.visitChildren(ctx))

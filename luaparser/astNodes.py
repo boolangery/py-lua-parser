@@ -9,9 +9,9 @@
 """
 
 
-'''
-AST base node.
-'''
+''' ----------------------------------------------------------------------- '''
+''' AST base nodes                                                          '''
+''' ----------------------------------------------------------------------- '''
 class Node(object):
     """Base class for lua AST Node"""
     def __init__(self, name, childs):
@@ -52,9 +52,9 @@ class Block(Node):
 
 
 
-'''
-Statements.
-'''
+''' ----------------------------------------------------------------------- '''
+''' Statements                                                              '''
+''' ----------------------------------------------------------------------- '''
 class Statement(Node):
     """Base class for Lua statement"""
     pass
@@ -114,16 +114,16 @@ class LocalRecStat(Statement):
     def __init__(self, childs):
         super(LocalRecStat, self).__init__('Localrec', childs)
 
-'''
-Lua Expression nodes.
-'''
+''' ----------------------------------------------------------------------- '''
+''' Lua Expression                                                          '''
+''' ----------------------------------------------------------------------- '''
 class Expression(Node):
     """Define a Lua generic expression"""
     pass
 
-'''
-Types and values
-'''
+''' ----------------------------------------------------------------------- '''
+''' Types and values                                                        '''
+''' ----------------------------------------------------------------------- '''
 class NilExpr(Expression):
     """Define the Lua 'nil' expression"""
     def __init__(self, childs=None):
@@ -191,16 +191,16 @@ class ExprsExpr(Expression):
     def __init__(self, childs):
         super(ExprsExpr, self).__init__('Exprs', childs)
 
-'''
-Operators
-'''
+''' ----------------------------------------------------------------------- '''
+''' Operators                                                               '''
+''' ----------------------------------------------------------------------- '''
 class OpExpr(Expression):
     """Base class for operators"""
     pass
 
-'''
-Arithmetic Operators    
-'''
+''' ----------------------------------------------------------------------- '''
+''' 3.4.1 – Arithmetic Operators                                            '''
+''' ----------------------------------------------------------------------- '''
 class AriOpExpr(OpExpr):
     """Base class for Arithmetic Operators """
     pass
@@ -241,9 +241,9 @@ class ExpoOpExpr(AriOpExpr):
         super(ExpoOpExpr, self).__init__('OpExpo', childs)
 
 
-'''
-3.4.2 – Bitwise Operators
-'''
+''' ----------------------------------------------------------------------- '''
+''' 3.4.2 – Bitwise Operators                                               '''
+''' ----------------------------------------------------------------------- '''
 class BitOpExpr(OpExpr):
     """Base class for Bitwise Operators"""
     pass
@@ -274,9 +274,9 @@ class ShiftLOpExpr(BitOpExpr):
         super(ShiftLOpExpr, self).__init__('OpShiftL', childs)
 
 
-'''
-3.4.4 – Relational Operators
-'''
+''' ----------------------------------------------------------------------- '''
+''' 3.4.4 – Relational Operators                                            '''
+''' ----------------------------------------------------------------------- '''
 class RelOpExpr(OpExpr):
     """Base class for Relational Operators """
     pass
@@ -305,9 +305,9 @@ class NotEqToOpExpr(RelOpExpr):
     def __init__(self, childs):
         super(NotEqToOpExpr, self).__init__('OpNotEq', childs)
 
-'''
-3.4.5 – Logical Operators
-'''
+''' ----------------------------------------------------------------------- '''
+''' 3.4.5 – Logical Operators                                               '''
+''' ----------------------------------------------------------------------- '''
 class LoOpExpr(OpExpr):
     """Base class for Logical Operators """
     pass
@@ -326,6 +326,14 @@ class NotLoOpExpr(LoOpExpr):
     """Logical Not operator"""
     def __init__(self, childs):
         super(NotLoOpExpr, self).__init__('LogicNot', childs)
+
+
+''' ----------------------------------------------------------------------- '''
+''' 3.4.6 – Concatenation                                                   '''
+''' ----------------------------------------------------------------------- '''
+class ConcatExpr(Expression):
+    def __init__(self, childs):
+        super(ConcatExpr, self).__init__('Concat', childs)
 
 
 '''

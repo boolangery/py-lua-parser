@@ -137,3 +137,12 @@ class ExpressionsTestCase(tests.TestCase):
         ast = self.parser.srcToAST(r'res = not 5')
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(NotLoOpExpr(NumberExpr(5)))])))
         self.assertAstEqual(exp, ast)
+
+    '''
+    3.4.6 – Concatenation
+    '''
+    def test_concatenation(self):
+        ast = self.parser.srcToAST(r'str = "begin".."end"')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("str")), ExprsExpr(ConcatExpr([StringExpr('begin'), StringExpr('end')]))])))
+        print(Printer.toStr(ast))
+        self.assertAstEqual(exp, ast)
