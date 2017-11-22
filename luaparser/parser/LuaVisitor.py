@@ -154,11 +154,6 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#todo_3.
-    def visitTodo_3(self, ctx:LuaParser.Todo_3Context):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LuaParser#opMult.
     def visitOpMult(self, ctx:LuaParser.OpMultContext):
         return self.visitChildren(ctx)
@@ -261,6 +256,11 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#false.
     def visitFalse(self, ctx:LuaParser.FalseContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#concat.
+    def visitConcat(self, ctx:LuaParser.ConcatContext):
         return self.visitChildren(ctx)
 
 
@@ -376,11 +376,6 @@ class LuaVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#fieldsep.
     def visitFieldsep(self, ctx:LuaParser.FieldsepContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#operatorStrcat.
-    def visitOperatorStrcat(self, ctx:LuaParser.OperatorStrcatContext):
         return self.visitChildren(ctx)
 
 

@@ -145,7 +145,7 @@ exp
     | exp '>>' exp                              # bitOpShiftR
     | exp '<<' exp                              # bitOpShiftL
     | <assoc=right> exp '^' exp                 # opExpo
-    | <assoc=right> exp operatorStrcat exp      # todo_3
+    | <assoc=right> exp '..' exp                # concat
     | exp '<' exp                               # relOpLess
     | exp '>' exp                               # relOpGreater
     | exp '<=' exp                              # relOpLessEq
@@ -225,9 +225,6 @@ tableValue
 fieldsep
     : ',' | ';'
     ;
-
-operatorStrcat
-	: '..';
 
 string
     : NORMALSTRING | CHARSTRING | LONGSTRING
