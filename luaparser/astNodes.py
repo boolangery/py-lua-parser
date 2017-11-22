@@ -249,27 +249,27 @@ class BitOpExpr(OpExpr):
     pass
 
 class AndOpExpr(BitOpExpr):
-    """And operator"""
+    """Bitwise And operator"""
     def __init__(self, childs):
         super(AndOpExpr, self).__init__('OpAnd', childs)
 
 class OrOpExpr(BitOpExpr):
-    """And operator"""
+    """Bitwise Or operator"""
     def __init__(self, childs):
         super(OrOpExpr, self).__init__('OpOr', childs)
 
 class XorOpExpr(BitOpExpr):
-    """And operator"""
+    """Bitwise Xor operator"""
     def __init__(self, childs):
         super(XorOpExpr, self).__init__('OpXor', childs)
 
 class ShiftROpExpr(BitOpExpr):
-    """And operator"""
+    """Bitwise Shift Right operator"""
     def __init__(self, childs):
         super(ShiftROpExpr, self).__init__('OpShiftR', childs)
 
 class ShiftLOpExpr(BitOpExpr):
-    """And operator"""
+    """Bitwise Shift Left operator"""
     def __init__(self, childs):
         super(ShiftLOpExpr, self).__init__('OpShiftL', childs)
 
@@ -304,6 +304,28 @@ class EqToOpExpr(RelOpExpr):
 class NotEqToOpExpr(RelOpExpr):
     def __init__(self, childs):
         super(NotEqToOpExpr, self).__init__('OpNotEq', childs)
+
+'''
+3.4.5 – Logical Operators
+'''
+class LoOpExpr(OpExpr):
+    """Base class for Logical Operators """
+    pass
+
+class AndLoOpExpr(LoOpExpr):
+    """Logical And operator"""
+    def __init__(self, childs):
+        super(AndLoOpExpr, self).__init__('LogicAnd', childs)
+
+class OrLoOpExpr(LoOpExpr):
+    """Logical Or operator"""
+    def __init__(self, childs):
+        super(OrLoOpExpr, self).__init__('LogicOr', childs)
+
+class NotLoOpExpr(LoOpExpr):
+    """Logical Not operator"""
+    def __init__(self, childs):
+        super(NotLoOpExpr, self).__init__('LogicNot', childs)
 
 
 '''

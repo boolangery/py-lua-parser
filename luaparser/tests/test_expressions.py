@@ -87,7 +87,7 @@ class ExpressionsTestCase(tests.TestCase):
         self.assertAstEqual(exp, ast)
 
     """
-    3.2 – Relational Operators
+    3.4.4 – Relational Operators
     """
     def test_less_than(self):
         ast = self.parser.srcToAST(r'res = (1 < 2)')

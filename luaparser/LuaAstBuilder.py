@@ -232,3 +232,15 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitUnOpBitNot(self, ctx):
         return UnOpNotExpr(self.visitChildren(ctx))
+
+    '''
+    3.4.5 – Logical Operators
+    '''
+    def visitLoOpAnd(self, ctx):
+        return AndLoOpExpr(self.visitChildren(ctx))
+
+    def visitLoOpOr(self, ctx):
+        return OrLoOpExpr(self.visitChildren(ctx))
+
+    def visitUnOpNot(self, ctx):
+        return NotLoOpExpr(self.visitChildren(ctx))
