@@ -121,11 +121,19 @@ class ExpressionsTestCase(tests.TestCase):
 
 
     """
-    3.3 – Logical Operators
+    3.4.5 – Logical Operators
     """
-    def test_less_or_eq_than(self):
+    def test_logic_and(self):
         ast = self.parser.srcToAST(r'res = 4 and 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(LessOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        #print(Printer.toStr(ast))
-        #self.assertAstEqual(exp, ast)
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(AndLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
 
+    def test_logic_or(self):
+        ast = self.parser.srcToAST(r'res = 4 or 5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(OrLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_logic_not(self):
+        ast = self.parser.srcToAST(r'res = not 5')
+        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(NotLoOpExpr(NumberExpr(5)))])))
+        self.assertAstEqual(exp, ast)
