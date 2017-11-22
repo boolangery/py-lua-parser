@@ -152,7 +152,6 @@ class ExpressionsTestCase(tests.TestCase):
     def test_length_op(self):
         ast = self.parser.srcToAST(r'len = #t')
         exp = Chunk(Block(SetStat([VarsExpr(IdExpr("len")), ExprsExpr(LengthExpr(IdExpr('t')))])))
-        #print(Printer.toStr(ast))
         self.assertAstEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -230,4 +229,29 @@ class ExpressionsTestCase(tests.TestCase):
                 NumberExpr(157)
             ])
         ]))])))
+        self.assertAstEqual(exp, ast)
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.10 – Function Calls                                                 '''
+    ''' ----------------------------------------------------------------------- '''
+    ''' todo: maybe remove ExprsExpr'''
+    def test_function_call(self):
+        ast = self.parser.srcToAST(r'print("hello")')
+        exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_call_no_parent(self):
+        ast = self.parser.srcToAST(r'print "hello"')
+        exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(StringExpr('hello'))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_call_sugar_syntax(self):
+        ast = self.parser.srcToAST(r'foo:print("hello")')
+        exp = Chunk(Block(InvokeStat([IdExpr("foo"), IdExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_call_args(self):
+        ast = self.parser.srcToAST(r'print("hello",  42)')
+        exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(ExprsExpr([StringExpr('hello'), NumberExpr(42)]))])))
+        #print(Printer.toStr(ast))
         self.assertAstEqual(exp, ast)
