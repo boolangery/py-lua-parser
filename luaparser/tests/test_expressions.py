@@ -264,5 +264,46 @@ class ExpressionsTestCase(tests.TestCase):
             VarsExpr(IdExpr('f')),
             ExprsExpr(FunctionExpr(Block(CallStat([IdExpr('print'), ArgsExpr(ExprsExpr(StringExpr('hello')))]))))
         ])))
-        #print(Printer.toStr(ast))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_definition_1(self):
+        ast = self.parser.srcToAST(r'function f() end')
+        exp = Chunk(Block(SetStat([IdExpr('f'),FunctionExpr(Block(None))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_definition_2(self):
+        ast = self.parser.srcToAST(r'function t.a.b.c.f() end')
+        exp = Chunk(Block(SetStat([
+            IndexExpr([
+                IndexExpr([
+                    IndexExpr([
+                        IndexExpr([
+                            IdExpr('t'), IdExpr('a')
+                        ]), IdExpr('b')
+                    ]), IdExpr('c')
+                ]), IdExpr('f')
+            ])
+            ,FunctionExpr(Block(None))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_definition_3(self):
+        ast = self.parser.srcToAST(r't.a.b.c.f = function () end')
+        exp = Chunk(Block(SetStat([
+            VarsExpr(
+                IndexExpr([
+                    IndexExpr([
+                        IndexExpr([
+                            IndexExpr([
+                                IdExpr('t'), IdExpr('a')
+                            ]), IdExpr('b')
+                        ]), IdExpr('c')
+                    ]), IdExpr('f')
+                ])
+            )
+            ,ExprsExpr(FunctionExpr(Block(None)))])))
+        self.assertAstEqual(exp, ast)
+
+    def test_function_definition_4(self):
+        ast = self.parser.srcToAST(r'local function f () end')
+        exp = Chunk(Block(LocalRecStat([IdExpr('f'), FunctionExpr(Block(None))])))
         self.assertAstEqual(exp, ast)

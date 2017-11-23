@@ -62,16 +62,6 @@ class ParseTreeVisitor(LuaVisitor):
     def visitForin(self, ctx):
         return ForinStat(self.visitChildren(ctx))
 
-    def visitFunc(self, ctx):
-        # 'function' funcname funcbody
-        return SetStat(self.visitChildren(ctx))
-
-    def visitLocalfunc(self, ctx):
-        return LocalRecStat(self.visitChildren(ctx))
-
-    def visitFuncbody(self, ctx):
-        return FunctionExpr(self.visitChildren(ctx))
-
 
     ''' 
     Visiting expressions.
@@ -259,3 +249,28 @@ class ParseTreeVisitor(LuaVisitor):
                     keys.addChild(NumberExpr(index))
                     index += 1
         return TableExpr([keys, values])
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.4.11 – Function Definitions                                           '''
+    ''' ----------------------------------------------------------------------- '''
+    def visitFunc(self, ctx):
+        # 'function' funcname funcbody
+        return SetStat(self.visitChildren(ctx))
+
+    def visitLocalfunc(self, ctx):
+        return LocalRecStat(self.visitChildren(ctx))
+
+    def visitFuncbody(self, ctx):
+        return FunctionExpr(self.visitChildren(ctx))
+
+    def visitFuncname(self, ctx):
+        # name ('.' name)* (':' name)?
+        if len(ctx.children)>2:
+            child = IndexExpr([self.visit(ctx.children[0]), self.visit(ctx.children[2])])
+            for i in range(3, len(ctx.children)):
+                if isinstance(ctx.children[i], LuaParser.NameContext):
+                    root = IndexExpr([child, self.visit(ctx.children[i])])
+                    child = root
+            return child
+        else:
+            return self.visitChildren(ctx)
