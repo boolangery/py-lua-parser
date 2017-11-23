@@ -85,13 +85,20 @@ goto        : 'goto' name ;
 do          : 'do' block 'end' ;
 whileStat   : 'while' exp 'do' block 'end' ;
 repeat      : 'repeat' block 'until' exp ;
-ifStat      : 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' ;
+ifStat      : 'if' exp 'then' block elseIfStat* elseStat? 'end' ;
 fornum      : 'for' name '=' exp ',' exp (',' exp)? 'do' block 'end' ;
 forin       : 'for' namelist 'in' explist 'do' block 'end' ;
 func        : 'function' funcname funcbody ;
 localfunc   : 'local' 'function' name funcbody ;
 localset    : 'local' namelist ('=' explist)? ;
 
+elseIfStat
+    : 'elseif' exp 'then' block
+    ;
+
+elseStat
+    : 'else' block
+    ;
 
 retstat
     : 'return' explist? ';'?

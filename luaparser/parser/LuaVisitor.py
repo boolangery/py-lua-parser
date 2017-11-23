@@ -99,6 +99,16 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#elseIfStat.
+    def visitElseIfStat(self, ctx:LuaParser.ElseIfStatContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#elseStat.
+    def visitElseStat(self, ctx:LuaParser.ElseStatContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#retstat.
     def visitRetstat(self, ctx:LuaParser.RetstatContext):
         return self.visitChildren(ctx)
