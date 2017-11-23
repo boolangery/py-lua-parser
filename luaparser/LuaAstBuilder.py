@@ -75,6 +75,9 @@ class ParseTreeVisitor(LuaVisitor):
     def visitLabel(self, ctx):
         return LabelStat(self.visitChildren(ctx))
 
+    def visitGoto(self, ctx):
+        return GotoStat(self.visitChildren(ctx))
+
     ''' 
     Visiting expressions.
     '''

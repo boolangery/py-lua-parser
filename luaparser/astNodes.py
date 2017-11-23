@@ -99,6 +99,11 @@ class LabelStat(Statement):
     def __init__(self, childs):
         super(LabelStat, self).__init__('Label', childs)
 
+class GotoStat(Statement):
+    """Define the 'goto' lua statement"""
+    def __init__(self, childs):
+        super(GotoStat, self).__init__('Goto', childs)
+
 class FornumStat(Statement):
     """Define the 'Fornum' lua statement"""
     def __init__(self, childs):
