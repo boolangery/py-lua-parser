@@ -78,6 +78,9 @@ class ParseTreeVisitor(LuaVisitor):
     def visitGoto(self, ctx):
         return GotoStat(self.visitChildren(ctx))
 
+    def visitBreakStat(self, ctx):
+        return BreakStat(self.visitChildren(ctx))
+
     ''' 
     Visiting expressions.
     '''

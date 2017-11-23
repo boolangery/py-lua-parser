@@ -104,6 +104,11 @@ class GotoStat(Statement):
     def __init__(self, childs):
         super(GotoStat, self).__init__('Goto', childs)
 
+class BreakStat(Statement):
+    """Define the 'break' lua statement"""
+    def __init__(self, childs):
+        super(BreakStat, self).__init__('Break', childs)
+
 class FornumStat(Statement):
     """Define the 'Fornum' lua statement"""
     def __init__(self, childs):
