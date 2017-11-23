@@ -1,13 +1,13 @@
-Work in progress
-================
+py-lua-parser (Work in progress)
+================================
 
-A Lua and LDoc parser written in Python.
+A Lua parser and AST builder written in Python.
 
 
 Usage
 =====
 
-.. code:: python
+.. code-block:: python
     from luaparser import Parser
     from luaparser import Printer
 
