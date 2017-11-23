@@ -36,8 +36,9 @@ class ParseTreeVisitor(LuaVisitor):
     def visitBlock(self, ctx):
         return Block(self.visitChildren(ctx))
 
-    ''' Visiting statements.
-    '''
+    ''' ----------------------------------------------------------------------- '''
+    ''' 3.3 – Statements                                                        '''
+    ''' ----------------------------------------------------------------------- '''
     def visitSetStat(self, ctx):
         return SetStat(self.visitChildren(ctx))
 
@@ -62,6 +63,14 @@ class ParseTreeVisitor(LuaVisitor):
     def visitForin(self, ctx):
         return ForinStat(self.visitChildren(ctx))
 
+    def visitIfStat(self, ctx):
+        return IfStat(self.visitChildren(ctx))
+
+    def visitElseIfStat(self, ctx):
+        return ElseIfStat(self.visitChildren(ctx))
+
+    def visitElseStat(self, ctx):
+        return ElseStat(self.visitChildren(ctx))
 
     ''' 
     Visiting expressions.

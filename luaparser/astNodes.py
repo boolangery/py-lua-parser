@@ -80,9 +80,19 @@ class RepeatStat(Statement):
         super(RepeatStat, self).__init__('Repeat', childs)
 
 class IfStat(Statement):
-    """Define the 'If' lua statement"""
+    """Define the 'if' lua statement"""
     def __init__(self, childs):
         super(IfStat, self).__init__('If', childs)
+
+class ElseIfStat(Statement):
+    """Define the 'elseif' lua statement"""
+    def __init__(self, childs):
+        super(ElseIfStat, self).__init__('ElseIf', childs)
+
+class ElseStat(Statement):
+    """Define the 'else' lua statement"""
+    def __init__(self, childs):
+        super(ElseStat, self).__init__('Else', childs)
 
 class FornumStat(Statement):
     """Define the 'Fornum' lua statement"""
