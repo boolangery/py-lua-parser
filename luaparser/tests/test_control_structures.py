@@ -27,6 +27,20 @@ class ControlStructureTestCase(tests.TestCase):
         ))
         self.assertAstEqual(exp, ast)
 
+    def test_while_break(self):
+        ast = self.parser.srcToAST(textwrap.dedent("""
+            while a[i] do
+              break
+            end"""))
+        exp = Chunk(Block(
+            WhileStat([
+                IndexExpr([IdExpr("a"), IdExpr("i")]),
+                Block(BreakStat(None))
+            ])
+        ))
+        self.assertAstEqual(exp, ast)
+
+
     def test_repeat_until(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             repeat        
