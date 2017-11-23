@@ -94,6 +94,11 @@ class ElseStat(Statement):
     def __init__(self, childs):
         super(ElseStat, self).__init__('Else', childs)
 
+class LabelStat(Statement):
+    """Define the '::label::' lua statement"""
+    def __init__(self, childs):
+        super(LabelStat, self).__init__('Label', childs)
+
 class FornumStat(Statement):
     """Define the 'Fornum' lua statement"""
     def __init__(self, childs):

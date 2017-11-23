@@ -97,3 +97,11 @@ class ControlStructureTestCase(tests.TestCase):
             ])
         ))
         self.assertAstEqual(exp, ast)
+
+    def test_label(self):
+        ast = self.parser.srcToAST(textwrap.dedent("""
+            ::foo::
+            """))
+        exp = Chunk(Block(LabelStat(IdExpr('foo'))))
+        print(Printer.toStr(ast))
+        self.assertAstEqual(exp, ast)

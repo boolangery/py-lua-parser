@@ -72,6 +72,9 @@ class ParseTreeVisitor(LuaVisitor):
     def visitElseStat(self, ctx):
         return ElseStat(self.visitChildren(ctx))
 
+    def visitLabel(self, ctx):
+        return LabelStat(self.visitChildren(ctx))
+
     ''' 
     Visiting expressions.
     '''
