@@ -174,7 +174,7 @@ class ExpressionsTestCase(tests.TestCase):
         ast = self.parser.srcToAST(r'a = ~5')
         exp = Chunk(body=Block(body=[AssignStat(
             targets=[NameExpr(id='a')],
-            values=[UNotOpExpr(operand=NumberExpr(5))]
+            values=[UBNotOpExpr(operand=NumberExpr(5))]
         )]))
         self.assertEqual(exp, ast)
 
@@ -245,7 +245,6 @@ class ExpressionsTestCase(tests.TestCase):
                 right=NumberExpr(2)
             )]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
 
@@ -254,18 +253,34 @@ class ExpressionsTestCase(tests.TestCase):
     """
     def test_logic_and(self):
         ast = self.parser.srcToAST(r'res = 4 and 5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(AndLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[AndLoOpExpr(
+                left=NumberExpr(4),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_logic_or(self):
         ast = self.parser.srcToAST(r'res = 4 or 5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(OrLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[OrLoOpExpr(
+                left=NumberExpr(4),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_logic_not(self):
         ast = self.parser.srcToAST(r'res = not 5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(NotLoOpExpr(NumberExpr(5)))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[ULNotOpExpr(operand=NumberExpr(5))]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.6 – Concatenation                                                   '''

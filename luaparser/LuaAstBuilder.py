@@ -270,19 +270,23 @@ class ParseTreeVisitor(LuaVisitor):
         return USubOpExpr(operand=self.visit(ctx.children[1]))
 
     def visitUnOpBitNot(self, ctx):
-        return UNotOpExpr(operand=self.visit(ctx.children[1]))
+        return UBNotOpExpr(operand=self.visit(ctx.children[1]))
+
+    def visitUnOpNot(self, ctx):
+        return ULNotOpExpr(self.visitChildren(ctx))
 
     '''
     3.4.5 – Logical Operators
     '''
     def visitLoOpAnd(self, ctx):
-        return AndLoOpExpr(self.visitChildren(ctx))
+        return AndLoOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitLoOpOr(self, ctx):
-        return OrLoOpExpr(self.visitChildren(ctx))
-
-    def visitUnOpNot(self, ctx):
-        return NotLoOpExpr(self.visitChildren(ctx))
+        return OrLoOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.6 – Concatenation                                                   '''

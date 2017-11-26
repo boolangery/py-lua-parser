@@ -393,24 +393,20 @@ class NotEqToOpExpr(RelOpExpr):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.5 – Logical Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
-class LoOpExpr(OpExpr):
+class LoOpExpr(LeftRightOpExpr):
     """Base class for Logical Operators """
     pass
 
 class AndLoOpExpr(LoOpExpr):
     """Logical And operator"""
-    def __init__(self, childs):
-        super(AndLoOpExpr, self).__init__('LogicAnd', childs)
+    def __init__(self, left, right):
+        super(AndLoOpExpr, self).__init__('LAndOp', left, right)
 
 class OrLoOpExpr(LoOpExpr):
     """Logical Or operator"""
-    def __init__(self, childs):
-        super(OrLoOpExpr, self).__init__('LogicOr', childs)
+    def __init__(self, left, right):
+        super(OrLoOpExpr, self).__init__('LOrOp', left, right)
 
-class NotLoOpExpr(LoOpExpr):
-    """Logical Not operator"""
-    def __init__(self, childs):
-        super(NotLoOpExpr, self).__init__('LogicNot', childs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -440,16 +436,20 @@ class UnOpExpr(Expression):
             return self.operand == other.operand
         return False
 
-class UNotOpExpr(UnOpExpr):
-    """Lua not unitary operator expression"""
+class UBNotOpExpr(UnOpExpr):
+    """Lua binary not unitary operator expression"""
     def __init__(self, operand):
-        super(UNotOpExpr, self).__init__('UNotOp', operand)
+        super(UBNotOpExpr, self).__init__('UBNotOp', operand)
 
 class USubOpExpr(UnOpExpr):
     """Lua negation unitary operator expression"""
     def __init__(self, operand):
         super(USubOpExpr, self).__init__('USubOp', operand)
 
+class ULNotOpExpr(UnOpExpr):
+    """Logical Not operator"""
+    def __init__(self, operand):
+        super(ULNotOpExpr, self).__init__('ULNotOp', operand)
 
 '''
 Left Hand Side expression.
