@@ -45,17 +45,20 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
     def visitSetStat(self, ctx):
-        return AssignStat(targets=listify(self.visit(ctx.children[0])), \
-                          values=listify(self.visit(ctx.children[2])))
+        return AssignStat(
+            targets=listify(self.visit(ctx.children[0])), \
+            values=listify(self.visit(ctx.children[2])))
 
     def visitLocalset(self, ctx):
         # 'local' namelist ('=' explist)?
         if len(ctx.children) > 1:
-            return LocalAssignStat(targets=listify(self.visit(ctx.children[1])), \
-                                   values=listify(self.visit(ctx.children[3])))
+            return LocalAssignStat(
+                targets=listify(self.visit(ctx.children[1])), \
+                values=listify(self.visit(ctx.children[3])))
         else:
-            return LocalAssignStat(targets=listify(self.visit(ctx.children[1])), \
-                                   values=[])
+            return LocalAssignStat(
+                targets=listify(self.visit(ctx.children[1])), \
+                values=[])
 
     def visitWhileStat(self, ctx):
         return WhileStat(self.visitChildren(ctx))
@@ -137,7 +140,7 @@ class ParseTreeVisitor(LuaVisitor):
         return ArgsExpr(self.visitChildren(ctx))
 
     def visitUnOpMin(self, ctx):
-        return UnOpNegExpr(self.visitChildren(ctx))
+        return USubOpExpr(operand=self.visit(ctx.children[1]))
 
     #def visitVarlist(self, ctx):
     #    return VarsExpr(self.visitChildren(ctx))
@@ -164,28 +167,42 @@ class ParseTreeVisitor(LuaVisitor):
     Visiting arithmetic operator expressions
     '''
     def visitOpAdd(self, ctx):
-        return AddOpExpr(self.visitChildren(ctx))
+        return AddOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitOpSub(self, ctx):
-        return SubOpExpr(self.visitChildren(ctx))
+        return SubOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
+
+    def visitOpMult(self, ctx):
+        return MultOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
+
+    def visitOpFloatDiv(self, ctx):
+        return FloatDivOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
+
+    def visitOpFloorDiv(self, ctx):
+        return FloorDivOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
+
+    def visitOpMod(self, ctx):
+        return ModOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
+
+    def visitOpExpo(self, ctx):
+        return ExpoOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitOpMin(self, ctx):
         return NegOpExpr(self.visitChildren(ctx))
-
-    def visitOpMult(self, ctx):
-        return MultOpExpr(self.visitChildren(ctx))
-
-    def visitOpFloatDiv(self, ctx):
-        return FloatDivOpExpr(self.visitChildren(ctx))
-
-    def visitOpFloorDiv(self, ctx):
-        return FloorDivOpExpr(self.visitChildren(ctx))
-
-    def visitOpMod(self, ctx):
-        return ModOpExpr(self.visitChildren(ctx))
-
-    def visitOpExpo(self, ctx):
-        return ExpoOpExpr(self.visitChildren(ctx))
 
     '''
     Relational Operators

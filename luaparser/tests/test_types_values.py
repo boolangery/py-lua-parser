@@ -129,5 +129,4 @@ class TypesValuesTestCase(tests.TestCase):
             targets=[NameExpr(id='b')],
             values=[StringExpr(s='one [[two]] one')]
         )]))
-        #Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)

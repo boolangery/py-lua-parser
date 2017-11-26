@@ -15,43 +15,104 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_addition(self):
         ast = self.parser.srcToAST(r'a = 1 + 0.2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(AddOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                AddOpExpr(
+                    left=NumberExpr(1),
+                    right=NumberExpr(0.2)
+                )
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
-    def test_subtraction(self):
+    def test_substraction(self):
         ast = self.parser.srcToAST(r'a = 1 - 0.2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(SubOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                SubOpExpr(
+                    left=NumberExpr(1),
+                    right=NumberExpr(0.2)
+                )
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_multiplication(self):
         ast = self.parser.srcToAST(r'a = 1 * 0.2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(MultOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                MultOpExpr(
+                    left=NumberExpr(1),
+                    right=NumberExpr(0.2)
+                )
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_float_division(self):
         ast = self.parser.srcToAST(r'a = 1 / 0.2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(FloatDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                FloatDivOpExpr(
+                    left=NumberExpr(1),
+                    right=NumberExpr(0.2)
+                )
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_floor_division(self):
         ast = self.parser.srcToAST(r'a = 1 // 0.2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(FloorDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                FloorDivOpExpr(
+                    left=NumberExpr(1),
+                    right=NumberExpr(0.2)
+                )
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
-    def test_mod_division(self):
+    def test_mod(self):
         ast = self.parser.srcToAST(r'a = 1 % 0.2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ModOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                ModOpExpr(
+                    left=NumberExpr(1),
+                    right=NumberExpr(0.2)
+                )
+            ]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
-    def test_negation(self):
+    def test_unary_sub(self):
         ast = self.parser.srcToAST(r'a = -1')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(UnOpNegExpr(NumberExpr(1)))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[
+                USubOpExpr(operand=NumberExpr(1))
+            ]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_exponentiation(self):
         ast = self.parser.srcToAST(r'a = 1^2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ExpoOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[ExpoOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     """
     3.4.2 – Bitwise Operators

@@ -274,43 +274,56 @@ class OpExpr(Expression):
 ''' 3.4.1 – Arithmetic Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
 class AriOpExpr(OpExpr):
-    """Base class for Arithmetic Operators """
+    """Base class for Arithmetic Operators"""
     pass
 
-class AddOpExpr(AriOpExpr):
+class LeftRightOpExpr(AriOpExpr):
+    """Base class for 'Left Op Right' Arithmetic Operators"""
+    def __init__(self, name, left, right):
+        super(LeftRightOpExpr, self).__init__(name, [])
+        self.left = left
+        self.right = right
+
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.left == other.left and \
+                   self.right == other.right
+        return False
+
+class AddOpExpr(LeftRightOpExpr):
     """+ operator"""
-    def __init__(self, childs):
-        super(AddOpExpr, self).__init__('OpAdd', childs)
+    def __init__(self, left, right):
+        super(AddOpExpr, self).__init__('AddOp', left, right)
 
-class SubOpExpr(AriOpExpr):
+class SubOpExpr(LeftRightOpExpr):
     """- operator"""
-    def __init__(self, childs):
-        super(SubOpExpr, self).__init__('OpSub', childs)
+    def __init__(self, left, right):
+        super(SubOpExpr, self).__init__('SubOp', left, right)
 
-class MultOpExpr(AriOpExpr):
+class MultOpExpr(LeftRightOpExpr):
     """* operator"""
-    def __init__(self, childs):
-        super(MultOpExpr, self).__init__('OpMult', childs)
+    def __init__(self, left, right):
+        super(MultOpExpr, self).__init__('MultOp', left, right)
 
-class FloatDivOpExpr(AriOpExpr):
+class FloatDivOpExpr(LeftRightOpExpr):
     """/ operator"""
-    def __init__(self, childs):
-        super(FloatDivOpExpr, self).__init__('OpFloatDiv', childs)
+    def __init__(self, left, right):
+        super(FloatDivOpExpr, self).__init__('FloatDivOp', left, right)
 
-class FloorDivOpExpr(AriOpExpr):
+class FloorDivOpExpr(LeftRightOpExpr):
     """// operator"""
-    def __init__(self, childs):
-        super(FloorDivOpExpr, self).__init__('OpFloorDiv', childs)
+    def __init__(self, left, right):
+        super(FloorDivOpExpr, self).__init__('FloorDivOp', left, right)
 
-class ModOpExpr(AriOpExpr):
+class ModOpExpr(LeftRightOpExpr):
     """# operator"""
-    def __init__(self, childs):
-        super(ModOpExpr, self).__init__('OpMod', childs)
+    def __init__(self, left, right):
+        super(ModOpExpr, self).__init__('ModOp', left, right)
 
-class ExpoOpExpr(AriOpExpr):
+class ExpoOpExpr(LeftRightOpExpr):
     """^ operator"""
-    def __init__(self, childs):
-        super(ExpoOpExpr, self).__init__('OpExpo', childs)
+    def __init__(self, left, right):
+        super(ExpoOpExpr, self).__init__('ExpoOp', left, right)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -426,10 +439,15 @@ class UnOpNotExpr(UnOpExpr):
     def __init__(self, childs):
         super(UnOpNotExpr, self).__init__('UnOpNot', childs)
 
-class UnOpNegExpr(UnOpExpr):
+class USubOpExpr(UnOpExpr):
     """Lua negation unitary operator expression"""
-    def __init__(self, childs):
-        super(UnOpNegExpr, self).__init__('UnOpNeg', childs)
+    def __init__(self, operand):
+        super(USubOpExpr, self).__init__('USubOp', [])
+        self.operand = operand
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.operand == other.operand
+        return False
 
 '''
 Left Hand Side expression.
