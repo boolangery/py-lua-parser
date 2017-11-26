@@ -15,42 +15,42 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_addition(self):
         ast = self.parser.srcToAST(r'a = 1 + 0.2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(AddOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(AddOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_subtraction(self):
         ast = self.parser.srcToAST(r'a = 1 - 0.2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(SubOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(SubOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_multiplication(self):
         ast = self.parser.srcToAST(r'a = 1 * 0.2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(MultOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(MultOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_float_division(self):
         ast = self.parser.srcToAST(r'a = 1 / 0.2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(FloatDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(FloatDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_floor_division(self):
         ast = self.parser.srcToAST(r'a = 1 // 0.2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(FloorDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(FloorDivOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_mod_division(self):
         ast = self.parser.srcToAST(r'a = 1 % 0.2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ModOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ModOpExpr([NumberExpr(1), NumberExpr(0.2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_negation(self):
         ast = self.parser.srcToAST(r'a = -1')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(UnOpNegExpr(NumberExpr(1)))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(UnOpNegExpr(NumberExpr(1)))])))
         self.assertAstEqual(exp, ast)
 
     def test_exponentiation(self):
         ast = self.parser.srcToAST(r'a = 1^2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ExpoOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ExpoOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
     """
@@ -58,32 +58,32 @@ class ExpressionsTestCase(tests.TestCase):
     """
     def test_bitwise_and(self):
         ast = self.parser.srcToAST(r'a = 3&5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(AndOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(AndOpExpr([NumberExpr(3), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_bitwise_or(self):
         ast = self.parser.srcToAST(r'a = 3|5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(OrOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(OrOpExpr([NumberExpr(3), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_bitwise_exclusive_or(self):
         ast = self.parser.srcToAST(r'a = 3 ~ 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(XorOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(XorOpExpr([NumberExpr(3), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_bitwise_right_shift(self):
         ast = self.parser.srcToAST(r'a = 3 >> 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ShiftROpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ShiftROpExpr([NumberExpr(3), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_bitwise_right_left(self):
         ast = self.parser.srcToAST(r'a = 3 << 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(ShiftLOpExpr([NumberExpr(3), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ShiftLOpExpr([NumberExpr(3), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_bitwise_unary_not(self):
         ast = self.parser.srcToAST(r'a = ~5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(UnOpNotExpr(NumberExpr(5)))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(UnOpNotExpr(NumberExpr(5)))])))
         self.assertAstEqual(exp, ast)
 
     """
@@ -91,32 +91,32 @@ class ExpressionsTestCase(tests.TestCase):
     """
     def test_less_than(self):
         ast = self.parser.srcToAST(r'res = (1 < 2)')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(LessThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(LessThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_greater_than(self):
         ast = self.parser.srcToAST(r'res = (1 > 2)')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(GreaterThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(GreaterThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_less_or_eq_than(self):
         ast = self.parser.srcToAST(r'res = (1 <= 2)')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(LessOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(LessOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_greater_or_eq_than(self):
         ast = self.parser.srcToAST(r'res = (1 >= 2)')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(GreaterOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(GreaterOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_equal_than(self):
         ast = self.parser.srcToAST(r'res = 1 == 2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(EqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(EqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_not_equal_than(self):
         ast = self.parser.srcToAST(r'res = 1 ~= 2')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(NotEqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(NotEqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
         self.assertAstEqual(exp, ast)
 
 
@@ -125,17 +125,17 @@ class ExpressionsTestCase(tests.TestCase):
     """
     def test_logic_and(self):
         ast = self.parser.srcToAST(r'res = 4 and 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(AndLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(AndLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_logic_or(self):
         ast = self.parser.srcToAST(r'res = 4 or 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(OrLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(OrLoOpExpr([NumberExpr(4), NumberExpr(5)]))])))
         self.assertAstEqual(exp, ast)
 
     def test_logic_not(self):
         ast = self.parser.srcToAST(r'res = not 5')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("res")), ExprsExpr(NotLoOpExpr(NumberExpr(5)))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(NotLoOpExpr(NumberExpr(5)))])))
         self.assertAstEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -143,7 +143,7 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_concatenation(self):
         ast = self.parser.srcToAST(r'str = "begin".."end"')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("str")), ExprsExpr(ConcatExpr([StringExpr('begin'), StringExpr('end')]))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("str")), ExprsExpr(ConcatExpr([StringExpr('begin'), StringExpr('end')]))])))
         self.assertAstEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -151,7 +151,7 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_length_op(self):
         ast = self.parser.srcToAST(r'len = #t')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("len")), ExprsExpr(LengthExpr(IdExpr('t')))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("len")), ExprsExpr(LengthExpr(NameExpr('t')))])))
         self.assertAstEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -159,8 +159,8 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_dict(self):
         ast = self.parser.srcToAST(r'a = {foo = "bar", bar = "foo"}')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("a")), ExprsExpr(TableExpr([
-            KeysExpr([IdExpr("foo"), IdExpr("bar")]),
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(TableExpr([
+            KeysExpr([NameExpr("foo"), NameExpr("bar")]),
             ValuesExpr([StringExpr("bar"), StringExpr("foo")])
         ]))])))
         self.assertAstEqual(exp, ast)
@@ -174,12 +174,12 @@ class ExpressionsTestCase(tests.TestCase):
               options = { radio = true }
             };
             '''))
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("foo")), ExprsExpr(TableExpr([
-            KeysExpr([IdExpr("car"),
-                      IdExpr("options")]),
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TableExpr([
+            KeysExpr([NameExpr("car"),
+                      NameExpr("options")]),
             ValuesExpr([
-                TableExpr([KeysExpr(IdExpr('name')), ValuesExpr(StringExpr('bmw'))]),
-                TableExpr([KeysExpr(IdExpr('radio')), ValuesExpr(TrueExpr())])
+                TableExpr([KeysExpr(NameExpr('name')), ValuesExpr(StringExpr('bmw'))]),
+                TableExpr([KeysExpr(NameExpr('radio')), ValuesExpr(TrueExpr())])
             ])
         ]))])))
         self.assertAstEqual(exp, ast)
@@ -194,7 +194,7 @@ class ExpressionsTestCase(tests.TestCase):
         }
         '''))
 
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("foo")), ExprsExpr(TableExpr([
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TableExpr([
             KeysExpr([
                 NumberExpr(1),    NumberExpr(2),    NumberExpr(3),
                 NumberExpr(4),    NumberExpr(5),    NumberExpr(6),
@@ -219,12 +219,12 @@ class ExpressionsTestCase(tests.TestCase):
         };
         '''))
 
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("foo")), ExprsExpr(TableExpr([
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TableExpr([
             KeysExpr([
-                IdExpr('options'), NumberExpr(1), NumberExpr(2)
+                NameExpr('options'), NumberExpr(1), NumberExpr(2)
             ]),
             ValuesExpr([
-                TableExpr([KeysExpr(IdExpr('radio')), ValuesExpr(TrueExpr())]),
+                TableExpr([KeysExpr(NameExpr('radio')), ValuesExpr(TrueExpr())]),
                 StringExpr('enabled'),
                 NumberExpr(157)
             ])
@@ -237,22 +237,22 @@ class ExpressionsTestCase(tests.TestCase):
     ''' todo: maybe remove ExprsExpr'''
     def test_function_call(self):
         ast = self.parser.srcToAST(r'print("hello")')
-        exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
+        exp = Chunk(Block(CallStat([NameExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
         self.assertAstEqual(exp, ast)
 
     def test_function_call_no_parent(self):
         ast = self.parser.srcToAST(r'print "hello"')
-        exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(StringExpr('hello'))])))
+        exp = Chunk(Block(CallStat([NameExpr("print"), ArgsExpr(StringExpr('hello'))])))
         self.assertAstEqual(exp, ast)
 
     def test_function_call_sugar_syntax(self):
         ast = self.parser.srcToAST(r'foo:print("hello")')
-        exp = Chunk(Block(InvokeStat([IdExpr("foo"), IdExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
+        exp = Chunk(Block(InvokeStat([NameExpr("foo"), NameExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
         self.assertAstEqual(exp, ast)
 
     def test_function_call_args(self):
         ast = self.parser.srcToAST(r'print("hello",  42)')
-        exp = Chunk(Block(CallStat([IdExpr("print"), ArgsExpr(ExprsExpr([StringExpr('hello'), NumberExpr(42)]))])))
+        exp = Chunk(Block(CallStat([NameExpr("print"), ArgsExpr(ExprsExpr([StringExpr('hello'), NumberExpr(42)]))])))
         self.assertAstEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -260,44 +260,44 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_function_definition(self):
         ast = self.parser.srcToAST(r'f = function() print("hello") end')
-        exp = Chunk(Block(SetStat([
-            VarsExpr(IdExpr('f')),
-            ExprsExpr(FunctionExpr(Block(CallStat([IdExpr('print'), ArgsExpr(ExprsExpr(StringExpr('hello')))]))))
+        exp = Chunk(Block(AssignStat([
+            VarsExpr(NameExpr('f')),
+            ExprsExpr(FunctionExpr(Block(CallStat([NameExpr('print'), ArgsExpr(ExprsExpr(StringExpr('hello')))]))))
         ])))
         self.assertAstEqual(exp, ast)
 
     def test_function_definition_1(self):
         ast = self.parser.srcToAST(r'function f() end')
-        exp = Chunk(Block(SetStat([IdExpr('f'),FunctionExpr(Block(None))])))
+        exp = Chunk(Block(AssignStat([NameExpr('f'), FunctionExpr(Block(None))])))
         self.assertAstEqual(exp, ast)
 
     def test_function_definition_2(self):
         ast = self.parser.srcToAST(r'function t.a.b.c.f() end')
-        exp = Chunk(Block(SetStat([
+        exp = Chunk(Block(AssignStat([
             IndexExpr([
                 IndexExpr([
                     IndexExpr([
                         IndexExpr([
-                            IdExpr('t'), IdExpr('a')
-                        ]), IdExpr('b')
-                    ]), IdExpr('c')
-                ]), IdExpr('f')
+                            NameExpr('t'), NameExpr('a')
+                        ]), NameExpr('b')
+                    ]), NameExpr('c')
+                ]), NameExpr('f')
             ])
             ,FunctionExpr(Block(None))])))
         self.assertAstEqual(exp, ast)
 
     def test_function_definition_3(self):
         ast = self.parser.srcToAST(r't.a.b.c.f = function () end')
-        exp = Chunk(Block(SetStat([
+        exp = Chunk(Block(AssignStat([
             VarsExpr(
                 IndexExpr([
                     IndexExpr([
                         IndexExpr([
                             IndexExpr([
-                                IdExpr('t'), IdExpr('a')
-                            ]), IdExpr('b')
-                        ]), IdExpr('c')
-                    ]), IdExpr('f')
+                                NameExpr('t'), NameExpr('a')
+                            ]), NameExpr('b')
+                        ]), NameExpr('c')
+                    ]), NameExpr('f')
                 ])
             )
             ,ExprsExpr(FunctionExpr(Block(None)))])))
@@ -305,5 +305,5 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_definition_4(self):
         ast = self.parser.srcToAST(r'local function f () end')
-        exp = Chunk(Block(LocalRecStat([IdExpr('f'), FunctionExpr(Block(None))])))
+        exp = Chunk(Block(LocalRecStat([NameExpr('f'), FunctionExpr(Block(None))])))
         self.assertAstEqual(exp, ast)

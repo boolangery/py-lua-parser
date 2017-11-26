@@ -14,6 +14,11 @@ from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astNodes import *
 from luaparser.parser.LuaParser import LuaParser
 
+def listify(obj):
+    if not isinstance(obj, list):
+        return [obj]
+    else:
+        return obj
 
 class ParseTreeVisitor(LuaVisitor):
     def visitChildren(self, ctx):
@@ -31,19 +36,26 @@ class ParseTreeVisitor(LuaVisitor):
     ''' Visiting root nodes.
     '''
     def visitChunk(self, ctx):
-        return Chunk(self.visitChildren(ctx))
+        return Chunk(self.visit(ctx.children[0]))
 
     def visitBlock(self, ctx):
-        return Block(self.visitChildren(ctx))
+        return Block(listify(self.visitChildren(ctx)))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
     def visitSetStat(self, ctx):
-        return SetStat(self.visitChildren(ctx))
+        return AssignStat(targets=listify(self.visit(ctx.children[0])), \
+                          values=listify(self.visit(ctx.children[2])))
 
     def visitLocalset(self, ctx):
-        return LocalSetStat(self.visitChildren(ctx))
+        # 'local' namelist ('=' explist)?
+        if len(ctx.children) > 1:
+            return LocalAssignStat(targets=listify(self.visit(ctx.children[1])), \
+                                   values=listify(self.visit(ctx.children[3])))
+        else:
+            return LocalAssignStat(targets=listify(self.visit(ctx.children[1])), \
+                                   values=[])
 
     def visitWhileStat(self, ctx):
         return WhileStat(self.visitChildren(ctx))
@@ -119,7 +131,7 @@ class ParseTreeVisitor(LuaVisitor):
         return StringExpr(luaStr)
 
     def visitName(self, ctx):
-        return IdExpr(ctx.children[0].getText())
+        return NameExpr(ctx.children[0].getText())
 
     def visitArgs(self, ctx):
         return ArgsExpr(self.visitChildren(ctx))
@@ -127,11 +139,11 @@ class ParseTreeVisitor(LuaVisitor):
     def visitUnOpMin(self, ctx):
         return UnOpNegExpr(self.visitChildren(ctx))
 
-    def visitVarlist(self, ctx):
-        return VarsExpr(self.visitChildren(ctx))
+    #def visitVarlist(self, ctx):
+    #    return VarsExpr(self.visitChildren(ctx))
 
-    def visitNamelist(self, ctx):
-        return VarsExpr(self.visitChildren(ctx))
+    #def visitNamelist(self, ctx):
+    #    return VarsExpr(self.visitChildren(ctx))
 
     def visitVar(self, ctx):
         # : (name | '(' exp ')' varSuffix) varSuffix*
@@ -145,8 +157,8 @@ class ParseTreeVisitor(LuaVisitor):
         else:
             return self.visitChildren(ctx)
 
-    def visitExplist(self, ctx):
-        return ExprsExpr(self.visitChildren(ctx))
+    #def visitExplist(self, ctx):
+    #    return ExprsExpr(self.visitChildren(ctx))
 
     '''
     Visiting arithmetic operator expressions
@@ -272,8 +284,9 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.4.11 – Function Definitions                                           '''
     ''' ----------------------------------------------------------------------- '''
     def visitFunc(self, ctx):
+        pass
         # 'function' funcname funcbody
-        return SetStat(self.visitChildren(ctx))
+        #return AssignStat(self.visitChildren(ctx))
 
     def visitLocalfunc(self, ctx):
         return LocalRecStat(self.visitChildren(ctx))

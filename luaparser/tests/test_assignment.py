@@ -9,25 +9,25 @@ class AssignmentTestCase(tests.TestCase):
 
     def test_set_number(self):
         ast = self.parser.srcToAST("i=3")
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("i")), ExprsExpr(NumberExpr(3))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("i")), ExprsExpr(NumberExpr(3))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_string(self):
         ast = self.parser.srcToAST('i="foo bar"')
-        exp = Chunk(Block(SetStat([VarsExpr(IdExpr("i")), ExprsExpr(StringExpr('foo bar'))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("i")), ExprsExpr(StringExpr('foo bar'))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_array_index(self):
         ast = self.parser.srcToAST('a[i] = 42')
-        exp = Chunk(Block(SetStat([VarsExpr(IndexExpr([IdExpr("a"), IdExpr("i")])), ExprsExpr(NumberExpr(42))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(IndexExpr([NameExpr("a"), NameExpr("i")])), ExprsExpr(NumberExpr(42))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_table_index(self):
         ast = self.parser.srcToAST('_ENV.x = val')
-        exp = Chunk(Block(SetStat([VarsExpr(IndexExpr([IdExpr("_ENV"), IdExpr("x")])), ExprsExpr(IdExpr('val'))])))
+        exp = Chunk(Block(AssignStat([VarsExpr(IndexExpr([NameExpr("_ENV"), NameExpr("x")])), ExprsExpr(NameExpr('val'))])))
         self.assertAstEqual(exp, ast)
 
     def test_set_multi(self):
         ast = self.parser.srcToAST('x, y = y, x')
-        exp = Chunk(Block(SetStat([VarsExpr([IdExpr("x"), IdExpr("y")]), ExprsExpr([IdExpr('y'), IdExpr('x')])])))
+        exp = Chunk(Block(AssignStat([VarsExpr([NameExpr("x"), NameExpr("y")]), ExprsExpr([NameExpr('y'), NameExpr('x')])])))
         self.assertAstEqual(exp, ast)

@@ -18,10 +18,10 @@ class ControlStructureTestCase(tests.TestCase):
             end"""))
         exp = Chunk(Block(
             WhileStat([
-                IndexExpr([IdExpr("a"), IdExpr("i")]),
-                Block(SetStat([
-                    VarsExpr(IdExpr("i")),
-                    ExprsExpr(AddOpExpr([IdExpr("i"), NumberExpr(1)]))
+                IndexExpr([NameExpr("a"), NameExpr("i")]),
+                Block(AssignStat([
+                    VarsExpr(NameExpr("i")),
+                    ExprsExpr(AddOpExpr([NameExpr("i"), NumberExpr(1)]))
                 ]))
             ])
         ))
@@ -34,7 +34,7 @@ class ControlStructureTestCase(tests.TestCase):
             end"""))
         exp = Chunk(Block(
             WhileStat([
-                IndexExpr([IdExpr("a"), IdExpr("i")]),
+                IndexExpr([NameExpr("a"), NameExpr("i")]),
                 Block(BreakStat(None))
             ])
         ))
@@ -62,7 +62,7 @@ class ControlStructureTestCase(tests.TestCase):
             if (a<2) then    
             end
             """))
-        exp = Chunk(Block(IfStat([LessThanOpExpr([IdExpr('a'), NumberExpr(2)]), Block(None)])))
+        exp = Chunk(Block(IfStat([LessThanOpExpr([NameExpr('a'), NumberExpr(2)]), Block(None)])))
         self.assertAstEqual(exp, ast)
 
     def test_if_elseif(self):
@@ -116,7 +116,7 @@ class ControlStructureTestCase(tests.TestCase):
         ast = self.parser.srcToAST(textwrap.dedent("""
             ::foo::
             """))
-        exp = Chunk(Block(LabelStat(IdExpr('foo'))))
+        exp = Chunk(Block(LabelStat(NameExpr('foo'))))
         self.assertAstEqual(exp, ast)
 
     def test_label(self):
@@ -124,5 +124,5 @@ class ControlStructureTestCase(tests.TestCase):
             goto foo
             ::foo::
             """))
-        exp = Chunk(Block([GotoStat(IdExpr('foo')), LabelStat(IdExpr('foo'))]))
+        exp = Chunk(Block([GotoStat(NameExpr('foo')), LabelStat(NameExpr('foo'))]))
         self.assertAstEqual(exp, ast)

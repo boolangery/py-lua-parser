@@ -8,7 +8,6 @@
     Contains all Ast Node definitions.
 """
 
-
 ''' ----------------------------------------------------------------------- '''
 ''' AST base nodes                                                          '''
 ''' ----------------------------------------------------------------------- '''
@@ -42,13 +41,23 @@ class Node(object):
 
 class Chunk(Node):
     """Define a Lua chunk"""
-    def __init__(self, childs):
-        super(Chunk, self).__init__('Chunk', childs)
+    def __init__(self, body):
+        super(Chunk, self).__init__('Chunk', [])
+        self.body = body
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.body == other.body
+        return False
 
 class Block(Node):
     """Define a Lua Block"""
-    def __init__(self, childs):
-        super(Block, self).__init__('Block', childs)
+    def __init__(self, body):
+        super(Block, self).__init__('Block', [])
+        self.body = body
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.body == other.body
+        return False
 
 
 
@@ -64,10 +73,30 @@ class DoStat(Statement):
     def __init__(self, childs):
         super(DoStat, self).__init__('Do', childs)
 
-class SetStat(Statement):
+class AssignStat(Statement):
     """Define the 'set' lua statement"""
-    def __init__(self, childs):
-        super(SetStat, self).__init__('Set', childs)
+    def __init__(self, targets, values):
+        super(AssignStat, self).__init__('Assign', [])
+        self.targets = targets
+        self.values  = values
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return (self.targets == other.targets) \
+                    and (self.values == other.values)
+        return False
+
+class LocalAssignStat(Statement):
+    """Define the 'Local assign' lua statement"""
+    def __init__(self, targets, values):
+        super(LocalAssignStat, self).__init__('LocalAssign', [])
+        self.targets = targets
+        self.values  = values
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return (self.targets == other.targets) \
+                   and (self.values == other.values)
+        return False
+
 
 class WhileStat(Statement):
     """Define the 'while' lua statement"""
@@ -119,11 +148,6 @@ class ForinStat(Statement):
     def __init__(self, childs):
         super(ForinStat, self).__init__('Forin', childs)
 
-class LocalSetStat(Statement):
-    """Define the 'Local' lua statement"""
-    def __init__(self, childs):
-        super(LocalSetStat, self).__init__('LocalSet', childs)
-
 class CallStat(Statement):
     """Define the 'Call' lua statement"""
     def __init__(self, childs):
@@ -166,8 +190,14 @@ class FalseExpr(Expression):
 
 class NumberExpr(Expression):
     """Define the Lua number expression"""
-    def __init__(self, childs):
-        super(NumberExpr, self).__init__('Number', childs)
+    def __init__(self, n):
+        super(NumberExpr, self).__init__('Number', [])
+        self.n = n
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.n == other.n
+        return False
+
 
 class StringExpr(Expression):
     """Define the Lua string expression"""
@@ -391,10 +421,15 @@ class LhsExpr(Expression):
     """Define a Lua Left Hand Side expression"""
     pass
 
-class IdExpr(LhsExpr):
+class NameExpr(LhsExpr):
     """Define a Lua Id expression"""
-    def __init__(self, childs):
-        super(IdExpr, self).__init__('Id', childs)
+    def __init__(self, id):
+        super(NameExpr, self).__init__('Name', [])
+        self.id = id
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.id == other.id
+        return False
 
 class IndexExpr(LhsExpr):
     """Define a Lua Index expression"""

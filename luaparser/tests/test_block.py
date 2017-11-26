@@ -14,5 +14,5 @@ class BlockTestCase(tests.TestCase):
 
     def test_2_block(self):
         ast = self.parser.srcToAST("local a;local b;")
-        exp = Chunk(Block([LocalSetStat(VarsExpr(IdExpr("a"))), LocalSetStat(VarsExpr(IdExpr("b")))]))
+        exp = Chunk(Block([LocalAssignStat(VarsExpr(NameExpr("a"))), LocalAssignStat(VarsExpr(NameExpr("b")))]))
         self.assertAstEqual(exp, ast)
