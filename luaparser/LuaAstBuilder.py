@@ -21,16 +21,30 @@ def listify(obj):
         return obj
 
 class ParseTreeVisitor(LuaVisitor):
-    def visitChildren(self, ctx):
-        nodes = []
+    def visitChildren(self, ctx, mergeList=False):
         if ctx.children:
-            for child in ctx.children:
-                node = self.visit(child)
-                if node != None:
+            return self.visitChildrenList(ctx.children, mergeList)
+        else:
+            return []
+
+    def visitChildrenList(self, children, mergeList=False):
+        nodes = []
+        for child in children:
+            node = self.visit(child)
+            if node != None:
+                if mergeList and isinstance(node, list):
+                    nodes.extend(node)
+                else:
                     nodes.append(node)
         if len(nodes) == 1:
             return nodes[0]
         return nodes
+
+    def visitStartingFrom(self, ctx, index, mergeList=False):
+        if ctx.children:
+            return self.visitChildrenList(ctx.children[index:], mergeList)
+        else:
+            return []
 
 
     ''' Visiting root nodes.
@@ -67,10 +81,30 @@ class ParseTreeVisitor(LuaVisitor):
         return RepeatStat(self.visitChildren(ctx))
 
     def visitCall(self, ctx):
-        return CallStat(self.visitChildren(ctx))
+        # varOrExp args+
+
+        return CallStat(
+            func=self.visit(ctx.children[0]), \
+            args=listify(self.visitStartingFrom(ctx, 1)))
 
     def visitInvoke(self, ctx):
-        return InvokeStat(self.visitChildren(ctx))
+        # varOrExp (':' name args)+
+        child = InvokeStat(
+            source=self.visit(ctx.children[0]), \
+            func=self.visit(ctx.children[2]), \
+            args=listify(self.visit(ctx.children[3])))
+        # if nested invoke:
+        if len(ctx.children)>4:
+            # iterate (':' name args)
+            for i in range(4, len(ctx.children), 3):
+                root = InvokeStat(
+                    source=child, \
+                    func=self.visit(ctx.children[i+1]), \
+                    args=listify(self.visit(ctx.children[i+2])))
+                child = root
+            return child
+        else:
+            return child
 
     def visitFornum(self, ctx):
         return FornumStat(self.visitChildren(ctx))
@@ -137,7 +171,7 @@ class ParseTreeVisitor(LuaVisitor):
         return NameExpr(ctx.children[0].getText())
 
     def visitArgs(self, ctx):
-        return ArgsExpr(self.visitChildren(ctx))
+        return self.visitChildren(ctx, mergeList=True)
 
     #def visitVarlist(self, ctx):
     #    return VarsExpr(self.visitChildren(ctx))

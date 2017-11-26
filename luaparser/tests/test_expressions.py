@@ -398,32 +398,57 @@ class ExpressionsTestCase(tests.TestCase):
                 ]
             )]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.10 – Function Calls                                                 '''
     ''' ----------------------------------------------------------------------- '''
-    ''' todo: maybe remove ExprsExpr'''
     def test_function_call(self):
         ast = self.parser.srcToAST(r'print("hello")')
-        exp = Chunk(Block(CallStat([NameExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[CallStat(
+            func=NameExpr(id='print'),
+            args=[StringExpr('hello')]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_function_call_no_parent(self):
         ast = self.parser.srcToAST(r'print "hello"')
-        exp = Chunk(Block(CallStat([NameExpr("print"), ArgsExpr(StringExpr('hello'))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[CallStat(
+            func=NameExpr(id='print'),
+            args=[StringExpr('hello')]
+        )]))
+        self.assertEqual(exp, ast)
 
-    def test_function_call_sugar_syntax(self):
+    def test_function_invoke(self):
         ast = self.parser.srcToAST(r'foo:print("hello")')
-        exp = Chunk(Block(InvokeStat([NameExpr("foo"), NameExpr("print"), ArgsExpr(ExprsExpr(StringExpr('hello')))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[InvokeStat(
+            source=NameExpr('foo'),
+            func=NameExpr(id='print'),
+            args=[StringExpr('hello')]
+        )]))
+        self.assertEqual(exp, ast)
+
+    def test_function_nested_invoke(self):
+        ast = self.parser.srcToAST(r'foo:bar():print("hello")')
+        exp = Chunk(body=Block(body=[InvokeStat(
+            source=InvokeStat(
+                source=NameExpr('foo'),
+                func=NameExpr(id='bar'),
+                args=[]
+            ),
+            func=NameExpr(id='print'),
+            args=[StringExpr('hello')]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_function_call_args(self):
         ast = self.parser.srcToAST(r'print("hello",  42)')
-        exp = Chunk(Block(CallStat([NameExpr("print"), ArgsExpr(ExprsExpr([StringExpr('hello'), NumberExpr(42)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[CallStat(
+            func=NameExpr(id='print'),
+            args=[StringExpr('hello'), NumberExpr(n=42)]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.11 – Function Definitions                                           '''

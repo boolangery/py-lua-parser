@@ -150,13 +150,29 @@ class ForinStat(Statement):
 
 class CallStat(Statement):
     """Define the 'Call' lua statement"""
-    def __init__(self, childs):
-        super(CallStat, self).__init__('Call', childs)
+    def __init__(self, func, args):
+        super(CallStat, self).__init__('Call', [])
+        self.func = func
+        self.args = args
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return (self.args == other.args) and \
+                   (self.func == other.func)
+        return False
 
 class InvokeStat(Statement):
     """Define the 'Invoke' lua statement"""
-    def __init__(self, childs):
-        super(InvokeStat, self).__init__('Invoke', childs)
+    def __init__(self, source, func, args):
+        super(InvokeStat, self).__init__('Invoke', [])
+        self.source = source
+        self.func = func
+        self.args = args
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return (self.args == other.args) and \
+                   (self.func == other.func) and \
+                   (self.source == other.source)
+            return False
 
 class LocalRecStat(Statement):
     """Lua local function statement"""
