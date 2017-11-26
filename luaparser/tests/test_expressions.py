@@ -279,7 +279,6 @@ class ExpressionsTestCase(tests.TestCase):
             targets=[NameExpr(id='res')],
             values=[ULNotOpExpr(operand=NumberExpr(5))]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -287,16 +286,26 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_concatenation(self):
         ast = self.parser.srcToAST(r'str = "begin".."end"')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("str")), ExprsExpr(ConcatExpr([StringExpr('begin'), StringExpr('end')]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='str')],
+            values=[ConcatExpr(
+                left=StringExpr('begin'),
+                right=StringExpr('end')
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.7 – The Length Operator                                             '''
     ''' ----------------------------------------------------------------------- '''
     def test_length_op(self):
         ast = self.parser.srcToAST(r'len = #t')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("len")), ExprsExpr(LengthExpr(NameExpr('t')))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='len')],
+            values=[ULengthOP(operand=NameExpr(id='t'))]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.9 – Table Constructors                                              '''

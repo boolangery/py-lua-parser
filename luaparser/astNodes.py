@@ -410,18 +410,11 @@ class OrLoOpExpr(LoOpExpr):
 
 
 ''' ----------------------------------------------------------------------- '''
-''' 3.4.6 – Concatenation                                                   '''
+''' 3.4.6 – Concatenation operator                                          '''
 ''' ----------------------------------------------------------------------- '''
-class ConcatExpr(Expression):
-    def __init__(self, childs):
-        super(ConcatExpr, self).__init__('Concat', childs)
-
-''' ----------------------------------------------------------------------- '''
-''' 3.4.7 – The Length Operator                                             '''
-''' ----------------------------------------------------------------------- '''
-class LengthExpr(Expression):
-    def __init__(self, childs):
-        super(LengthExpr, self).__init__('Length', childs)
+class ConcatExpr(LeftRightOpExpr):
+    def __init__(self, left, right):
+        super(ConcatExpr, self).__init__('ConcatOp', left, right)
 
 '''
 Unitary Operators.
@@ -450,6 +443,13 @@ class ULNotOpExpr(UnOpExpr):
     """Logical Not operator"""
     def __init__(self, operand):
         super(ULNotOpExpr, self).__init__('ULNotOp', operand)
+
+''' ----------------------------------------------------------------------- '''
+''' 3.4.7 – The Length Operator                                             '''
+''' ----------------------------------------------------------------------- '''
+class ULengthOP(UnOpExpr):
+    def __init__(self, operand):
+        super(ULengthOP, self).__init__('ULengthOp', operand)
 
 '''
 Left Hand Side expression.

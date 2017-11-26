@@ -292,13 +292,15 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.4.6 – Concatenation                                                   '''
     ''' ----------------------------------------------------------------------- '''
     def visitConcat(self, ctx):
-        return ConcatExpr(self.visitChildren(ctx))
+        return ConcatExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.7 – The Length Operator                                             '''
     ''' ----------------------------------------------------------------------- '''
     def visitUnOpLength(self, ctx):
-        return LengthExpr(self.visitChildren(ctx))
+        return ULengthOP(operand=self.visit(ctx.children[1]))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.9 – Table Constructors                                              '''
