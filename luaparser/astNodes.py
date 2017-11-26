@@ -270,14 +270,7 @@ class OpExpr(Expression):
     """Base class for operators"""
     pass
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.1 – Arithmetic Operators                                            '''
-''' ----------------------------------------------------------------------- '''
-class AriOpExpr(OpExpr):
-    """Base class for Arithmetic Operators"""
-    pass
-
-class LeftRightOpExpr(AriOpExpr):
+class LeftRightOpExpr(OpExpr):
     """Base class for 'Left Op Right' Arithmetic Operators"""
     def __init__(self, name, left, right):
         super(LeftRightOpExpr, self).__init__(name, [])
@@ -290,37 +283,44 @@ class LeftRightOpExpr(AriOpExpr):
                    self.right == other.right
         return False
 
-class AddOpExpr(LeftRightOpExpr):
+''' ----------------------------------------------------------------------- '''
+''' 3.4.1 – Arithmetic Operators                                            '''
+''' ----------------------------------------------------------------------- '''
+class AriOpExpr(LeftRightOpExpr):
+    """Base class for Arithmetic Operators"""
+    pass
+
+class AddOpExpr(AriOpExpr):
     """+ operator"""
     def __init__(self, left, right):
         super(AddOpExpr, self).__init__('AddOp', left, right)
 
-class SubOpExpr(LeftRightOpExpr):
+class SubOpExpr(AriOpExpr):
     """- operator"""
     def __init__(self, left, right):
         super(SubOpExpr, self).__init__('SubOp', left, right)
 
-class MultOpExpr(LeftRightOpExpr):
+class MultOpExpr(AriOpExpr):
     """* operator"""
     def __init__(self, left, right):
         super(MultOpExpr, self).__init__('MultOp', left, right)
 
-class FloatDivOpExpr(LeftRightOpExpr):
+class FloatDivOpExpr(AriOpExpr):
     """/ operator"""
     def __init__(self, left, right):
         super(FloatDivOpExpr, self).__init__('FloatDivOp', left, right)
 
-class FloorDivOpExpr(LeftRightOpExpr):
+class FloorDivOpExpr(AriOpExpr):
     """// operator"""
     def __init__(self, left, right):
         super(FloorDivOpExpr, self).__init__('FloorDivOp', left, right)
 
-class ModOpExpr(LeftRightOpExpr):
+class ModOpExpr(AriOpExpr):
     """# operator"""
     def __init__(self, left, right):
         super(ModOpExpr, self).__init__('ModOp', left, right)
 
-class ExpoOpExpr(LeftRightOpExpr):
+class ExpoOpExpr(AriOpExpr):
     """^ operator"""
     def __init__(self, left, right):
         super(ExpoOpExpr, self).__init__('ExpoOp', left, right)
@@ -329,66 +329,66 @@ class ExpoOpExpr(LeftRightOpExpr):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.2 – Bitwise Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
-class BitOpExpr(OpExpr):
+class BitOpExpr(LeftRightOpExpr):
     """Base class for Bitwise Operators"""
     pass
 
-class AndOpExpr(BitOpExpr):
+class BAndOpExpr(BitOpExpr):
     """Bitwise And operator"""
-    def __init__(self, childs):
-        super(AndOpExpr, self).__init__('OpAnd', childs)
+    def __init__(self, left, right):
+        super(BAndOpExpr, self).__init__('BAndOp', left, right)
 
-class OrOpExpr(BitOpExpr):
+class BOrOpExpr(BitOpExpr):
     """Bitwise Or operator"""
-    def __init__(self, childs):
-        super(OrOpExpr, self).__init__('OpOr', childs)
+    def __init__(self, left, right):
+        super(BOrOpExpr, self).__init__('BOrOp', left, right)
 
-class XorOpExpr(BitOpExpr):
+class BXorOpExpr(BitOpExpr):
     """Bitwise Xor operator"""
-    def __init__(self, childs):
-        super(XorOpExpr, self).__init__('OpXor', childs)
+    def __init__(self, left, right):
+        super(BXorOpExpr, self).__init__('BXorOp', left, right)
 
-class ShiftROpExpr(BitOpExpr):
+class BShiftROpExpr(BitOpExpr):
     """Bitwise Shift Right operator"""
-    def __init__(self, childs):
-        super(ShiftROpExpr, self).__init__('OpShiftR', childs)
+    def __init__(self, left, right):
+        super(BShiftROpExpr, self).__init__('BShiftROp', left, right)
 
-class ShiftLOpExpr(BitOpExpr):
+class BShiftLOpExpr(BitOpExpr):
     """Bitwise Shift Left operator"""
-    def __init__(self, childs):
-        super(ShiftLOpExpr, self).__init__('OpShiftL', childs)
+    def __init__(self, left, right):
+        super(BShiftLOpExpr, self).__init__('BShiftLOp', left, right)
 
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.4 – Relational Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
-class RelOpExpr(OpExpr):
+class RelOpExpr(LeftRightOpExpr):
     """Base class for Relational Operators """
     pass
 
 class LessThanOpExpr(RelOpExpr):
-    def __init__(self, childs):
-        super(LessThanOpExpr, self).__init__('OpLess', childs)
+    def __init__(self, left, right):
+        super(LessThanOpExpr, self).__init__('RLtOp', left, right)
 
 class GreaterThanOpExpr(RelOpExpr):
-    def __init__(self, childs):
-        super(GreaterThanOpExpr, self).__init__('OpGreater', childs)
+    def __init__(self, left, right):
+        super(GreaterThanOpExpr, self).__init__('RGtOp', left, right)
 
 class LessOrEqThanOpExpr(RelOpExpr):
-    def __init__(self, childs):
-        super(LessOrEqThanOpExpr, self).__init__('OpLessEq', childs)
+    def __init__(self, left, right):
+        super(LessOrEqThanOpExpr, self).__init__('RLtEqOp', left, right)
 
 class GreaterOrEqThanOpExpr(RelOpExpr):
-    def __init__(self, childs):
-        super(GreaterOrEqThanOpExpr, self).__init__('OpGreatEq', childs)
+    def __init__(self, left, right):
+        super(GreaterOrEqThanOpExpr, self).__init__('RGtEqOp', left, right)
 
 class EqToOpExpr(RelOpExpr):
-    def __init__(self, childs):
-        super(EqToOpExpr, self).__init__('OpEq', childs)
+    def __init__(self, left, right):
+        super(EqToOpExpr, self).__init__('REqOp', left, right)
 
 class NotEqToOpExpr(RelOpExpr):
-    def __init__(self, childs):
-        super(NotEqToOpExpr, self).__init__('OpNotEq', childs)
+    def __init__(self, left, right):
+        super(NotEqToOpExpr, self).__init__('RNotEqOp', left, right)
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.5 – Logical Operators                                               '''
@@ -432,22 +432,24 @@ Unitary Operators.
 '''
 class UnOpExpr(Expression):
     """Base class for Lua unitary operator"""
-    pass
-
-class UnOpNotExpr(UnOpExpr):
-    """Lua not unitary operator expression"""
-    def __init__(self, childs):
-        super(UnOpNotExpr, self).__init__('UnOpNot', childs)
-
-class USubOpExpr(UnOpExpr):
-    """Lua negation unitary operator expression"""
-    def __init__(self, operand):
-        super(USubOpExpr, self).__init__('USubOp', [])
+    def __init__(self, name, operand):
+        super(UnOpExpr, self).__init__(name, [])
         self.operand = operand
     def __eq__(self, other):
         if isinstance(self, other.__class__):
             return self.operand == other.operand
         return False
+
+class UNotOpExpr(UnOpExpr):
+    """Lua not unitary operator expression"""
+    def __init__(self, operand):
+        super(UNotOpExpr, self).__init__('UNotOp', operand)
+
+class USubOpExpr(UnOpExpr):
+    """Lua negation unitary operator expression"""
+    def __init__(self, operand):
+        super(USubOpExpr, self).__init__('USubOp', operand)
+
 
 '''
 Left Hand Side expression.

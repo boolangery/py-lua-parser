@@ -139,9 +139,6 @@ class ParseTreeVisitor(LuaVisitor):
     def visitArgs(self, ctx):
         return ArgsExpr(self.visitChildren(ctx))
 
-    def visitUnOpMin(self, ctx):
-        return USubOpExpr(operand=self.visit(ctx.children[1]))
-
     #def visitVarlist(self, ctx):
     #    return VarsExpr(self.visitChildren(ctx))
 
@@ -208,44 +205,72 @@ class ParseTreeVisitor(LuaVisitor):
     Relational Operators
     '''
     def visitRelOpLess(self, ctx):
-        return LessThanOpExpr(self.visitChildren(ctx))
+        return LessThanOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitRelOpGreater(self, ctx):
-        return GreaterThanOpExpr(self.visitChildren(ctx))
+        return GreaterThanOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitRelOpLessEq(self, ctx):
-        return LessOrEqThanOpExpr(self.visitChildren(ctx))
+        return LessOrEqThanOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitRelOpGreaterEq(self, ctx):
-        return GreaterOrEqThanOpExpr(self.visitChildren(ctx))
+        return GreaterOrEqThanOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitRelOpNotEq(self, ctx):
-        return NotEqToOpExpr(self.visitChildren(ctx))
+        return NotEqToOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitRelOpEq(self, ctx):
-        return EqToOpExpr(self.visitChildren(ctx))
+        return EqToOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
 
     '''
     3.4.2 – Bitwise Operators
     '''
     def visitBitOpAnd(self, ctx):
-        return AndOpExpr(self.visitChildren(ctx))
+        return BAndOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitBitOpOr(self, ctx):
-        return OrOpExpr(self.visitChildren(ctx))
+        return BOrOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitBitOpXor(self, ctx):
-        return XorOpExpr(self.visitChildren(ctx))
+        return BXorOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitBitOpShiftR(self, ctx):
-        return ShiftROpExpr(self.visitChildren(ctx))
+        return BShiftROpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
 
     def visitBitOpShiftL(self, ctx):
-        return ShiftLOpExpr(self.visitChildren(ctx))
+        return BShiftLOpExpr(
+            left=self.visit(ctx.children[0]), \
+            right=self.visit(ctx.children[2]))
+
+    '''
+    Unary Operators
+    '''
+    def visitUnOpMin(self, ctx):
+        return USubOpExpr(operand=self.visit(ctx.children[1]))
 
     def visitUnOpBitNot(self, ctx):
-        return UnOpNotExpr(self.visitChildren(ctx))
+        return UNotOpExpr(operand=self.visit(ctx.children[1]))
 
     '''
     3.4.5 – Logical Operators

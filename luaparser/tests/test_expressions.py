@@ -89,7 +89,6 @@ class ExpressionsTestCase(tests.TestCase):
                 )
             ]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_unary_sub(self):
@@ -100,7 +99,6 @@ class ExpressionsTestCase(tests.TestCase):
                 USubOpExpr(operand=NumberExpr(1))
             ]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_exponentiation(self):
@@ -119,66 +117,136 @@ class ExpressionsTestCase(tests.TestCase):
     """
     def test_bitwise_and(self):
         ast = self.parser.srcToAST(r'a = 3&5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(AndOpExpr([NumberExpr(3), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[BAndOpExpr(
+                left=NumberExpr(3),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_bitwise_or(self):
         ast = self.parser.srcToAST(r'a = 3|5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(OrOpExpr([NumberExpr(3), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[BOrOpExpr(
+                left=NumberExpr(3),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_bitwise_exclusive_or(self):
         ast = self.parser.srcToAST(r'a = 3 ~ 5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(XorOpExpr([NumberExpr(3), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[BXorOpExpr(
+                left=NumberExpr(3),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_bitwise_right_shift(self):
         ast = self.parser.srcToAST(r'a = 3 >> 5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ShiftROpExpr([NumberExpr(3), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[BShiftROpExpr(
+                left=NumberExpr(3),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
-    def test_bitwise_right_left(self):
+    def test_bitwise_left_shirt(self):
         ast = self.parser.srcToAST(r'a = 3 << 5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(ShiftLOpExpr([NumberExpr(3), NumberExpr(5)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[BShiftLOpExpr(
+                left=NumberExpr(3),
+                right=NumberExpr(5)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_bitwise_unary_not(self):
         ast = self.parser.srcToAST(r'a = ~5')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(UnOpNotExpr(NumberExpr(5)))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[UNotOpExpr(operand=NumberExpr(5))]
+        )]))
+        self.assertEqual(exp, ast)
 
     """
     3.4.4 – Relational Operators
     """
     def test_less_than(self):
         ast = self.parser.srcToAST(r'res = (1 < 2)')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(LessThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[LessThanOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_greater_than(self):
         ast = self.parser.srcToAST(r'res = (1 > 2)')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(GreaterThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[GreaterThanOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_less_or_eq_than(self):
         ast = self.parser.srcToAST(r'res = (1 <= 2)')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(LessOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[LessOrEqThanOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_greater_or_eq_than(self):
         ast = self.parser.srcToAST(r'res = (1 >= 2)')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(GreaterOrEqThanOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[GreaterOrEqThanOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_equal_than(self):
         ast = self.parser.srcToAST(r'res = 1 == 2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(EqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[EqToOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_not_equal_than(self):
         ast = self.parser.srcToAST(r'res = 1 ~= 2')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("res")), ExprsExpr(NotEqToOpExpr([NumberExpr(1), NumberExpr(2)]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='res')],
+            values=[NotEqToOpExpr(
+                left=NumberExpr(1),
+                right=NumberExpr(2)
+            )]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
 
     """
