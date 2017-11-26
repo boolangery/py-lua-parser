@@ -10,65 +10,124 @@ class TypesValuesTestCase(tests.TestCase):
 
     def test_nil(self):
         ast = self.parser.srcToAST(r'foo = nil')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(NilExpr([]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[
+                NameExpr(id='foo')
+            ],
+            values=[
+                NilExpr()
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_true(self):
         ast = self.parser.srcToAST(r'foo = true')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TrueExpr([]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[
+                NameExpr(id='foo')
+            ],
+            values=[
+                TrueExpr()
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_false(self):
         ast = self.parser.srcToAST(r'foo = false')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(FalseExpr([]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[
+                NameExpr(id='foo')
+            ],
+            values=[
+                FalseExpr()
+            ]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_numbers(self):
         ast = self.parser.srcToAST(r'foo = 4')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(NumberExpr(4))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[NumberExpr(n=4)]
+        )]))
+        self.assertEqual(exp, ast)
+
         ast = self.parser.srcToAST(r'foo = 0.4')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(NumberExpr(0.4))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[NumberExpr(n=0.4)]
+        )]))
+        self.assertEqual(exp, ast)
+
         ast = self.parser.srcToAST(r'foo = 4.57e-3')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(NumberExpr(4.57e-3))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[NumberExpr(n=4.57e-3)]
+        )]))
+        self.assertEqual(exp, ast)
+
         ast = self.parser.srcToAST(r'foo = 0.3e12')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(NumberExpr(0.3e12))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[NumberExpr(n=0.3e12)]
+        )]))
+        self.assertEqual(exp, ast)
+
         ast = self.parser.srcToAST(r'foo = 5e+20')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(NumberExpr(5e+20))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[NumberExpr(n=5e+20)]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_string_dbl_quote(self):
         ast = self.parser.srcToAST(r'a = "a line"')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(StringExpr('a line'))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[StringExpr(s='a line')]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_string_quote(self):
         ast = self.parser.srcToAST(r"b = 'another line'")
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("b")), ExprsExpr(StringExpr('another line'))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='b')],
+            values=[StringExpr(s='another line')]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_string_escape(self):
         ast = self.parser.srcToAST(r'''b = "one line\nnext line\n\"in quotes\", 'in quotes'"''')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("b")), ExprsExpr(StringExpr(r"one line\nnext line\n\"in quotes\", 'in quotes'"))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='b')],
+            values=[StringExpr(s=r"one line\nnext line\n\"in quotes\", 'in quotes'")]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_string_dbl_square(self):
         ast = self.parser.srcToAST(r'b = [[hello]]')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("b")), ExprsExpr(StringExpr(r"hello"))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='b')],
+            values=[StringExpr(s='hello')]
+        )]))
+        self.assertEqual(exp, ast)
 
         ast = self.parser.srcToAST(textwrap.dedent(r'''
             b = [[Multiple lines of text
             can be enclosed in double square
             brackets.]]
             '''))
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("b")), ExprsExpr(StringExpr("Multiple lines of text\ncan be enclosed in double square\nbrackets."))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='b')],
+            values=[StringExpr(s='Multiple lines of text\ncan be enclosed in double square\nbrackets.')]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_string_dbl_square_equal(self):
         ast = self.parser.srcToAST(r'b = [=[one [[two]] one]=]')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("b")), ExprsExpr(StringExpr(r"one [[two]] one"))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='b')],
+            values=[StringExpr(s='one [[two]] one')]
+        )]))
+        #Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)

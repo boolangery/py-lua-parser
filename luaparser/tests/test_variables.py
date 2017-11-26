@@ -50,5 +50,4 @@ class VariablesTestCase(tests.TestCase):
                 NumberExpr(n=42)
             ]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)

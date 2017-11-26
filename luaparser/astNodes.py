@@ -177,16 +177,28 @@ class NilExpr(Expression):
     """Define the Lua 'nil' expression"""
     def __init__(self, childs=None):
         super(NilExpr, self).__init__('Nil', childs)
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return True
+        return False
 
 class TrueExpr(Expression):
     """Define the Lua 'true' expression"""
     def __init__(self, childs=None):
         super(TrueExpr, self).__init__('True', childs)
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return True
+        return False
 
 class FalseExpr(Expression):
     """Define the Lua 'false' expression"""
     def __init__(self, childs=None):
         super(FalseExpr, self).__init__('False', childs)
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return True
+        return False
 
 class NumberExpr(Expression):
     """Define the Lua number expression"""
@@ -201,8 +213,13 @@ class NumberExpr(Expression):
 
 class StringExpr(Expression):
     """Define the Lua string expression"""
-    def __init__(self, childs):
-        super(StringExpr, self).__init__('String', childs)
+    def __init__(self, s):
+        super(StringExpr, self).__init__('String', [])
+        self.s = s
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.s == other.s
+        return False
 
 class DotsExpr(Expression):
     """Define the Lua dots (...) expression"""

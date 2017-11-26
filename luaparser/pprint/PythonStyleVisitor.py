@@ -42,22 +42,16 @@ class PythonStyleVisitor():
         res = ''
         if isinstance(object, list):
             itemCount = len(object)
-            hasItems  = (itemCount > 0)
-            if hasItems:
-                res += '[] ' + str(itemCount) + ' '
-                if itemCount > 1 : res += 'items'
-                else             : res += 'item'
-            else: res += '[noItems]'
+            res += '[] ' + str(itemCount) + ' '
+            if itemCount > 1 : res += 'items'
+            else             : res += 'item'
         elif isinstance(object, Node):
             if isList:
                 return '{} 1 key'
             keyCount = len(object.__dict__.items()) -2 # name + childs
-            hasKeys  = (keyCount > 0)
-            if hasKeys:
-                res += '{} ' + str(keyCount) + ' '
-                if keyCount > 1 : res += 'keys'
-                else            : res += 'key'
-            else: res += '[noKeys]'
+            res += '{} ' + str(keyCount) + ' '
+            if keyCount > 1 : res += 'keys'
+            else            : res += 'key'
         else:
             res += '[unknow]'
         return res
