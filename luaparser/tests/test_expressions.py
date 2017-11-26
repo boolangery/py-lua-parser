@@ -304,7 +304,6 @@ class ExpressionsTestCase(tests.TestCase):
             targets=[NameExpr(id='len')],
             values=[ULengthOP(operand=NameExpr(id='t'))]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
@@ -312,11 +311,20 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_dict(self):
         ast = self.parser.srcToAST(r'a = {foo = "bar", bar = "foo"}')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("a")), ExprsExpr(TableExpr([
-            KeysExpr([NameExpr("foo"), NameExpr("bar")]),
-            ValuesExpr([StringExpr("bar"), StringExpr("foo")])
-        ]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='a')],
+            values=[TableExpr(
+                keys=[
+                    NameExpr(id='foo'),
+                    NameExpr(id='bar')
+                ],
+                values=[
+                    StringExpr(s='bar'),
+                    StringExpr(s='foo')
+                ]
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_nested_dict(self):
         ast = self.parser.srcToAST(textwrap.dedent(r'''
@@ -327,15 +335,20 @@ class ExpressionsTestCase(tests.TestCase):
               options = { radio = true }
             };
             '''))
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TableExpr([
-            KeysExpr([NameExpr("car"),
-                      NameExpr("options")]),
-            ValuesExpr([
-                TableExpr([KeysExpr(NameExpr('name')), ValuesExpr(StringExpr('bmw'))]),
-                TableExpr([KeysExpr(NameExpr('radio')), ValuesExpr(TrueExpr())])
-            ])
-        ]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[TableExpr(
+                keys=[
+                    NameExpr(id='car'),
+                    NameExpr(id='options')
+                ],
+                values=[
+                    TableExpr(keys=[NameExpr(id='name')], values=[StringExpr(s='bmw')]),
+                    TableExpr(keys=[NameExpr(id='radio')], values=[TrueExpr()]),
+                ]
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_array(self):
         ast = self.parser.srcToAST(textwrap.dedent(r'''
@@ -346,22 +359,24 @@ class ExpressionsTestCase(tests.TestCase):
           512,  1024,   2048
         }
         '''))
-
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TableExpr([
-            KeysExpr([
-                NumberExpr(1),    NumberExpr(2),    NumberExpr(3),
-                NumberExpr(4),    NumberExpr(5),    NumberExpr(6),
-                NumberExpr(7),    NumberExpr(8),    NumberExpr(9),
-                NumberExpr(10),   NumberExpr(11),   NumberExpr(12)
-            ]),
-            ValuesExpr([
-                NumberExpr(1),    NumberExpr(2),    NumberExpr(4),
-                NumberExpr(8),    NumberExpr(16),   NumberExpr(32),
-                NumberExpr(64),   NumberExpr(128),  NumberExpr(256),
-                NumberExpr(512),  NumberExpr(1024), NumberExpr(2048)
-            ])
-        ]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[TableExpr(
+                keys=[
+                    NumberExpr(1),  NumberExpr(2),  NumberExpr(3),
+                    NumberExpr(4),  NumberExpr(5),  NumberExpr(6),
+                    NumberExpr(7),  NumberExpr(8),  NumberExpr(9),
+                    NumberExpr(10), NumberExpr(11), NumberExpr(12)
+                ],
+                values=[
+                    NumberExpr(1),  NumberExpr(2),   NumberExpr(4),
+                    NumberExpr(8),  NumberExpr(16),  NumberExpr(32),
+                    NumberExpr(64), NumberExpr(128), NumberExpr(256),
+                    NumberExpr(512),NumberExpr(1024),NumberExpr(2048)
+                ]
+            )]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_mix_dict_array(self):
         ast = self.parser.srcToAST(textwrap.dedent(r'''
@@ -371,18 +386,20 @@ class ExpressionsTestCase(tests.TestCase):
           157
         };
         '''))
-
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("foo")), ExprsExpr(TableExpr([
-            KeysExpr([
-                NameExpr('options'), NumberExpr(1), NumberExpr(2)
-            ]),
-            ValuesExpr([
-                TableExpr([KeysExpr(NameExpr('radio')), ValuesExpr(TrueExpr())]),
-                StringExpr('enabled'),
-                NumberExpr(157)
-            ])
-        ]))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='foo')],
+            values=[TableExpr(
+                keys=[
+                    NameExpr('options'),  NumberExpr(1),  NumberExpr(2)
+                ],
+                values=[
+                    TableExpr(keys=[NameExpr(id='radio')], values=[TrueExpr()]),
+                    StringExpr('enabled'), NumberExpr(157)
+                ]
+            )]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.10 – Function Calls                                                 '''

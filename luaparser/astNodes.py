@@ -228,8 +228,14 @@ class DotsExpr(Expression):
 
 class TableExpr(Expression):
     """Define the Lua table expression"""
-    def __init__(self, childs):
-        super(TableExpr, self).__init__('Table', childs)
+    def __init__(self, keys, values):
+        super(TableExpr, self).__init__('Table', [])
+        self.keys = keys
+        self.values = values
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.keys == other.keys and self.values == other.values
+        return False
 
 class KeysExpr(Expression):
     """Table keys"""
