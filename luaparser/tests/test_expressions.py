@@ -447,56 +447,83 @@ class ExpressionsTestCase(tests.TestCase):
             func=NameExpr(id='print'),
             args=[StringExpr('hello'), NumberExpr(n=42)]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.11 – Function Definitions                                           '''
     ''' ----------------------------------------------------------------------- '''
     def test_function_definition(self):
-        ast = self.parser.srcToAST(r'f = function() print("hello") end')
-        exp = Chunk(Block(AssignStat([
-            VarsExpr(NameExpr('f')),
-            ExprsExpr(FunctionExpr(Block(CallStat([NameExpr('print'), ArgsExpr(ExprsExpr(StringExpr('hello')))]))))
-        ])))
-        self.assertAstEqual(exp, ast)
+        ast = self.parser.srcToAST(r'f = function() local a end')
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[NameExpr(id='f')],
+            values=[FunctionExpr(
+                name='',
+                args=[],
+                body=[LocalAssignStat(
+                    targets=[NameExpr(id='a')],
+                    values=[]
+                )]
+            )]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_function_definition_1(self):
         ast = self.parser.srcToAST(r'function f() end')
-        exp = Chunk(Block(AssignStat([NameExpr('f'), FunctionExpr(Block(None))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[FunctionExpr(
+            name='f',
+            args=[],
+            body=[]
+        )]))
+        self.assertEqual(exp, ast)
 
     def test_function_definition_2(self):
         ast = self.parser.srcToAST(r'function t.a.b.c.f() end')
-        exp = Chunk(Block(AssignStat([
-            IndexExpr([
-                IndexExpr([
-                    IndexExpr([
-                        IndexExpr([
-                            NameExpr('t'), NameExpr('a')
-                        ]), NameExpr('b')
-                    ]), NameExpr('c')
-                ]), NameExpr('f')
-            ])
-            ,FunctionExpr(Block(None))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[IndexExpr(
+                idx='f',
+                value=IndexExpr(
+                    idx='c',
+                    value=IndexExpr(
+                        idx='b',
+                        value=IndexExpr(
+                            idx='a',
+                            value=NameExpr(id='t')
+                        )
+                    )
+                ))],
+            values=[FunctionExpr(
+                name='',
+                args=[],
+                body=[]
+            )]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_function_definition_3(self):
         ast = self.parser.srcToAST(r't.a.b.c.f = function () end')
-        exp = Chunk(Block(AssignStat([
-            VarsExpr(
-                IndexExpr([
-                    IndexExpr([
-                        IndexExpr([
-                            IndexExpr([
-                                NameExpr('t'), NameExpr('a')
-                            ]), NameExpr('b')
-                        ]), NameExpr('c')
-                    ]), NameExpr('f')
-                ])
-            )
-            ,ExprsExpr(FunctionExpr(Block(None)))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[AssignStat(
+            targets=[IndexExpr(
+                idx='f',
+                value=IndexExpr(
+                    idx='c',
+                    value=IndexExpr(
+                        idx='b',
+                        value=IndexExpr(
+                            idx='a',
+                            value=NameExpr(id='t')
+                        )
+                    )
+                ))],
+            values=[FunctionExpr(
+                name='',
+                args=[],
+                body=[]
+            )]
+        )]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_function_definition_4(self):
         ast = self.parser.srcToAST(r'local function f () end')

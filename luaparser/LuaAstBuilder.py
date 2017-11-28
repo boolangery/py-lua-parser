@@ -65,7 +65,7 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitLocalset(self, ctx):
         # 'local' namelist ('=' explist)?
-        if len(ctx.children) > 1:
+        if len(ctx.children) > 2:
             return LocalAssignStat(
                 targets=listify(self.visit(ctx.children[1])), \
                 values=listify(self.visit(ctx.children[3])))
@@ -365,24 +365,51 @@ class ParseTreeVisitor(LuaVisitor):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.11 – Function Definitions                                           '''
     ''' ----------------------------------------------------------------------- '''
+    def visitFunctiondef(self, ctx):
+        # 'function' funcbody
+        argsBlock = self.visit(ctx.children[1])
+        return FunctionExpr(name='', args=argsBlock[0], body=argsBlock[1].body)
+
+    def visitFuncbody(self, ctx):
+        # '(' parlist? ')' block 'end'
+        if isinstance(ctx.children[1], LuaParser.ParlistContext):
+            nodes = [self.visit(ctx.children[1]),
+                     self.visit(ctx.children[3])]
+        else:
+            nodes = [[],self.visit(ctx.children[2])]
+        return nodes
+
+    def visitParlist(self, ctx):
+
+        return self.visitChildren(ctx, True)
+
+
     def visitFunc(self, ctx):
-        pass
         # 'function' funcname funcbody
-        #return AssignStat(self.visitChildren(ctx))
+        names     = self.visit(ctx.children[1])
+        argsBlock = self.visit(ctx.children[2])
+
+        if isinstance(names, NameExpr):
+            return FunctionExpr(name=names.id, args=argsBlock[0], body=argsBlock[1].body)
+        else:
+            return AssignStat(
+                targets=[names],
+                values =[FunctionExpr(name='', args=argsBlock[0], body=argsBlock[1].body)]
+            )
 
     def visitLocalfunc(self, ctx):
         return LocalRecStat(self.visitChildren(ctx))
 
-    def visitFuncbody(self, ctx):
-        return FunctionExpr(self.visitChildren(ctx))
+
 
     def visitFuncname(self, ctx):
         # name ('.' name)* (':' name)?
         if len(ctx.children)>2:
-            child = IndexExpr([self.visit(ctx.children[0]), self.visit(ctx.children[2])])
+            child = IndexExpr(value=self.visit(ctx.children[0]), idx=self.visit(ctx.children[2]).id)
+
             for i in range(3, len(ctx.children)):
                 if isinstance(ctx.children[i], LuaParser.NameContext):
-                    root = IndexExpr([child, self.visit(ctx.children[i])])
+                    root = IndexExpr(value=child, idx=self.visit(ctx.children[i]).id)
                     child = root
             return child
         else:

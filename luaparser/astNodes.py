@@ -263,12 +263,19 @@ class ValuesExpr(Expression):
     def __init__(self, childs):
         super(ValuesExpr, self).__init__('Values', childs)
 
-
-
 class FunctionExpr(Expression):
     """Define the Lua function expression"""
-    def __init__(self, childs):
-        super(FunctionExpr, self).__init__('Function', childs)
+    def __init__(self, name, args, body):
+        super(FunctionExpr, self).__init__('FunctionDef', [])
+        self.id   = name # TODO: rename after refactor name
+        self.args = args
+        self.body = body
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.id == other.id and \
+                   self.args == other.args and \
+                   self.body == other.body
+        return False
 
 class ArgsExpr(Expression):
     """Define a Lua arg list expression"""
@@ -492,5 +499,11 @@ class NameExpr(LhsExpr):
 
 class IndexExpr(LhsExpr):
     """Define a Lua Index expression"""
-    def __init__(self, childs):
-        super(IndexExpr, self).__init__('Index', childs)
+    def __init__(self, idx, value):
+        super(IndexExpr, self).__init__('Index', [])
+        self.idx    = idx
+        self.value  = value
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.idx == other.idx and self.value == other.value
+        return False
