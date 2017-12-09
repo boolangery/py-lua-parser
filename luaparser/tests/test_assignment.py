@@ -7,27 +7,40 @@ class AssignmentTestCase(tests.TestCase):
     def setUp(self):
         self.parser = Parser()
 
+    """
+    3.3.3 – Assignment
+    """
     def test_set_number(self):
         ast = self.parser.srcToAST("i=3")
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("i")), ExprsExpr(NumberExpr(3))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            AssignStat(targets=[NameExpr('i')],values=[NumberExpr(3)])
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_set_string(self):
         ast = self.parser.srcToAST('i="foo bar"')
-        exp = Chunk(Block(AssignStat([VarsExpr(NameExpr("i")), ExprsExpr(StringExpr('foo bar'))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            AssignStat(targets=[NameExpr('i')],values=[StringExpr('foo bar')])
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_set_array_index(self):
         ast = self.parser.srcToAST('a[i] = 42')
-        exp = Chunk(Block(AssignStat([VarsExpr(IndexExpr([NameExpr("a"), NameExpr("i")])), ExprsExpr(NumberExpr(42))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            AssignStat(targets=[IndexExpr(idx=NameExpr('i'), value=NameExpr('a'))], values=[NumberExpr(42)])
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_set_table_index(self):
         ast = self.parser.srcToAST('_ENV.x = val')
-        exp = Chunk(Block(AssignStat([VarsExpr(IndexExpr([NameExpr("_ENV"), NameExpr("x")])), ExprsExpr(NameExpr('val'))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            AssignStat(targets=[IndexExpr(idx=NameExpr('x'), value=NameExpr('_ENV'))], values=[NameExpr('val')])
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_set_multi(self):
         ast = self.parser.srcToAST('x, y = y, x')
-        exp = Chunk(Block(AssignStat([VarsExpr([NameExpr("x"), NameExpr("y")]), ExprsExpr([NameExpr('y'), NameExpr('x')])])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            AssignStat(targets=[NameExpr('x'), NameExpr('y')],values=[NameExpr('y'), NameExpr('x')])
+        ]))
+        self.assertEqual(exp, ast)
