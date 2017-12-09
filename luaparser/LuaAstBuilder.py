@@ -183,9 +183,9 @@ class ParseTreeVisitor(LuaVisitor):
         # : (name | '(' exp ')' varSuffix) varSuffix*
         # if name varSuffix*
         if len(ctx.children)>1 and isinstance(ctx.children[1], LuaParser.VarSuffixContext):
-            child = IndexExpr([self.visit(ctx.children[0]), self.visit(ctx.children[1])])
+            child = IndexExpr(value=self.visit(ctx.children[0]), idx=self.visit(ctx.children[1]))
             for i in range(2, len(ctx.children)):
-                root = IndexExpr([child, self.visit(ctx.children[i])])
+                root = IndexExpr(value=child, idx=self.visit(ctx.children[i]))
                 child = root
             return child
         else:
@@ -386,20 +386,22 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitFunc(self, ctx):
         # 'function' funcname funcbody
-        names     = self.visit(ctx.children[1])
+        name      = self.visit(ctx.children[1])
         argsBlock = self.visit(ctx.children[2])
 
-        if isinstance(names, NameExpr):
-            return FunctionExpr(name=names.id, args=argsBlock[0], body=argsBlock[1].body)
+        if isinstance(name, NameExpr):
+            return FunctionExpr(name=name.id, args=argsBlock[0], body=argsBlock[1].body)
         else:
             return AssignStat(
-                targets=[names],
+                targets=[name],
                 values =[FunctionExpr(name='', args=argsBlock[0], body=argsBlock[1].body)]
             )
 
     def visitLocalfunc(self, ctx):
-        return LocalRecStat(self.visitChildren(ctx))
-
+        # 'local' 'function' name funcbody
+        name      = self.visit(ctx.children[2])
+        argsBlock = self.visit(ctx.children[3])
+        return LocalFunctionExpr(name=name.id, args=argsBlock[0], body=argsBlock[1].body)
 
 
     def visitFuncname(self, ctx):

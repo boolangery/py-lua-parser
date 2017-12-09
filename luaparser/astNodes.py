@@ -174,10 +174,20 @@ class InvokeStat(Statement):
                    (self.source == other.source)
             return False
 
-class LocalRecStat(Statement):
-    """Lua local function statement"""
-    def __init__(self, childs):
-        super(LocalRecStat, self).__init__('Localrec', childs)
+class LocalFunctionExpr(Statement):
+    """Define the Lua local function statement"""
+    def __init__(self, name, args, body):
+        super(LocalFunctionExpr, self).__init__('LocalFunctionDef', [])
+        self.id   = name
+        self.args = args
+        self.body = body
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.id == other.id and \
+                   self.args == other.args and \
+                   self.body == other.body
+        return False
+
 
 ''' ----------------------------------------------------------------------- '''
 ''' Lua Expression                                                          '''

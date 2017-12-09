@@ -505,13 +505,13 @@ class ExpressionsTestCase(tests.TestCase):
         ast = self.parser.srcToAST(r't.a.b.c.f = function () end')
         exp = Chunk(body=Block(body=[AssignStat(
             targets=[IndexExpr(
-                idx='f',
+                idx=NameExpr('f'),
                 value=IndexExpr(
-                    idx='c',
+                    idx=NameExpr('c'),
                     value=IndexExpr(
-                        idx='b',
+                        idx=NameExpr('b'),
                         value=IndexExpr(
-                            idx='a',
+                            idx=NameExpr('a'),
                             value=NameExpr(id='t')
                         )
                     )
@@ -522,10 +522,13 @@ class ExpressionsTestCase(tests.TestCase):
                 body=[]
             )]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_function_definition_4(self):
         ast = self.parser.srcToAST(r'local function f () end')
-        exp = Chunk(Block(LocalRecStat([NameExpr('f'), FunctionExpr(Block(None))])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[LocalFunctionExpr(
+            name='f',
+            args=[],
+            body=[]
+        )]))
+        self.assertEqual(exp, ast)
