@@ -75,10 +75,16 @@ class ParseTreeVisitor(LuaVisitor):
                 values=[])
 
     def visitWhileStat(self, ctx):
-        return WhileStat(self.visitChildren(ctx))
+        # 'while' exp 'do' block 'end' ;
+        return WhileStat(
+            test=self.visit(ctx.children[1]),
+            body=self.visit(ctx.children[3]).body)
 
     def visitRepeat(self, ctx):
-        return RepeatStat(self.visitChildren(ctx))
+        # 'repeat' block 'until' exp ;
+        return RepeatStat(
+            body=self.visit(ctx.children[1]).body,
+            test=self.visit(ctx.children[3]))
 
     def visitCall(self, ctx):
         # varOrExp args+
@@ -113,13 +119,30 @@ class ParseTreeVisitor(LuaVisitor):
         return ForinStat(self.visitChildren(ctx))
 
     def visitIfStat(self, ctx):
-        return IfStat(self.visitChildren(ctx))
+        # 'if' exp 'then' block elseIfStat* elseStat? 'end' ;
+        mainIf = IfStat(
+            test=self.visit(ctx.children[1]),
+            body=self.visit(ctx.children[3]).body,
+            orelse=None)
+        lastStat = mainIf
+        for node in ctx.children[4:-2]:
+            elseIfNodes = self.visit(node)
+            elseIf = IfStat(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None)
+            lastStat.orelse = elseIf
+            lastStat = elseIf
+        if isinstance(ctx.children[-2], LuaParser.ElseStatContext):
+            lastStat.orelse = self.visit(ctx.children[-2])
+        return mainIf
 
     def visitElseIfStat(self, ctx):
-        return ElseIfStat(self.visitChildren(ctx))
+        # 'elseif' exp 'then' block
+        return [
+            self.visit(ctx.children[1]),
+            self.visit(ctx.children[3]).body]
 
     def visitElseStat(self, ctx):
-        return ElseStat(self.visitChildren(ctx))
+        # 'else' block
+        return self.visit(ctx.children[1]).body
 
     def visitLabel(self, ctx):
         return LabelStat(self.visitChildren(ctx))

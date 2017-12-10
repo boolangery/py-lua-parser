@@ -13,49 +13,40 @@ class ControlStructureTestCase(tests.TestCase):
 
     def test_while(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
-            while a[i] do
-              i = i + 1
+            while true do
+              print('hello world')
             end"""))
-        exp = Chunk(Block(
-            WhileStat([
-                IndexExpr([NameExpr("a"), NameExpr("i")]),
-                Block(AssignStat([
-                    VarsExpr(NameExpr("i")),
-                    ExprsExpr(AddOpExpr([NameExpr("i"), NumberExpr(1)]))
-                ]))
+        exp = Chunk(body=Block(body=[
+            WhileStat(test=TrueExpr(), body=[
+                CallStat(func=NameExpr('print'), args=[StringExpr('hello world')])
             ])
-        ))
-        self.assertAstEqual(exp, ast)
-
-    def test_while_break(self):
-        ast = self.parser.srcToAST(textwrap.dedent("""
-            while a[i] do
-              break
-            end"""))
-        exp = Chunk(Block(
-            WhileStat([
-                IndexExpr([NameExpr("a"), NameExpr("i")]),
-                Block(BreakStat(None))
-            ])
-        ))
-        self.assertAstEqual(exp, ast)
-
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_repeat_until(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             repeat        
             until true
             """))
-        exp = Chunk(Block(RepeatStat([Block(None), TrueExpr()])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            RepeatStat(body=[], test=TrueExpr())
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_if(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             if true then    
             end
             """))
-        exp = Chunk(Block(IfStat([TrueExpr(), Block(None)])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=TrueExpr(),
+                body=[],
+                orelse=None
+            )
+        ]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_if_exp(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
@@ -85,14 +76,19 @@ class ControlStructureTestCase(tests.TestCase):
             else   
             end
             """))
-        exp = Chunk(Block(
-            IfStat([
-                TrueExpr(), Block(None),
-                ElseIfStat([FalseExpr(), Block(None)]),
-                ElseStat(Block(None))
-            ])
-        ))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=TrueExpr(),
+                body=[],
+                orelse=IfStat(
+                    test=FalseExpr(),
+                    body=[],
+                    orelse=[]
+                )
+            )
+        ]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_if_elseif_elseif_else(self):
         ast = self.parser.srcToAST(textwrap.dedent("""

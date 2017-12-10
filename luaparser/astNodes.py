@@ -100,28 +100,38 @@ class LocalAssignStat(Statement):
 
 class WhileStat(Statement):
     """Define the 'while' lua statement"""
-    def __init__(self, childs):
-        super(WhileStat, self).__init__('While', childs)
+    def __init__(self, test, body):
+        super(WhileStat, self).__init__('While', [])
+        self.test = test
+        self.body = body
+    def __eq__(self, other):
+        return isinstance(self, other.__class__) and \
+               (self.test == other.test) and \
+               (self.body == other.body)
 
 class RepeatStat(Statement):
     """Define the 'Repeat' lua statement"""
-    def __init__(self, childs):
-        super(RepeatStat, self).__init__('Repeat', childs)
+    def __init__(self, body, test):
+        super(RepeatStat, self).__init__('Repeat', [])
+        self.body = body
+        self.test = test
+    def __eq__(self, other):
+        return isinstance(self, other.__class__) and \
+               (self.body == other.body) and \
+               (self.test == other.test)
 
 class IfStat(Statement):
     """Define the 'if' lua statement"""
-    def __init__(self, childs):
-        super(IfStat, self).__init__('If', childs)
-
-class ElseIfStat(Statement):
-    """Define the 'elseif' lua statement"""
-    def __init__(self, childs):
-        super(ElseIfStat, self).__init__('ElseIf', childs)
-
-class ElseStat(Statement):
-    """Define the 'else' lua statement"""
-    def __init__(self, childs):
-        super(ElseStat, self).__init__('Else', childs)
+    def __init__(self, test, body, orelse):
+        super(IfStat, self).__init__('If', [])
+        self.test = test
+        self.body = body
+        self.orelse = orelse
+    def __eq__(self, other):
+        return isinstance(self, other.__class__) and \
+               (self.test == other.test) and \
+               (self.body == other.body) and \
+               (self.orelse == other.orelse)
 
 class LabelStat(Statement):
     """Define the '::label::' lua statement"""
