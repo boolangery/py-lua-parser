@@ -83,7 +83,8 @@ class PythonStyleVisitor():
                     res += self.visit(attrValue)
                     self.dedent()
                 else:
-                    res += self.indentStr() + attr + ': ' + self.visit(attrValue)
+                    if attrValue is not None:
+                        res += self.indentStr() + attr + ': ' + self.visit(attrValue)
         self.dedent()
         return res
 
