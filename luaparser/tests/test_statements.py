@@ -210,3 +210,29 @@ class StatementsTestCase(tests.TestCase):
             LabelStat(id='foo')
         ]))
         self.assertEqual(exp, ast)
+
+
+    def test_comment_line(self):
+        ast = self.parser.srcToAST(textwrap.dedent("""
+            -- a basic comment
+            """))
+        exp = Chunk(body=Block(body=[
+            CommentStat('a basic comment')
+        ]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
+
+    # def test_comment_enable_code(self):
+    #     ast = self.parser.srcToAST(textwrap.dedent("""
+    #         ---[[The long handled doubleshovel means that this code will run
+    #         print "This will print because it is not a comment!"
+    #         -- We can still include comments by prefixing them with a doubledash
+    #         -- print "This will not print because it is commented out"
+    #         ]]
+    #         """))
+    #     exp = Chunk(body=Block(body=[
+    #         GotoStat(label='foo'),
+    #         LabelStat(id='foo')
+    #     ]))
+    #     Printer.pprint(ast, Printer.Style.PYTHON, True)
+    #     self.assertEqual(exp, ast)

@@ -536,3 +536,15 @@ class IndexExpr(LhsExpr):
         if isinstance(self, other.__class__):
             return self.idx == other.idx and self.value == other.value
         return False
+
+''' ----------------------------------------------------------------------- '''
+''' Comments                                                                '''
+''' ----------------------------------------------------------------------- '''
+class CommentStat(Statement):
+    def __init__(self, s):
+        super(CommentStat, self).__init__('Comment', [])
+        self.s = s
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return (self.s == other.s)
+        return False

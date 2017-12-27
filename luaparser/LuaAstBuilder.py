@@ -439,3 +439,13 @@ class ParseTreeVisitor(LuaVisitor):
             return child
         else:
             return self.visitChildren(ctx)
+
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' Comments                                                                '''
+    ''' ----------------------------------------------------------------------- '''
+    def visitComment_rule(self, ctx):
+        comment = self.visitString(ctx).s
+        if comment.startswith('--'):
+            comment = comment[2:]
+        return CommentStat(comment.strip(' \t\n\r'))
