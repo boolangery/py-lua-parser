@@ -135,13 +135,22 @@ class IfStat(Statement):
 
 class LabelStat(Statement):
     """Define the '::label::' lua statement"""
-    def __init__(self, childs):
-        super(LabelStat, self).__init__('Label', childs)
+    def __init__(self, id):
+        super(LabelStat, self).__init__('Label', [])
+        self.id = id
+    def __eq__(self, other):
+        return isinstance(self, other.__class__) and \
+               (self.id == other.id)
 
 class GotoStat(Statement):
     """Define the 'goto' lua statement"""
-    def __init__(self, childs):
-        super(GotoStat, self).__init__('Goto', childs)
+    def __init__(self, label):
+        super(GotoStat, self).__init__('Goto', [])
+        self.label = label
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return self.label == other.label
+        return False
 
 class BreakStat(Statement):
     """Define the 'break' lua statement"""

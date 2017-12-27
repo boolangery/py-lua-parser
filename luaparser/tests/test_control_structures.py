@@ -155,19 +155,7 @@ class ControlStructureTestCase(tests.TestCase):
             ::foo::
             """))
         exp = Chunk(body=Block(body=[
-            IfStat(
-                test=TrueExpr(),
-                body=[],
-                orelse=IfStat(
-                    test=FalseExpr(),
-                    body=[],
-                    orelse=IfStat(
-                        test=NumberExpr(42),
-                        body=[],
-                        orelse=[]
-                    )
-                )
-            )
+            GotoStat(label='foo'),
+            LabelStat(id='foo')
         ]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)

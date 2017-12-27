@@ -145,10 +145,10 @@ class ParseTreeVisitor(LuaVisitor):
         return self.visit(ctx.children[1]).body
 
     def visitLabel(self, ctx):
-        return LabelStat(self.visitChildren(ctx))
+        return LabelStat(id=self.visit(ctx.children[1]).id)
 
     def visitGoto(self, ctx):
-        return GotoStat(self.visitChildren(ctx))
+        return GotoStat(label=self.visit(ctx.children[1]).id)
 
     def visitBreakStat(self, ctx):
         return BreakStat(self.visitChildren(ctx))
