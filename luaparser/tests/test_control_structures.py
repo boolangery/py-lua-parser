@@ -45,7 +45,6 @@ class ControlStructureTestCase(tests.TestCase):
                 orelse=None
             )
         ]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_if_exp(self):
@@ -53,8 +52,18 @@ class ControlStructureTestCase(tests.TestCase):
             if (a<2) then    
             end
             """))
-        exp = Chunk(Block(IfStat([LessThanOpExpr([NameExpr('a'), NumberExpr(2)]), Block(None)])))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=LessThanOpExpr(
+                    left=NameExpr('a'),
+                    right=NumberExpr(2)
+                ),
+                body=[],
+                orelse=None
+            )
+        ]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
 
     def test_if_elseif(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
@@ -62,12 +71,17 @@ class ControlStructureTestCase(tests.TestCase):
             elseif false then     
             end
             """))
-        exp = Chunk(Block(
-            IfStat([
-                TrueExpr(), Block(None), ElseIfStat([FalseExpr(), Block(None)])
-            ])
-        ))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=LessThanOpExpr(
+                    left=NameExpr('a'),
+                    right=NumberExpr(2)
+                ),
+                body=[],
+                orelse=None
+            )
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_if_elseif_else(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
@@ -87,7 +101,6 @@ class ControlStructureTestCase(tests.TestCase):
                 )
             )
         ]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_if_elseif_elseif_else(self):
@@ -98,27 +111,63 @@ class ControlStructureTestCase(tests.TestCase):
             else   
             end
             """))
-        exp = Chunk(Block(
-            IfStat([
-                TrueExpr(), Block(None),
-                ElseIfStat([FalseExpr(), Block(None)]),
-                ElseIfStat([NumberExpr(42), Block(None)]),
-                ElseStat(Block(None))
-            ])
-        ))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=TrueExpr(),
+                body=[],
+                orelse=IfStat(
+                    test=FalseExpr(),
+                    body=[],
+                    orelse=IfStat(
+                        test=NumberExpr(42),
+                        body=[],
+                        orelse=[]
+                    )
+                )
+            )
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_label(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             ::foo::
             """))
-        exp = Chunk(Block(LabelStat(NameExpr('foo'))))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=TrueExpr(),
+                body=[],
+                orelse=IfStat(
+                    test=FalseExpr(),
+                    body=[],
+                    orelse=IfStat(
+                        test=NumberExpr(42),
+                        body=[],
+                        orelse=[]
+                    )
+                )
+            )
+        ]))
+        self.assertEqual(exp, ast)
 
     def test_label(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             goto foo
             ::foo::
             """))
-        exp = Chunk(Block([GotoStat(NameExpr('foo')), LabelStat(NameExpr('foo'))]))
-        self.assertAstEqual(exp, ast)
+        exp = Chunk(body=Block(body=[
+            IfStat(
+                test=TrueExpr(),
+                body=[],
+                orelse=IfStat(
+                    test=FalseExpr(),
+                    body=[],
+                    orelse=IfStat(
+                        test=NumberExpr(42),
+                        body=[],
+                        orelse=[]
+                    )
+                )
+            )
+        ]))
+        Printer.pprint(ast, Printer.Style.PYTHON, True)
+        self.assertEqual(exp, ast)
