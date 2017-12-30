@@ -116,7 +116,11 @@ class ParseTreeVisitor(LuaVisitor):
         return FornumStat(self.visitChildren(ctx))
 
     def visitForin(self, ctx):
-        return ForinStat(self.visitChildren(ctx))
+        # 'for' namelist 'in' explist 'do' block 'end' ;
+        return ForinStat(
+            body=self.visit(ctx.children[5]).body,
+            iter=self.visit(ctx.children[3]),
+            targets=listify(self.visit(ctx.children[1])))
 
     def visitIfStat(self, ctx):
         # 'if' exp 'then' block elseIfStat* elseStat? 'end' ;

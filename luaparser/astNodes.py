@@ -99,8 +99,11 @@ class FornumStat(Statement):
 
 class ForinStat(Statement):
     """Define the 'Forin' lua statement"""
-    def __init__(self):
+    def __init__(self, body, iter, targets):
         super(ForinStat, self).__init__('Forin')
+        self.body = body
+        self.iter = iter
+        self.targets = targets
 
 class CallStat(Statement):
     """Define the 'Call' lua statement"""

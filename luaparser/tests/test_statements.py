@@ -65,6 +65,21 @@ class StatementsTestCase(tests.TestCase):
     '''
     3.3.4 – Control Structures
     '''
+    def test_for(self):
+        ast = self.parser.srcToAST(textwrap.dedent("""
+            for k, v in pairs({}) do
+              print(k, v)
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            ForinStat(
+                body=[CallStat(func=NameExpr('print'), args=[NameExpr('k'), NameExpr('v')])],
+                iter=CallStat(func=NameExpr('pairs'), args=[TableExpr(keys=[], values=[])]),
+                targets=[NameExpr('k'), NameExpr('v')]
+            )
+        ]))
+        self.assertEqual(exp, ast)
+
     def test_while(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             while true do
