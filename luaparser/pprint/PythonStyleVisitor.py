@@ -76,7 +76,7 @@ class PythonStyleVisitor():
 
         self.indent()
         for attr, attrValue in node.__dict__.items():
-            if attr not in ('name'):
+            if attr != 'name':
                 if isinstance(attrValue, Node) or isinstance(attrValue, list):
                     res += self.indentStr() + attr + ': ' + self.prettyCount(attrValue)
                     self.indent()
