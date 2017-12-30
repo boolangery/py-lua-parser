@@ -1,36 +1,48 @@
-py-lua-parser (Work in progress)
-================================
+py-lua-parser
+===============================================================================
 
 A Lua parser and AST builder written in Python.
 
+Installation:
+------------------------------------------------------------------------------
+The package can be installed through `pip`:
 
-Usage
-=====
+    python3.6 -m pip install .
+
+Quickstart
+------------------------------------------------------------------------------
+
+Minimal exemple:
 
 .. code-block:: python
-    from luaparser import Parser
-    from luaparser import Printer
 
+    from luaparser import Parser, Printer
 
-    parser = Parser()
+    source = """
+    -- sample program
+    print('Hello world !')
+    """
 
-    ast = parser.fileToAST('local var = 42')
+    ast = Parser().srcToAST(source)
+    Printer.pprint(ast, style=Printer.Style.PYTHON, indent=True)
 
-    print('** Default AST ***')
-    print(Printer.toStr(ast, Printer.Style.DEFAULT))
+will display:
 
-    print('** Metalua AST ***')
-    print(Printer.toStr(ast, Printer.Style.METALUA))
+.. code-block::
 
-
-To generate parser
-------------------
-
-http://www.antlr.org/download/antlr-4.7-complete.jar
-
-java -Xmx500M -cp ../antlr-4.7-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -visitor Lua.g4
-
-https://github.com/antlr/antlr4/blob/master/doc/python-target.md
-
-python3.6 parser_v2.py ../tests/dog.lua
-python3.6 -m pip install --upgrade ../ --user && python3.6 parser_v2.py ../tests/dog.lua
+    Chunk: {} 1 key
+      body: {} 1 key
+        Block: {} 1 key
+          body: [] 2 items
+            0: {} 1 key
+              Comment: {} 1 key
+                s: "sample program"
+            1: {} 1 key
+              Call: {} 2 keys
+                func: {} 1 key
+                  Name: {} 1 key
+                    id: "print"
+                args: [] 1 item
+                  0: {} 1 key
+                    String: {} 1 key
+                      s: "Hello world !"
