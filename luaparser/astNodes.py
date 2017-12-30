@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
     ``astNodes`` module
     ===================
@@ -13,52 +10,26 @@
 ''' ----------------------------------------------------------------------- '''
 class Node(object):
     """Base class for lua AST Node"""
-    def __init__(self, name, childs):
+    def __init__(self, name):
         self.name = name
-        if childs == None:
-            self.childs = []
-        elif not isinstance(childs, list):
-            self.childs = [childs]
-        else:
-            self.childs = childs
 
-    def isTerm(self):
-        """Test if the node is a terminal node.
-        :return: true if the node is terminal
-        :rtype: bool
-        """
-        return (len(self.childs)==0) or isinstance(self.childs[0], str)
-
-    def getValue(self):
-        if len(self.childs)==0:
-            return ''
-        else:
-            return self.childs[0]
-
-    def addChild(self, child):
-        self.childs.append(child)
-
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(self, other.__class__):
+            return self.__dict__ == other.__dict__
+        return False
 
 class Chunk(Node):
     """Define a Lua chunk"""
     def __init__(self, body):
-        super(Chunk, self).__init__('Chunk', [])
+        super(Chunk, self).__init__('Chunk')
         self.body = body
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.body == other.body
-        return False
 
 class Block(Node):
     """Define a Lua Block"""
     def __init__(self, body):
-        super(Block, self).__init__('Block', [])
+        super(Block, self).__init__('Block')
         self.body = body
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.body == other.body
-        return False
-
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -68,145 +39,91 @@ class Statement(Node):
     """Base class for Lua statement"""
     pass
 
-class DoStat(Statement):
-    """Define the 'do' lua statement"""
-    def __init__(self, childs):
-        super(DoStat, self).__init__('Do', childs)
-
 class AssignStat(Statement):
     """Define the 'set' lua statement"""
     def __init__(self, targets, values):
-        super(AssignStat, self).__init__('Assign', [])
+        super(AssignStat, self).__init__('Assign')
         self.targets = targets
         self.values  = values
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return (self.targets == other.targets) \
-                    and (self.values == other.values)
-        return False
 
 class LocalAssignStat(Statement):
     """Define the 'Local assign' lua statement"""
     def __init__(self, targets, values):
-        super(LocalAssignStat, self).__init__('LocalAssign', [])
+        super(LocalAssignStat, self).__init__('LocalAssign')
         self.targets = targets
         self.values  = values
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return (self.targets == other.targets) \
-                   and (self.values == other.values)
-        return False
-
 
 class WhileStat(Statement):
     """Define the 'while' lua statement"""
     def __init__(self, test, body):
-        super(WhileStat, self).__init__('While', [])
+        super(WhileStat, self).__init__('While')
         self.test = test
         self.body = body
-    def __eq__(self, other):
-        return isinstance(self, other.__class__) and \
-               (self.test == other.test) and \
-               (self.body == other.body)
 
 class RepeatStat(Statement):
     """Define the 'Repeat' lua statement"""
     def __init__(self, body, test):
-        super(RepeatStat, self).__init__('Repeat', [])
+        super(RepeatStat, self).__init__('Repeat')
         self.body = body
         self.test = test
-    def __eq__(self, other):
-        return isinstance(self, other.__class__) and \
-               (self.body == other.body) and \
-               (self.test == other.test)
 
 class IfStat(Statement):
     """Define the 'if' lua statement"""
     def __init__(self, test, body, orelse):
-        super(IfStat, self).__init__('If', [])
+        super(IfStat, self).__init__('If')
         self.test = test
         self.body = body
         self.orelse = orelse
-    def __eq__(self, other):
-        return isinstance(self, other.__class__) and \
-               (self.test == other.test) and \
-               (self.body == other.body) and \
-               (self.orelse == other.orelse)
 
 class LabelStat(Statement):
     """Define the '::label::' lua statement"""
     def __init__(self, id):
-        super(LabelStat, self).__init__('Label', [])
+        super(LabelStat, self).__init__('Label')
         self.id = id
-    def __eq__(self, other):
-        return isinstance(self, other.__class__) and \
-               (self.id == other.id)
 
 class GotoStat(Statement):
     """Define the 'goto' lua statement"""
     def __init__(self, label):
-        super(GotoStat, self).__init__('Goto', [])
+        super(GotoStat, self).__init__('Goto')
         self.label = label
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.label == other.label
-        return False
 
 class BreakStat(Statement):
     """Define the 'break' lua statement"""
-    def __init__(self, childs):
-        super(BreakStat, self).__init__('Break', childs)
+    def __init__(self):
+        super(BreakStat, self).__init__('Break')
 
 class FornumStat(Statement):
     """Define the 'Fornum' lua statement"""
-    def __init__(self, childs):
-        super(FornumStat, self).__init__('Fornum', childs)
+    def __init__(self):
+        super(FornumStat, self).__init__('Fornum')
 
 class ForinStat(Statement):
     """Define the 'Forin' lua statement"""
-    def __init__(self, childs):
-        super(ForinStat, self).__init__('Forin', childs)
+    def __init__(self):
+        super(ForinStat, self).__init__('Forin')
 
 class CallStat(Statement):
     """Define the 'Call' lua statement"""
     def __init__(self, func, args):
-        super(CallStat, self).__init__('Call', [])
+        super(CallStat, self).__init__('Call')
         self.func = func
         self.args = args
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return (self.args == other.args) and \
-                   (self.func == other.func)
-        return False
 
 class InvokeStat(Statement):
     """Define the 'Invoke' lua statement"""
     def __init__(self, source, func, args):
-        super(InvokeStat, self).__init__('Invoke', [])
+        super(InvokeStat, self).__init__('Invoke')
         self.source = source
         self.func = func
         self.args = args
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return (self.args == other.args) and \
-                   (self.func == other.func) and \
-                   (self.source == other.source)
-            return False
 
 class LocalFunctionExpr(Statement):
     """Define the Lua local function statement"""
     def __init__(self, name, args, body):
-        super(LocalFunctionExpr, self).__init__('LocalFunctionDef', [])
+        super(LocalFunctionExpr, self).__init__('LocalFunctionDef')
         self.id   = name
         self.args = args
         self.body = body
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.id == other.id and \
-                   self.args == other.args and \
-                   self.body == other.body
-        return False
-
 
 ''' ----------------------------------------------------------------------- '''
 ''' Lua Expression                                                          '''
@@ -220,106 +137,75 @@ class Expression(Node):
 ''' ----------------------------------------------------------------------- '''
 class NilExpr(Expression):
     """Define the Lua 'nil' expression"""
-    def __init__(self, childs=None):
-        super(NilExpr, self).__init__('Nil', childs)
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return True
-        return False
+    def __init__(self):
+        super(NilExpr, self).__init__('Nil')
 
 class TrueExpr(Expression):
     """Define the Lua 'true' expression"""
-    def __init__(self, childs=None):
-        super(TrueExpr, self).__init__('True', childs)
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return True
-        return False
+    def __init__(self):
+        super(TrueExpr, self).__init__('True')
 
 class FalseExpr(Expression):
     """Define the Lua 'false' expression"""
-    def __init__(self, childs=None):
-        super(FalseExpr, self).__init__('False', childs)
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return True
-        return False
+    def __init__(self):
+        super(FalseExpr, self).__init__('False')
 
 class NumberExpr(Expression):
     """Define the Lua number expression"""
     def __init__(self, n):
-        super(NumberExpr, self).__init__('Number', [])
+        super(NumberExpr, self).__init__('Number')
         self.n = n
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.n == other.n
-        return False
-
 
 class StringExpr(Expression):
     """Define the Lua string expression"""
     def __init__(self, s):
-        super(StringExpr, self).__init__('String', [])
+        super(StringExpr, self).__init__('String')
         self.s = s
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.s == other.s
-        return False
 
 class DotsExpr(Expression):
     """Define the Lua dots (...) expression"""
-    def __init__(self, childs=None):
-        super(DotsExpr, self).__init__('Dots', childs)
+    def __init__(self):
+        super(DotsExpr, self).__init__('Dots')
 
 class TableExpr(Expression):
     """Define the Lua table expression"""
     def __init__(self, keys, values):
-        super(TableExpr, self).__init__('Table', [])
+        super(TableExpr, self).__init__('Table')
         self.keys = keys
         self.values = values
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.keys == other.keys and self.values == other.values
-        return False
 
 class KeysExpr(Expression):
     """Table keys"""
-    def __init__(self, childs):
-        super(KeysExpr, self).__init__('Keys', childs)
+    def __init__(self):
+        super(KeysExpr, self).__init__('Keys')
 
 class ValuesExpr(Expression):
     """Table values"""
-    def __init__(self, childs):
-        super(ValuesExpr, self).__init__('Values', childs)
+    def __init__(self):
+        super(ValuesExpr, self).__init__('Values')
 
 class FunctionExpr(Expression):
     """Define the Lua function expression"""
     def __init__(self, name, args, body):
-        super(FunctionExpr, self).__init__('FunctionDef', [])
+        super(FunctionExpr, self).__init__('FunctionDef')
         self.id   = name # TODO: rename after refactor name
         self.args = args
         self.body = body
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.id == other.id and \
-                   self.args == other.args and \
-                   self.body == other.body
-        return False
 
 class ArgsExpr(Expression):
     """Define a Lua arg list expression"""
-    def __init__(self, childs):
-        super(ArgsExpr, self).__init__('Args', childs)
+    def __init__(self):
+        super(ArgsExpr, self).__init__('Args')
 
 class VarsExpr(Expression):
     """Define a Lua var list expression"""
-    def __init__(self, childs):
-        super(VarsExpr, self).__init__('Vars', childs)
+    def __init__(self):
+        super(VarsExpr, self).__init__('Vars')
 
 class ExprsExpr(Expression):
     """Define a Lua expression list expression"""
-    def __init__(self, childs):
-        super(ExprsExpr, self).__init__('Exprs', childs)
+    def __init__(self):
+        super(ExprsExpr, self).__init__('Exprs')
 
 ''' ----------------------------------------------------------------------- '''
 ''' Operators                                                               '''
@@ -331,15 +217,9 @@ class OpExpr(Expression):
 class LeftRightOpExpr(OpExpr):
     """Base class for 'Left Op Right' Arithmetic Operators"""
     def __init__(self, name, left, right):
-        super(LeftRightOpExpr, self).__init__(name, [])
+        super(LeftRightOpExpr, self).__init__(name)
         self.left = left
         self.right = right
-
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.left == other.left and \
-                   self.right == other.right
-        return False
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.1 – Arithmetic Operators                                            '''
@@ -480,12 +360,8 @@ Unitary Operators.
 class UnOpExpr(Expression):
     """Base class for Lua unitary operator"""
     def __init__(self, name, operand):
-        super(UnOpExpr, self).__init__(name, [])
+        super(UnOpExpr, self).__init__(name)
         self.operand = operand
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.operand == other.operand
-        return False
 
 class UBNotOpExpr(UnOpExpr):
     """Lua binary not unitary operator expression"""
@@ -519,32 +395,20 @@ class LhsExpr(Expression):
 class NameExpr(LhsExpr):
     """Define a Lua Id expression"""
     def __init__(self, id):
-        super(NameExpr, self).__init__('Name', [])
+        super(NameExpr, self).__init__('Name')
         self.id = id
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.id == other.id
-        return False
 
 class IndexExpr(LhsExpr):
     """Define a Lua Index expression"""
     def __init__(self, idx, value):
-        super(IndexExpr, self).__init__('Index', [])
+        super(IndexExpr, self).__init__('Index')
         self.idx    = idx
         self.value  = value
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return self.idx == other.idx and self.value == other.value
-        return False
 
 ''' ----------------------------------------------------------------------- '''
 ''' Comments                                                                '''
 ''' ----------------------------------------------------------------------- '''
 class CommentStat(Statement):
     def __init__(self, s):
-        super(CommentStat, self).__init__('Comment', [])
+        super(CommentStat, self).__init__('Comment')
         self.s = s
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return (self.s == other.s)
-        return False

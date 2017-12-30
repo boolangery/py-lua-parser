@@ -116,7 +116,6 @@ class StatementsTestCase(tests.TestCase):
                 orelse=None
             )
         ]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_if_elseif(self):
@@ -219,7 +218,6 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[
             CommentStat('a basic comment')
         ]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     # def test_comment_enable_code(self):

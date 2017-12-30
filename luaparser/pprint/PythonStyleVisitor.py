@@ -48,7 +48,7 @@ class PythonStyleVisitor():
         elif isinstance(object, Node):
             if isList:
                 return '{} 1 key'
-            keyCount = len(object.__dict__.items()) -2 # name + childs
+            keyCount = len(object.__dict__.items()) - 1 # name
             res += '{} ' + str(keyCount) + ' '
             if keyCount > 1 : res += 'keys'
             else            : res += 'key'
@@ -76,7 +76,7 @@ class PythonStyleVisitor():
 
         self.indent()
         for attr, attrValue in node.__dict__.items():
-            if attr not in ('name', 'childs'):
+            if attr not in ('name'):
                 if isinstance(attrValue, Node) or isinstance(attrValue, list):
                     res += self.indentStr() + attr + ': ' + self.prettyCount(attrValue)
                     self.indent()

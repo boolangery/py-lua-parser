@@ -160,13 +160,13 @@ class ParseTreeVisitor(LuaVisitor):
     Types and values
     '''
     def visitNil(self, ctx):
-        return NilExpr(self.visitChildren(ctx))
+        return NilExpr()
 
     def visitTrue(self, ctx):
-        return TrueExpr(self.visitChildren(ctx))
+        return TrueExpr()
 
     def visitFalse(self, ctx):
-        return FalseExpr(self.visitChildren(ctx))
+        return FalseExpr()
 
     def visitNumber(self, ctx):
         # using python number eval to parse lua number:
@@ -196,12 +196,6 @@ class ParseTreeVisitor(LuaVisitor):
     def visitArgs(self, ctx):
         return self.visitChildren(ctx, mergeList=True)
 
-    #def visitVarlist(self, ctx):
-    #    return VarsExpr(self.visitChildren(ctx))
-
-    #def visitNamelist(self, ctx):
-    #    return VarsExpr(self.visitChildren(ctx))
-
     def visitVar(self, ctx):
         # : (name | '(' exp ')' varSuffix) varSuffix*
         # if name varSuffix*
@@ -213,9 +207,6 @@ class ParseTreeVisitor(LuaVisitor):
             return child
         else:
             return self.visitChildren(ctx)
-
-    #def visitExplist(self, ctx):
-    #    return ExprsExpr(self.visitChildren(ctx))
 
     '''
     Visiting arithmetic operator expressions

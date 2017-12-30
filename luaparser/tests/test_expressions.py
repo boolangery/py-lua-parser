@@ -465,7 +465,6 @@ class ExpressionsTestCase(tests.TestCase):
                 )]
             )]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_function_definition_1(self):
@@ -498,7 +497,6 @@ class ExpressionsTestCase(tests.TestCase):
                 body=[]
             )]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_function_definition_3(self):

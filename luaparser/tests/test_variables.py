@@ -36,7 +36,6 @@ class VariablesTestCase(tests.TestCase):
                 NumberExpr(n=2)
             ]
         )]))
-        Printer.pprint(ast, Printer.Style.PYTHON, True)
         self.assertEqual(exp, ast)
 
     def test_local_multi_var(self):
