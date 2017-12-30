@@ -65,7 +65,7 @@ class StatementsTestCase(tests.TestCase):
     '''
     3.3.4 – Control Structures
     '''
-    def test_for(self):
+    def test_for_in(self):
         ast = self.parser.srcToAST(textwrap.dedent("""
             for k, v in pairs({}) do
               print(k, v)
@@ -76,6 +76,19 @@ class StatementsTestCase(tests.TestCase):
                 body=[CallStat(func=NameExpr('print'), args=[NameExpr('k'), NameExpr('v')])],
                 iter=CallStat(func=NameExpr('pairs'), args=[TableExpr(keys=[], values=[])]),
                 targets=[NameExpr('k'), NameExpr('v')]
+            )
+        ]))
+        self.assertEqual(exp, ast)
+
+    def test_numeric_for(self):
+        ast = self.parser.srcToAST(textwrap.dedent("""
+            for i=1,10,2 do print(i) end
+            """))
+        exp = Chunk(body=Block(body=[
+            FornumStat(
+                start=NumberExpr(1),
+                stop=NumberExpr(10),
+                step=NumberExpr(2)
             )
         ]))
         self.assertEqual(exp, ast)

@@ -113,7 +113,18 @@ class ParseTreeVisitor(LuaVisitor):
             return child
 
     def visitFornum(self, ctx):
-        return FornumStat(self.visitChildren(ctx))
+        # 'for' name '=' exp ',' exp (',' exp)? 'do' block 'end' ;
+        # if has step expr
+        if len(ctx.children) > 8:
+            return FornumStat(
+                start=self.visit(ctx.children[3]),
+                stop=self.visit(ctx.children[5]),
+                step=self.visit(ctx.children[7]))
+        else:
+            return FornumStat(
+                start=self.visit(ctx.children[3]),
+                stop=self.visit(ctx.children[5]),
+                step=NumberExpr(1))
 
     def visitForin(self, ctx):
         # 'for' namelist 'in' explist 'do' block 'end' ;

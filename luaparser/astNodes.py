@@ -94,8 +94,11 @@ class BreakStat(Statement):
 
 class FornumStat(Statement):
     """Define the 'Fornum' lua statement"""
-    def __init__(self):
+    def __init__(self, start, stop, step):
         super(FornumStat, self).__init__('Fornum')
+        self.start = start
+        self.stop = stop
+        self.step = step
 
 class ForinStat(Statement):
     """Define the 'Forin' lua statement"""
