@@ -65,8 +65,13 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
     def visitSetStat(self, ctx):
+        symbol = EqSymbol(
+            line=ctx.children[1].symbol.line,
+            column=ctx.children[1].symbol.column)
+
         return AssignStat(
             targets=listify(self.visit(ctx.children[0])),
+            symbol=symbol,
             values=listify(self.visit(ctx.children[2])),
             line=ctx.start.line,
             column=ctx.start.column)

@@ -48,6 +48,26 @@ class Block(Node):
 
 
 ''' ----------------------------------------------------------------------- '''
+''' Symbols                                                                 '''
+''' AST must contains all information to be able to do some                 '''
+''' 'fidelity printing'. (i.e render ast to source code)                    '''
+''' ----------------------------------------------------------------------- '''
+class Symbol(Node):
+    """
+        Define a generic symbol.
+        Exemple '='
+        Mainly used to keep symbol source informations.
+    """
+    def __init__(self, name, s, line=0, column=0):
+        super(Symbol, self).__init__(name, line, column)
+        self.s = s
+
+class EqSymbol(Symbol):
+    """"""
+    def __init__(self, line=0, column=0):
+        super(EqSymbol, self).__init__('EqSymbol', '=', line, column)
+
+''' ----------------------------------------------------------------------- '''
 ''' Statements                                                              '''
 ''' ----------------------------------------------------------------------- '''
 class Statement(Node):
@@ -56,10 +76,11 @@ class Statement(Node):
 
 class AssignStat(Statement):
     """Define the 'set' lua statement"""
-    def __init__(self, targets, values, line=0, column=0):
+    def __init__(self, targets, values, symbol=EqSymbol(), line=0, column=0):
         super(AssignStat, self).__init__('Assign', line, column)
         self.targets = targets
         self.values  = values
+        self.symbol  = symbol
 
 class LocalAssignStat(Statement):
     """Define the 'Local assign' lua statement"""
