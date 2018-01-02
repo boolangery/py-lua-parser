@@ -8,14 +8,12 @@ class LuaVisitorTestCase(tests.TestCase):
     def setUp(self):
         self.parser = Parser()
 
-    def test_addition(self):
-        ast = self.parser.srcToAST(textwrap.dedent("""
-            i   = 3
-            """))
+    def test_assign(self):
+        src = """i  = 3"""
+        ast = self.parser.srcToAST(textwrap.dedent(src))
+        self.assertEqual(src, Printer.toStr(ast, Printer.Style.LUA))
 
-        exp = Chunk(body=Block(body=[
-            AssignStat(targets=[NameExpr('i')],values=[NumberExpr(3)])
-        ]))
-        Printer.pprint(ast, Printer.Style.PYTHON)
-        Printer.pprint(ast, Printer.Style.LUA)
-        self.assertEqual(exp, ast)
+    def test_assign(self):
+        src = """x,  y,z =  a,b,c"""
+        ast = self.parser.srcToAST(textwrap.dedent(src))
+        self.assertEqual(src, Printer.toStr(ast, Printer.Style.LUA))

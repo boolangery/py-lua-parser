@@ -445,7 +445,10 @@ class ExpressionsTestCase(tests.TestCase):
         ast = self.parser.srcToAST(r'print("hello",  42)')
         exp = Chunk(body=Block(body=[CallStat(
             func=NameExpr(id='print'),
-            args=[StringExpr('hello'), NumberExpr(n=42)]
+            args=[
+                StringExpr('hello'),
+                CommaSymbol(),
+                NumberExpr(n=42)]
         )]))
         self.assertEqual(exp, ast)
 

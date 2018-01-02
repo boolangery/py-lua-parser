@@ -58,7 +58,14 @@ class StatementsTestCase(tests.TestCase):
     def test_set_multi(self):
         ast = self.parser.srcToAST('x, y = y, x')
         exp = Chunk(body=Block(body=[
-            AssignStat(targets=[NameExpr('x'), NameExpr('y')],values=[NameExpr('y'), NameExpr('x')])
+            AssignStat(targets=[
+                NameExpr('x'),
+                CommaSymbol(),
+                NameExpr('y')],
+            values=[
+                NameExpr('y'),
+                CommaSymbol(),
+                NameExpr('x')])
         ]))
         self.assertEqual(exp, ast)
 
@@ -73,9 +80,20 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             ForinStat(
-                body=[CallStat(func=NameExpr('print'), args=[NameExpr('k'), NameExpr('v')])],
-                iter=CallStat(func=NameExpr('pairs'), args=[TableExpr(keys=[], values=[])]),
-                targets=[NameExpr('k'), NameExpr('v')]
+                body=[CallStat(
+                    func=NameExpr('print'),
+                    args=[
+                        NameExpr('k'),
+                        CommaSymbol(),
+                        NameExpr('v')])],
+                iter=CallStat(
+                    func=NameExpr('pairs'),
+                    args=[
+                        TableExpr(keys=[], values=[])]),
+                targets=[
+                    NameExpr('k'),
+                    CommaSymbol(),
+                    NameExpr('v')]
             )
         ]))
         self.assertEqual(exp, ast)

@@ -21,6 +21,9 @@ def listify(obj):
         return obj
 
 class ParseTreeVisitor(LuaVisitor):
+    def __init__(self, includeSymbols=False):
+        self.includeSymbols = includeSymbols
+
     def visitChildren(self, ctx, mergeList=False):
         if ctx.children:
             return self.visitChildrenList(ctx.children, mergeList)
@@ -65,13 +68,9 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
     def visitSetStat(self, ctx):
-        symbol = EqSymbol(
-            line=ctx.children[1].symbol.line,
-            column=ctx.children[1].symbol.column)
-
         return AssignStat(
             targets=listify(self.visit(ctx.children[0])),
-            symbol=symbol,
+            symbol=self.visit(ctx.children[1]),
             values=listify(self.visit(ctx.children[2])),
             line=ctx.start.line,
             column=ctx.start.column)
@@ -612,5 +611,18 @@ class ParseTreeVisitor(LuaVisitor):
             comment = comment[2:]
         return CommentStat(
             comment.strip(' \t\n\r'),
+            line=ctx.start.line,
+            column=ctx.start.column)
+
+    ''' ----------------------------------------------------------------------- '''
+    ''' Symbols                                                                 '''
+    ''' ----------------------------------------------------------------------- '''
+    def visitEqSymbol(self, ctx):
+        return EqSymbol(
+            line=ctx.start.line,
+            column=ctx.start.column)
+
+    def visitCommaSymbol(self, ctx):
+        return CommaSymbol(
             line=ctx.start.line,
             column=ctx.start.column)
