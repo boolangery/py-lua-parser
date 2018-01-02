@@ -11,7 +11,7 @@
 from enum import Enum
 from luaparser.pprint.DefaultVisitor import DefaultVisitor
 from luaparser.pprint.PythonStyleVisitor import PythonStyleVisitor
-from luaparser.pprint.LuaStyleVisitor import LuaStyleVisitor
+from luaparser.pprint.LuaFidelityVisitor import LuaFidelityVisitor
 
 
 class PrinterException(Exception):
@@ -36,7 +36,7 @@ class Printer():
         elif style == Printer.Style.PYTHON:
             visitor = PythonStyleVisitor(indent, lineInfo, indentValue)
         elif style == Printer.Style.LUA:
-            visitor = LuaStyleVisitor(indent, lineInfo, indentValue)
+            visitor = LuaFidelityVisitor(indent, lineInfo, indentValue)
         else:
             raise PrinterException('No such style: ' + str(style))
         return visitor.visit(ast)
