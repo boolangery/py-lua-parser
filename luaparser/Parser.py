@@ -26,6 +26,13 @@ class Parser():
         parser = LuaParser(CommonTokenStream(lexer))
         return parser.chunk()
 
+    def srcToTokens(self, str):
+        lexer = LuaLexer(InputStream(str))
+        stream = CommonTokenStream(lexer)
+        parser = LuaParser(stream)
+        parser.chunk()
+        return stream.tokens
+
     def fileToParseTree(self, filepath):
         """
         Convert Lua source file to antlr4 parse tree.
