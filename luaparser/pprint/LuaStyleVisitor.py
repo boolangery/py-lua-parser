@@ -1,14 +1,13 @@
 from luaparser.astNodes import *
 from luaparser.visitor import *
-from itertools import repeat
 
-class LuaFidelityVisitor():
+
+class LuaStyleVisitor():
     def __init__(self, indent, lineInfo, indentValue):
         self.indentEnabled = indent
         self.lineInfo = lineInfo
         self.indentValue = indentValue
         self.currentIndent = 0
-        self.lines = []
 
     def indentStr(self, newLine=True):
         res = ''
@@ -32,48 +31,17 @@ class LuaFidelityVisitor():
             visited.append(self.visit(node))
         return visited
 
-
-    def fidelityPrint(self, node):
-        if isinstance(node, list):
-            for n in node:
-                self.fidelityPrint(n)
-            return
-
-        # extend current source:
-        if node.line > len(self.lines):
-            self.lines.extend(repeat('', (node.line - len(self.lines) + 1)))
-
-        # Insert in source line:
-        text = self.visit(node)
-        position = node.column
-        s = self.lines[node.line]
-        # extend string
-        if position > len(s):
-            s += ' ' * (position - len(s))
-        print(text, position, s)
-
-
-        # Use slicing to extract portion to replace:
-        s = s[:position] + text + s[position+len(text):]
-        self.lines[node.line] = s
-
     @visitor(Chunk)
     def visit(self, node):
         return self.visit(node.body)
 
     @visitor(Block)
     def visit(self, node):
-        self.visitList(node.body)
-        return '\n'.join(self.lines)
-        # return '\n'.join(self.visitList(node.body))
+        return '\n'.join(self.visitList(node.body))
 
     @visitor(NameExpr)
     def visit(self, node):
         return node.id
-
-    @visitor(Symbol)
-    def visit(self, node):
-        return node.s
 
     @visitor(NumberExpr)
     def visit(self, node):
@@ -85,10 +53,7 @@ class LuaFidelityVisitor():
 
     @visitor(AssignStat)
     def visit(self, node):
-        self.fidelityPrint(node.targets)
-        self.fidelityPrint(node.symbol)
-        self.fidelityPrint(node.values)
-        # return ' '.join([', '.join(self.visitList(node.targets)), '=', ', '.join(self.visitList(node.values))])
+        return ' '.join([', '.join(self.visitList(node.targets)), '=', ', '.join(self.visitList(node.values))])
 
     @visitor(LocalAssignStat)
     def visit(self, node):
