@@ -12,7 +12,7 @@ from antlr4 import *
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaParser import LuaParser
 from luaparser.LuaAstBuilder import ParseTreeVisitor
-
+from luaparser.pprint.TokenPrinter import TokenPrinter
 
 
 class Parser():
@@ -32,6 +32,10 @@ class Parser():
         parser = LuaParser(stream)
         parser.chunk()
         return stream.tokens
+
+    def tokensToStr(self, tokens):
+        return TokenPrinter().toStr(tokens)
+
 
     def fileToParseTree(self, filepath):
         """
