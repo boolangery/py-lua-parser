@@ -63,12 +63,9 @@ class Symbol(Node):
         self.s = s
 
 class EqSymbol(Symbol):
+    """"""
     def __init__(self, line=0, column=0):
         super(EqSymbol, self).__init__('EqSymbol', '=', line, column)
-
-class CommaSymbol(Symbol):
-    def __init__(self, line=0, column=0):
-        super(CommaSymbol, self).__init__('CommaSymbol', ',', line, column)
 
 ''' ----------------------------------------------------------------------- '''
 ''' Statements                                                              '''

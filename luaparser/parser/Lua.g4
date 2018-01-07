@@ -76,7 +76,7 @@ stat
     | localset
     ;
 
-setStat     : varlist eqSymbol explist ;
+setStat     : varlist '=' explist ;
 call        : varOrExp args+ ;
 invoke      : varOrExp (':' name args)+ ;
 label       : '::' name '::' ;
@@ -109,11 +109,11 @@ funcname
     ;
 
 varlist
-    : var (commaSymbol var)*
+    : var (',' var)*
     ;
 
 namelist
-    : name (commaSymbol name)*
+    : name (',' name)*
     ;
 
 name
@@ -121,7 +121,7 @@ name
     ;
 
 explist
-    : exp (commaSymbol exp)*
+    : exp (',' exp)*
     ;
 
 exp
@@ -240,10 +240,6 @@ string
 comment_rule
     : COMMENT | LINE_COMMENT
     ;
-
-// Symbols
-commaSymbol : ',';
-eqSymbol    : '=';
 
 // LEXER
 

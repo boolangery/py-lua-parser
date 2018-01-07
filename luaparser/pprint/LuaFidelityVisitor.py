@@ -41,20 +41,21 @@ class LuaFidelityVisitor():
 
         # extend current source:
         if node.line > len(self.lines):
-            self.lines.extend(repeat('', (node.line - len(self.lines))))
+            self.lines.extend(repeat('', (node.line - len(self.lines) + 1)))
 
         # Insert in source line:
-        line = node.line -1
         text = self.visit(node)
         position = node.column
-        s = self.lines[line]
+        s = self.lines[node.line]
         # extend string
         if position > len(s):
             s += ' ' * (position - len(s))
+        print(text, position, s)
+
 
         # Use slicing to extract portion to replace:
         s = s[:position] + text + s[position+len(text):]
-        self.lines[line] = s
+        self.lines[node.line] = s
 
     @visitor(Chunk)
     def visit(self, node):

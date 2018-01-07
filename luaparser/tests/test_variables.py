@@ -28,14 +28,11 @@ class VariablesTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[AssignStat(
             targets=[
                 NameExpr(id='a'),
-                CommaSymbol(),
                 NameExpr(id='b'),
-                CommaSymbol(),
                 NameExpr(id='c')
             ],
             values=[
                 NumberExpr(n=1),
-                CommaSymbol(),
                 NumberExpr(n=2)
             ]
         )]))
@@ -46,7 +43,6 @@ class VariablesTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[LocalAssignStat(
             targets=[
                 NameExpr(id='foo'),
-                CommaSymbol(),
                 NameExpr(id='bar')
             ],
             values=[

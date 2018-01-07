@@ -399,15 +399,5 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#commaSymbol.
-    def visitCommaSymbol(self, ctx:LuaParser.CommaSymbolContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#eqSymbol.
-    def visitEqSymbol(self, ctx:LuaParser.EqSymbolContext):
-        return self.visitChildren(ctx)
-
-
 
 del LuaParser
