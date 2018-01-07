@@ -23,16 +23,16 @@ class Printer():
         PYTHON  = 1
 
     @staticmethod
-    def pprint(ast, style = Style.PYTHON, indent=True, lineInfo=True, indentValue=2):
-        print(Printer.toStr(ast, style, indent, lineInfo, indentValue))
+    def pprint(ast, style = Style.DEFAULT, indent=False, indentValue=2):
+        print(Printer.toStr(ast, style, indent, indentValue))
 
     @staticmethod
-    def toStr(ast, style = Style.PYTHON, indent=True, lineInfo=True, indentValue=2):
+    def toStr(ast, style = Style.DEFAULT, indent=False, indentValue=2):
         visitor = None
         if style == Printer.Style.DEFAULT:
-            visitor = DefaultVisitor(indent, lineInfo, indentValue)
+            visitor = DefaultVisitor(indent, indentValue)
         elif style == Printer.Style.PYTHON:
-            visitor = PythonStyleVisitor(indent, lineInfo, indentValue)
+            visitor = PythonStyleVisitor(indent, indentValue)
         else:
             raise PrinterException('No such style: ' + str(style))
         return visitor.visit(ast)

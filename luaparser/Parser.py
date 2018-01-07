@@ -55,13 +55,3 @@ class Parser():
         parseTree = self.fileToParseTree(filepath)
         astVisitor = ParseTreeVisitor()
         return astVisitor.visit(parseTree)
-
-    def srcToTokens(self, str):
-        """
-        Convert Lua source string to antlr4 tokens.
-        :param str: Lua source
-        :return: An antlr4 token list
-        """
-        lexer = LuaLexer(InputStream(str))
-        tokens = CommonTokenStream(lexer)
-        return lexer.getAllTokens()

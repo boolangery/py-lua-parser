@@ -3,9 +3,8 @@ from luaparser.visitor import *
 
 
 class PythonStyleVisitor():
-    def __init__(self, indent, lineInfo, indentValue):
+    def __init__(self, indent, indentValue):
         self.indentEnabled = indent
-        self.lineInfo = lineInfo
         self.indentValue = indentValue
         self.currentIndent = 0
 
@@ -57,6 +56,8 @@ class PythonStyleVisitor():
             res += '[unknow]'
         return res
 
+
+
     @visitor(list)
     def visit(self, obj):
         res = ''
@@ -86,3 +87,4 @@ class PythonStyleVisitor():
                         res += self.indentStr() + attr + ': ' + self.visit(attrValue)
         self.dedent()
         return res
+
