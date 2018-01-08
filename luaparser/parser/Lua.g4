@@ -46,18 +46,16 @@ Tested by Kazunori Sakamoto with Test suite for Lua 5.2 (http://www.lua.org/test
 Tested by Alexander Alexeev with Test suite for Lua 5.3 http://www.lua.org/tests/lua-5.3.2-tests.tar.gz
 */
 
+//////////////////////////////////////////////////////////////////////////////////
+//                                Grammar                                       //
+//////////////////////////////////////////////////////////////////////////////////
 grammar Lua;
 
-chunk
-    : block EOF
-    ;
-
-block
-    : stat* retstat?
-    ;
+chunk: block EOF;
+block: stat* retstat?;
 
 stat
-    : BLOCK_SEP
+    : SEMI_COLON
     | comment_rule
     | setStat
     | call
@@ -76,149 +74,113 @@ stat
     | localset
     ;
 
-setStat     : varlist '=' explist ;
-call        : varOrExp args+ ;
-invoke      : varOrExp (':' name args)+ ;
-label       : '::' name '::' ;
-breakStat   : 'break' ;
-goto        : 'goto' name ;
-do          : 'do' block 'end' ;
-whileStat   : 'while' exp 'do' block 'end' ;
-repeat      : 'repeat' block 'until' exp ;
-ifStat      : 'if' exp 'then' block elseIfStat* elseStat? 'end' ;
-fornum      : 'for' name '=' exp ',' exp (',' exp)? 'do' block 'end' ;
-forin       : 'for' namelist 'in' explist 'do' block 'end' ;
-func        : 'function' funcname funcbody ;
-localfunc   : 'local' 'function' name funcbody ;
-localset    : 'local' namelist ('=' explist)? ;
+setStat: varlist EQUAL explist ;
+call: varOrExp args+ ;
+invoke: varOrExp (COLON name args)+ ;
+label: LABEL name LABEL ;
+breakStat: BREAK ;
+goto: GOTO name ;
+do: DO block END ;
+whileStat: WHILE exp DO block END ;
+repeat: REPEAT block UNTIL exp ;
+ifStat: IF exp THEN block elseIfStat* elseStat? END ;
+fornum: FOR name EQUAL exp COMMA exp (COMMA exp)? DO block END ;
+forin: FOR namelist IN explist DO block END ;
+func: FUNCTION funcname funcbody ;
+localfunc: LOCAL FUNCTION name funcbody ;
+localset: LOCAL namelist (EQUAL explist)? ;
+elseIfStat: ELSEIF exp THEN block;
+elseStat: ELSE block;
+retstat: RETURN explist? SEMI_COLON?;
 
-elseIfStat
-    : 'elseif' exp 'then' block
-    ;
-
-elseStat
-    : 'else' block
-    ;
-
-retstat
-    : 'return' explist? ';'?
-    ;
-
-funcname
-    : name ('.' name)* (':' name)?
-    ;
-
-varlist
-    : var (',' var)*
-    ;
-
-namelist
-    : name (',' name)*
-    ;
-
-name
-    : NAME
-    ;
-
-explist
-    : exp (',' exp)*
-    ;
+funcname: name (INDEX name)* (COLON name)?;
+varlist: var (COMMA var)*;
+namelist: name (COMMA name)*;
+name: NAME;
+explist: exp (COMMA exp)*;
 
 exp
-    : 'nil'                                     # nil
-    | 'false'                                   # false
-    | 'true'                                    # true
+    : NIL                                       # nil
+    | FALSE                                     # false
+    | TRUE                                      # true
     | (INT | HEX | FLOAT | HEX_FLOAT)           # number
     | string                                    # stringExp
-    | '...'                                     # todo2
+    | VARARGS                                   # todo2
     | call                                      # todo3
     | invoke                                    # todo4
     | functiondef                               # todo5
     | prefixexp                                 # todo6
     | tableconstructor                          # table
-    | 'not' exp                                 # unOpNot
-    | '#' exp                                   # unOpLength
-    | '-' exp                                   # unOpMin
-    | '~' exp                                   # unOpBitNot
-    | exp '+' exp                               # opAdd
-    | exp '-' exp                               # opSub
-    | exp '*' exp                               # opMult
-    | exp '/' exp                               # opFloatDiv
-    | exp '//' exp                              # opFloorDiv
-    | exp '%' exp                               # opMod
-    | exp '&' exp                               # bitOpAnd
-    | exp '|' exp                               # bitOpOr
-    | exp '~' exp                               # bitOpXor
-    | exp '>>' exp                              # bitOpShiftR
-    | exp '<<' exp                              # bitOpShiftL
-    | <assoc=right> exp '^' exp                 # opExpo
-    | <assoc=right> exp '..' exp                # concat
-    | exp '<' exp                               # relOpLess
-    | exp '>' exp                               # relOpGreater
-    | exp '<=' exp                              # relOpLessEq
-    | exp '>=' exp                              # relOpGreaterEq
-    | exp '~=' exp                              # relOpNotEq
-    | exp '==' exp                              # relOpEq
-    | exp 'and' exp                             # loOpAnd
-    | exp 'or' exp                              # loOpOr
+    | NOT exp                                   # unOpNot
+    | OP_LENGTH exp                             # unOpLength
+    | OP_MINUS exp                              # unOpMin
+    | OP_BIT_NOT exp                            # unOpBitNot
+    | exp OP_ADD exp                            # opAdd
+    | exp OP_MINUS exp                          # opSub
+    | exp OP_MULT exp                           # opMult
+    | exp OP_FLOAT_DIV exp                      # opFloatDiv
+    | exp OP_FLOOR_DIV exp                      # opFloorDiv
+    | exp OP_MOD exp                            # opMod
+    | exp OP_BIT_AND exp                        # bitOpAnd
+    | exp OP_BIT_OR exp                         # bitOpOr
+    | exp OP_BIT_NOT exp                        # bitOpXor
+    | exp OP_BIT_SR exp                         # bitOpShiftR
+    | exp OP_BIT_SL exp                         # bitOpShiftL
+    | <assoc=right> exp OP_EXP exp              # opExpo
+    | <assoc=right> exp OP_CONCAT exp           # concat
+    | exp OP_LT exp                             # relOpLess
+    | exp OP_GT exp                             # relOpGreater
+    | exp OP_LTE exp                            # relOpLessEq
+    | exp OP_GTE exp                            # relOpGreaterEq
+    | exp OP_NEQ exp                            # relOpNotEq
+    | exp OP_EQ exp                             # relOpEq
+    | exp AND exp                               # loOpAnd
+    | exp OR exp                                # loOpOr
     ;
+
 
 prefixexp
     : varOrExp nameAndArgs*
     ;
 
 varOrExp
-    : var | '(' exp ')'
+    : var | PARENT_R exp PARENT_L
     ;
 
 var
-    : (name | '(' exp ')' varSuffix) varSuffix*
+    : (name | PARENT_R exp PARENT_L varSuffix) varSuffix*
     ;
 
 varSuffix
-    : nameAndArgs* ('[' exp ']' | '.' name)
+    : nameAndArgs* (SQUARE_R exp SQUARE_L | INDEX name)
     ;
 
 nameAndArgs
-    : (':' name)? args
+    : (COLON name)? args
     ;
-
-/*
-var
-    : NAME | prefixexp '[' exp ']' | prefixexp '.' NAME
-    ;
-
-prefixexp
-    : var | functioncall | '(' exp ')'
-    ;
-
-functioncall
-    : prefixexp args | prefixexp ':' NAME args
-    ;
-*/
 
 args
-    : '(' explist? ')' | tableconstructor | string
+    : PARENT_R explist? PARENT_L | tableconstructor | string
     ;
 
 functiondef
-    : 'function' funcbody
+    : FUNCTION funcbody
     ;
 
 funcbody
-    : '(' parlist? ')' block 'end'
+    : PARENT_R parlist? PARENT_L block END
     ;
 
 parlist
-    : namelist (',' '...')? | '...'
+    : namelist (COMMA VARARGS)? | VARARGS
     ;
 
 tableconstructor
-    : '{' (field (fieldsep field)* fieldsep?)? '}'
+    : BRACE_R (field (fieldsep field)* fieldsep?)? BRACE_L
     ;
 
 field
-    : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
+    : SQUARE_R tableKey SQUARE_L EQUAL tableValue | tableKey EQUAL tableValue | tableValue
     ;
 
 tableKey
@@ -230,40 +192,89 @@ tableValue
     ;
 
 fieldsep
-    : ',' | ';'
+    : COMMA | SEMI_COLON
     ;
 
 string
-    : NORMALSTRING | CHARSTRING | LONGSTRING
+    : STRING
     ;
 
 comment_rule
     : COMMENT | LINE_COMMENT
     ;
 
-// LEXER
+//////////////////////////////////////////////////////////////////////////////////
+//                                    Lexer                                     //
+//////////////////////////////////////////////////////////////////////////////////
+// keyword:
+NIL: 'nil';
+FALSE: 'false';
+TRUE: 'true';
+BREAK: 'break';
+GOTO: 'goto';
+DO: 'do';
+WHILE: 'while';
+END: 'end';
+REPEAT: 'repeat';
+UNTIL: 'until';
+IF: 'if';
+FOR: 'for';
+LOCAL: 'local';
+FUNCTION: 'function';
+THEN: 'then';
+ELSE: 'else';
+ELSEIF: 'elseif';
+IN: 'in';
+RETURN: 'return';
+
+VARARGS: '...';
+NOT: 'not';
+EQUAL: '=';
+INDEX: '.';
+COMMA: ',';
+COLON: ':';
+SEMI_COLON: ';' -> channel(HIDDEN);
+LABEL: '::';
+PARENT_R: '(';
+PARENT_L: ')';
+BRACE_R: '{';
+BRACE_L: '}';
+SQUARE_R: '[';
+SQUARE_L: ']';
+
+OP_LENGTH: '#';
+OP_MINUS: '-';
+OP_BIT_NOT: '~';
+OP_ADD: '+';
+OP_MULT: '*';
+OP_FLOAT_DIV: '/';
+OP_FLOOR_DIV: '//';
+OP_MOD: '%';
+OP_BIT_AND: '&';
+OP_BIT_OR: '|';
+OP_BIT_SR: '>>';
+OP_BIT_SL: '<<';
+OP_EXP: '^';
+OP_CONCAT: '..';
+OP_LT: '<';
+OP_GT: '>';
+OP_LTE: '<=';
+OP_GTE: '>=';
+OP_NEQ: '~=';
+OP_EQ: '==';
+AND: 'and';
+OR: 'or';
 
 NAME
     : [a-zA-Z_][a-zA-Z_0-9]*
     ;
 
-NORMALSTRING
-    : '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+STRING
+    : ('"' ( EscapeSequence | ~('\\'|'"') )* '"')
+    | ('\'' ( EscapeSequence | ~('\''|'\\') )* '\'')
+    | ('[' NESTED_STR ']')
     ;
 
-CHARSTRING
-    : '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
-    ;
-
-LONGSTRING
-    : '[' NESTED_STR ']'
-    ;
-
-fragment
-NESTED_STR
-    : '=' NESTED_STR '='
-    | '[' .*? ']'
-    ;
 
 INT
     : Digit+
@@ -283,6 +294,15 @@ HEX_FLOAT
     : '0' [xX] HexDigit+ '.' HexDigit* HexExponentPart?
     | '0' [xX] '.' HexDigit+ HexExponentPart?
     | '0' [xX] HexDigit+ HexExponentPart
+    ;
+
+//////////////////////////////////////////////////////////////////////////////////
+//                                 Fragments                                    //
+//////////////////////////////////////////////////////////////////////////////////
+fragment
+NESTED_STR
+    : '=' NESTED_STR '='
+    | '[' .*? ']'
     ;
 
 fragment
@@ -350,8 +370,4 @@ WS
 
 SHEBANG
     : '#' '!' ~('\n'|'\r')* -> channel(HIDDEN)
-    ;
-
-BLOCK_SEP
-    : ';' -> channel(HIDDEN)
     ;
