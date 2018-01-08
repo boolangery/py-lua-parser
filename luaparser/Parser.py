@@ -12,8 +12,7 @@ from antlr4 import *
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaParser import LuaParser
 from luaparser.LuaAstBuilder import ParseTreeVisitor
-from luaparser.pprint.TokenPrinter import TokenPrinter
-
+from luaparser.editor import ProgramEditor
 
 class Parser():
     def srcToParseTree(self, str):
@@ -26,16 +25,12 @@ class Parser():
         parser = LuaParser(CommonTokenStream(lexer))
         return parser.chunk()
 
-    def srcToTokens(self, str):
+    def srcToProgramEditor(self, str):
         lexer = LuaLexer(InputStream(str))
         stream = CommonTokenStream(lexer)
         parser = LuaParser(stream)
         parser.chunk()
-        return stream.tokens
-
-    def tokensToStr(self, tokens):
-        return TokenPrinter().toStr(tokens)
-
+        return ProgramEditor(stream.tokens)
 
     def fileToParseTree(self, filepath):
         """
