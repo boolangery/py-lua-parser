@@ -1,18 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-    ``LuaAstBuilder`` module
-    ===================
-
-    Contains all Ast Node definitions.
-"""
+import luaparser.asttokens
 import ast
 import re
-
+from antlr4 import *
+from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astNodes import *
 from luaparser.parser.LuaParser import LuaParser
+
+def parse(source):
+    lexer = LuaLexer(InputStream(source))
+    parser = LuaParser(CommonTokenStream(lexer))
+    astVisitor = ParseTreeVisitor()
+    return astVisitor.visit(parser.chunk())
 
 def listify(obj):
     if not isinstance(obj, list):

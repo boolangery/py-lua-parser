@@ -1,5 +1,5 @@
 from luaparser import tests
-from luaparser import Parser, Printer
+from luaparser import ast
 from luaparser.astNodes import *
 import textwrap
 
@@ -7,9 +7,6 @@ import textwrap
 # https://www.lua.org/manual/5.3/manual.html#3.4
 
 class TokensTestCase(tests.TestCase):
-    def setUp(self):
-        self.parser = Parser()
-
     def test_tokenEditor(self):
         src = textwrap.dedent("""
             local a = 1; local b = 2;
@@ -19,8 +16,6 @@ class TokensTestCase(tests.TestCase):
               local str = 'error'
             end
             """)
-        editor = self.parser.srcToProgramEditor(src)
-
-
-        print(editor.toStr())
+        # editor = self.parser.srcToProgramEditor(src)
+        # print(editor.toStr())
 
