@@ -1,5 +1,5 @@
 from luaparser.astNodes import *
-from luaparser.visitor import *
+from luaparser.utils.visitor import *
 
 
 class PythonStyleVisitor():
