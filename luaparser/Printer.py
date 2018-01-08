@@ -23,11 +23,11 @@ class Printer():
         PYTHON  = 1
 
     @staticmethod
-    def pprint(ast, style = Style.DEFAULT, indent=False, indentValue=2):
+    def pprint(ast, style = Style.PYTHON, indent=True, indentValue=2):
         print(Printer.toStr(ast, style, indent, indentValue))
 
     @staticmethod
-    def toStr(ast, style = Style.DEFAULT, indent=False, indentValue=2):
+    def toStr(ast, style = Style.PYTHON, indent=True, indentValue=2):
         visitor = None
         if style == Printer.Style.DEFAULT:
             visitor = DefaultVisitor(indent, indentValue)
