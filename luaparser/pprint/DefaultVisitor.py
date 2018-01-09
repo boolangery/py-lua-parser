@@ -1,4 +1,4 @@
-from luaparser.astNodes import *
+from luaparser.astnodes import *
 from luaparser.utils.visitor import *
 
 

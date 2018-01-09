@@ -1,5 +1,5 @@
 import unittest
-from luaparser.astNodes import *
+from luaparser.astnodes import *
 
 class TestCase(unittest.TestCase):
     def assertAstEqual(self, ast, other):

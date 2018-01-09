@@ -1,7 +1,7 @@
-from luaparser import tests
+from luaparser.utils  import tests
 from luaparser import ast
 from luaparser import asttokens
-from luaparser.astNodes import *
+from luaparser.astnodes import *
 import textwrap
 
 
