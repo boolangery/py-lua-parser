@@ -12,11 +12,23 @@ class Node(object):
     """Base class for lua AST Node"""
     def __init__(self, name):
         self.name = name
+        self.start = 0
+        self.stop = 0
+
+    def equalDicts(self, d1, d2, ignore_keys):
+        ignored = set(ignore_keys)
+        for k1, v1 in d1.items():
+            if k1 not in ignored and (k1 not in d2 or d2[k1] != v1):
+                return False
+        for k2, v2 in d2.items():
+            if k2 not in ignored and k2 not in d1:
+                return False
+        return True
 
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(self, other.__class__):
-            return self.__dict__ == other.__dict__
+            return self.equalDicts(self.__dict__, other.__dict__, ['start', 'stop'])
         return False
 
 class Chunk(Node):
