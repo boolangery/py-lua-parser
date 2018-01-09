@@ -1,3 +1,4 @@
+from antlr4 import *
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astNodes import *
 from luaparser.parser.LuaParser import LuaParser

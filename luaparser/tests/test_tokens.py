@@ -1,10 +1,9 @@
 from luaparser import tests
 from luaparser import ast
+from luaparser import asttokens
 from luaparser.astNodes import *
 import textwrap
 
-
-# https://www.lua.org/manual/5.3/manual.html#3.4
 
 class TokensTestCase(tests.TestCase):
     def test_tokenEditor(self):
@@ -16,6 +15,8 @@ class TokensTestCase(tests.TestCase):
               local str = 'error'
             end
             """)
+        tree = ast.parse(src)
+        tokens = asttokens.parse(src)
         # editor = self.parser.srcToProgramEditor(src)
         # print(editor.toStr())
 

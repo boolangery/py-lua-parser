@@ -9,7 +9,7 @@ setup(
   author = 'Eliott Dumeix',
   author_email = 'eliott.dumeix@gmail.com',
   license = 'MIT',
-  packages = ['luaparser', 'luaparser.pprint', 'luaparser.parser', 'luaparser.tests'],
+  packages = ['luaparser', 'luaparser.pprint', 'luaparser.parser', 'luaparser.utils', 'luaparser.tests'],
   zip_safe = False,
   classifiers = [
         'Programming Language :: Python :: 3',
