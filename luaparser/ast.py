@@ -458,3 +458,22 @@ class ParseTreeVisitor(LuaVisitor):
         if comment.startswith('--'):
             comment = comment[2:]
         return _setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
+
+class ASTVisitor():
+    def do_visit(self, node):
+        if isinstance(node, Node):
+            name = 'visit_' + node.__class__.__name__
+            visitor = getattr(self, name, None)
+            if visitor:
+                visitor(node)
+            # visit all object public attributes:
+            childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+            for child in childs:
+                self.visit(node.__dict__[child])
+
+    def visit(self, node):
+        if isinstance(node, list):
+            for n in node:
+                self.do_visit(n)
+        else:
+            self.do_visit(node)
