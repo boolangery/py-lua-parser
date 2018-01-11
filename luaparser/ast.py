@@ -13,22 +13,27 @@ def parse(source):
     astVisitor = ParseTreeVisitor()
     return astVisitor.visit(parser.chunk())
 
-def walk(node):
-    # TODO: rewrite without recursion
-    if isinstance(node, Node):
-        yield(node)
-        # visit all object public attributes:
-        childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
-        for child in childs:
-            yield from walk(node.__dict__[child])
-    if isinstance(node, list):
-        for n in node:
-            yield(n)
-            # visit all object public attributes:
-            childs = [attr for attr in n.__dict__.keys() if not attr.startswith("_")]
-            for child in childs:
-                yield from walk(n.__dict__[child])
+def walk(root):
+    # base case:
+    if root is None:
+        return
+    nodeStack = []
+    nodeStack.append(root)
 
+    while(len(nodeStack) > 0):
+        node = nodeStack.pop()
+        # push childs to the stack:
+        if isinstance(node, Node):
+            yield node
+
+            # add childs
+            childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+            for child in childs:
+                nodeStack.append(node.__dict__[child])
+        elif isinstance(node, list):
+            # append node list in reversal order
+            for n in reversed(node):
+                nodeStack.append(n)
 
 def _listify(obj):
     if not isinstance(obj, list):
