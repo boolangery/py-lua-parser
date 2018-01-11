@@ -477,21 +477,29 @@ class ParseTreeVisitor(LuaVisitor):
         return _setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
 
 class ASTVisitor():
-    # TODO: rewrite without recursion
-    def do_visit(self, node):
-        if isinstance(node, Node):
-            name = 'visit_' + node.__class__.__name__
-            visitor = getattr(self, name, None)
-            if visitor:
-                visitor(node)
-            # visit all object public attributes:
-            childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
-            for child in childs:
-                self.visit(node.__dict__[child])
+    def visit(self, root):
+        # base case:
+        if root is None:
+            return
+        nodeStack = []
+        nodeStack.append(root)
 
-    def visit(self, node):
-        if isinstance(node, list):
-            for n in node:
-                self.do_visit(n)
-        else:
-            self.do_visit(node)
+        while(len(nodeStack) > 0):
+            node = nodeStack.pop()
+            # push childs to the stack:
+            if isinstance(node, Node):
+                # call visit method
+                name = 'visit_' + node.__class__.__name__
+                visitor = getattr(self, name, None)
+                if visitor:
+                    visitor(node)
+
+                # add childs
+                childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+                for child in childs:
+                    nodeStack.append(node.__dict__[child])
+            elif isinstance(node, list):
+                # append node list in reversal order
+                for n in reversed(node):
+                    nodeStack.append(n)
+
