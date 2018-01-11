@@ -13,13 +13,13 @@ def parse(source):
     astVisitor = ParseTreeVisitor()
     return astVisitor.visit(parser.chunk())
 
-def listify(obj):
+def _listify(obj):
     if not isinstance(obj, list):
         return [obj]
     else:
         return obj
 
-def setMetadata(ctx, node):
+def _setMetadata(ctx, node):
     if ctx.start:
         node.start = ctx.start.tokenIndex
     if ctx.stop:
@@ -56,55 +56,55 @@ class ParseTreeVisitor(LuaVisitor):
     ''' Visiting root nodes.
     '''
     def visitChunk(self, ctx):
-        return setMetadata(ctx, Chunk(self.visit(ctx.children[0])))
+        return _setMetadata(ctx, Chunk(self.visit(ctx.children[0])))
 
     def visitBlock(self, ctx):
-        return setMetadata(ctx, Block(listify(self.visitChildren(ctx))))
+        return _setMetadata(ctx, Block(_listify(self.visitChildren(ctx))))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
     def visitSetStat(self, ctx):
-        return setMetadata(ctx, Assign(
-            targets=listify(self.visit(ctx.children[0])), \
-            values=listify(self.visit(ctx.children[2]))))
+        return _setMetadata(ctx, Assign(
+            targets=_listify(self.visit(ctx.children[0])), \
+            values=_listify(self.visit(ctx.children[2]))))
 
     def visitLocalset(self, ctx):
         # 'local' namelist ('=' explist)?
         if len(ctx.children) > 2:
-            return setMetadata(ctx, LocalAssign(
-                targets=listify(self.visit(ctx.children[1])), \
-                values=listify(self.visit(ctx.children[3]))))
+            return _setMetadata(ctx, LocalAssign(
+                targets=_listify(self.visit(ctx.children[1])), \
+                values=_listify(self.visit(ctx.children[3]))))
         else:
-            return setMetadata(ctx, LocalAssign(
-                targets=listify(self.visit(ctx.children[1])), \
+            return _setMetadata(ctx, LocalAssign(
+                targets=_listify(self.visit(ctx.children[1])), \
                 values=[]))
 
     def visitWhileStat(self, ctx):
         # 'while' exp 'do' block 'end' ;
-        return setMetadata(ctx, While(
+        return _setMetadata(ctx, While(
             test=self.visit(ctx.children[1]),
             body=self.visit(ctx.children[3]).body))
 
     def visitRepeat(self, ctx):
         # 'repeat' block 'until' exp ;
-        return setMetadata(ctx, Repeat(
+        return _setMetadata(ctx, Repeat(
             body=self.visit(ctx.children[1]).body,
             test=self.visit(ctx.children[3])))
 
     def visitCall(self, ctx):
         # varOrExp args+
 
-        return setMetadata(ctx, Call(
+        return _setMetadata(ctx, Call(
             func=self.visit(ctx.children[0]), \
-            args=listify(self.visitStartingFrom(ctx, 1))))
+            args=_listify(self.visitStartingFrom(ctx, 1))))
 
     def visitInvoke(self, ctx):
         # varOrExp (':' name args)+
         child = Invoke(
             source=self.visit(ctx.children[0]), \
             func=self.visit(ctx.children[2]), \
-            args=listify(self.visit(ctx.children[3])))
+            args=_listify(self.visit(ctx.children[3])))
         # if nested invoke:
         if len(ctx.children)>4:
             # iterate (':' name args)
@@ -112,32 +112,32 @@ class ParseTreeVisitor(LuaVisitor):
                 root = Invoke(
                     source=child, \
                     func=self.visit(ctx.children[i+1]), \
-                    args=listify(self.visit(ctx.children[i+2])))
+                    args=_listify(self.visit(ctx.children[i+2])))
                 child = root
-            return setMetadata(ctx, child)
+            return _setMetadata(ctx, child)
         else:
-            return setMetadata(ctx, child)
+            return _setMetadata(ctx, child)
 
     def visitFornum(self, ctx):
         # 'for' name '=' exp ',' exp (',' exp)? 'do' block 'end' ;
         # if has step expr
         if len(ctx.children) > 8:
-            return setMetadata(ctx, Fornum(
+            return _setMetadata(ctx, Fornum(
                 start=self.visit(ctx.children[3]),
                 stop=self.visit(ctx.children[5]),
                 step=self.visit(ctx.children[7])))
         else:
-            return setMetadata(ctx, Fornum(
+            return _setMetadata(ctx, Fornum(
                 start=self.visit(ctx.children[3]),
                 stop=self.visit(ctx.children[5]),
                 step=Number(1)))
 
     def visitForin(self, ctx):
         # 'for' namelist 'in' explist 'do' block 'end' ;
-        return setMetadata(ctx, Forin(
+        return _setMetadata(ctx, Forin(
             body=self.visit(ctx.children[5]).body,
             iter=self.visit(ctx.children[3]),
-            targets=listify(self.visit(ctx.children[1]))))
+            targets=_listify(self.visit(ctx.children[1]))))
 
     def visitIfStat(self, ctx):
         # 'if' exp 'then' block elseIfStat* elseStat? 'end' ;
@@ -153,7 +153,7 @@ class ParseTreeVisitor(LuaVisitor):
             lastStat = elseIf
         if isinstance(ctx.children[-2], LuaParser.ElseStatContext):
             lastStat.orelse = self.visit(ctx.children[-2])
-        return setMetadata(ctx, mainIf)
+        return _setMetadata(ctx, mainIf)
 
     def visitElseIfStat(self, ctx):
         # 'elseif' exp 'then' block
@@ -166,13 +166,13 @@ class ParseTreeVisitor(LuaVisitor):
         return self.visit(ctx.children[1]).body
 
     def visitLabel(self, ctx):
-        return setMetadata(ctx, Label(id=self.visit(ctx.children[1]).id))
+        return _setMetadata(ctx, Label(id=self.visit(ctx.children[1]).id))
 
     def visitGoto(self, ctx):
-        return setMetadata(ctx, Goto(label=self.visit(ctx.children[1]).id))
+        return _setMetadata(ctx, Goto(label=self.visit(ctx.children[1]).id))
 
     def visitBreakStat(self, ctx):
-        return setMetadata(ctx, Break(self.visitChildren(ctx)))
+        return _setMetadata(ctx, Break(self.visitChildren(ctx)))
 
     ''' 
     Visiting expressions.
@@ -181,18 +181,18 @@ class ParseTreeVisitor(LuaVisitor):
     Types and values
     '''
     def visitNil(self, ctx):
-        return setMetadata(ctx, Nil())
+        return _setMetadata(ctx, Nil())
 
     def visitTrue(self, ctx):
-        return setMetadata(ctx, TrueExpr())
+        return _setMetadata(ctx, TrueExpr())
 
     def visitFalse(self, ctx):
-        return setMetadata(ctx, FalseExpr())
+        return _setMetadata(ctx, FalseExpr())
 
     def visitNumber(self, ctx):
         # using python number eval to parse lua number:
         number = ast.literal_eval(ctx.children[0].getText())
-        return setMetadata(ctx, Number(number))
+        return _setMetadata(ctx, Number(number))
 
     def visitString(self, ctx):
         luaStr = ctx.children[0].getText()
@@ -209,10 +209,10 @@ class ParseTreeVisitor(LuaVisitor):
         # nested quote
         elif p.match(luaStr):
             luaStr = p.search(luaStr).group(1)
-        return setMetadata(ctx, String(luaStr))
+        return _setMetadata(ctx, String(luaStr))
 
     def visitName(self, ctx):
-        return setMetadata(ctx, Name(ctx.children[0].getText()))
+        return _setMetadata(ctx, Name(ctx.children[0].getText()))
 
     def visitArgs(self, ctx):
         return self.visitChildren(ctx, mergeList=True)
@@ -225,7 +225,7 @@ class ParseTreeVisitor(LuaVisitor):
             for i in range(2, len(ctx.children)):
                 root = Index(value=child, idx=self.visit(ctx.children[i]))
                 child = root
-            return setMetadata(ctx, child)
+            return _setMetadata(ctx, child)
         else:
             return self.visitChildren(ctx)
 
@@ -233,73 +233,73 @@ class ParseTreeVisitor(LuaVisitor):
     Visiting arithmetic operator expressions
     '''
     def visitOpAdd(self, ctx):
-        return setMetadata(ctx, AddOp(
+        return _setMetadata(ctx, AddOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpSub(self, ctx):
-        return setMetadata(ctx, SubOp(
+        return _setMetadata(ctx, SubOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpMult(self, ctx):
-        return setMetadata(ctx, MultOp(
+        return _setMetadata(ctx, MultOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpFloatDiv(self, ctx):
-        return setMetadata(ctx, FloatDivOp(
+        return _setMetadata(ctx, FloatDivOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpFloorDiv(self, ctx):
-        return setMetadata(ctx, FloorDivOp(
+        return _setMetadata(ctx, FloorDivOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpMod(self, ctx):
-        return setMetadata(ctx, ModOp(
+        return _setMetadata(ctx, ModOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpExpo(self, ctx):
-        return setMetadata(ctx, ExpoOp(
+        return _setMetadata(ctx, ExpoOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitOpMin(self, ctx):
-        return setMetadata(ctx, NegOp(self.visitChildren(ctx)))
+        return _setMetadata(ctx, NegOp(self.visitChildren(ctx)))
 
     '''
     Relational Operators
     '''
     def visitRelOpLess(self, ctx):
-        return setMetadata(ctx, LessThanOp(
+        return _setMetadata(ctx, LessThanOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitRelOpGreater(self, ctx):
-        return setMetadata(ctx, GreaterThanOp(
+        return _setMetadata(ctx, GreaterThanOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitRelOpLessEq(self, ctx):
-        return setMetadata(ctx, LessOrEqThanOp(
+        return _setMetadata(ctx, LessOrEqThanOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitRelOpGreaterEq(self, ctx):
-        return setMetadata(ctx, GreaterOrEqThanOp(
+        return _setMetadata(ctx, GreaterOrEqThanOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitRelOpNotEq(self, ctx):
-        return setMetadata(ctx, NotEqToOp(
+        return _setMetadata(ctx, NotEqToOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitRelOpEq(self, ctx):
-        return setMetadata(ctx, EqToOp(
+        return _setMetadata(ctx, EqToOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
@@ -308,27 +308,27 @@ class ParseTreeVisitor(LuaVisitor):
     3.4.2 – Bitwise Operators
     '''
     def visitBitOpAnd(self, ctx):
-        return setMetadata(ctx, BAndOp(
+        return _setMetadata(ctx, BAndOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitBitOpOr(self, ctx):
-        return setMetadata(ctx, BOrOp(
+        return _setMetadata(ctx, BOrOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitBitOpXor(self, ctx):
-        return setMetadata(ctx, BXorOp(
+        return _setMetadata(ctx, BXorOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitBitOpShiftR(self, ctx):
-        return setMetadata(ctx, BShiftROp(
+        return _setMetadata(ctx, BShiftROp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitBitOpShiftL(self, ctx):
-        return setMetadata(ctx, BShiftLOp(
+        return _setMetadata(ctx, BShiftLOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
@@ -336,24 +336,24 @@ class ParseTreeVisitor(LuaVisitor):
     Unary Operators
     '''
     def visitUnOpMin(self, ctx):
-        return setMetadata(ctx, USubOp(operand=self.visit(ctx.children[1])))
+        return _setMetadata(ctx, USubOp(operand=self.visit(ctx.children[1])))
 
     def visitUnOpBitNot(self, ctx):
-        return setMetadata(ctx, UBNotOp(operand=self.visit(ctx.children[1])))
+        return _setMetadata(ctx, UBNotOp(operand=self.visit(ctx.children[1])))
 
     def visitUnOpNot(self, ctx):
-        return setMetadata(ctx, ULNotOp(self.visitChildren(ctx)))
+        return _setMetadata(ctx, ULNotOp(self.visitChildren(ctx)))
 
     '''
     3.4.5 – Logical Operators
     '''
     def visitLoOpAnd(self, ctx):
-        return setMetadata(ctx, AndLoOp(
+        return _setMetadata(ctx, AndLoOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
     def visitLoOpOr(self, ctx):
-        return setMetadata(ctx, OrLoOp(
+        return _setMetadata(ctx, OrLoOp(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
@@ -361,7 +361,7 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.4.6 – Concatenation                                                   '''
     ''' ----------------------------------------------------------------------- '''
     def visitConcat(self, ctx):
-        return setMetadata(ctx, Concat(
+        return _setMetadata(ctx, Concat(
             left=self.visit(ctx.children[0]), \
             right=self.visit(ctx.children[2])))
 
@@ -369,7 +369,7 @@ class ParseTreeVisitor(LuaVisitor):
     ''' 3.4.7 – The Length Operator                                             '''
     ''' ----------------------------------------------------------------------- '''
     def visitUnOpLength(self, ctx):
-        return setMetadata(ctx, ULengthOP(operand=self.visit(ctx.children[1])))
+        return _setMetadata(ctx, ULengthOP(operand=self.visit(ctx.children[1])))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.9 – Table Constructors                                              '''
@@ -395,7 +395,7 @@ class ParseTreeVisitor(LuaVisitor):
                 if not hasKey:
                     keys.append(Number(index))
                     index += 1
-        return setMetadata(ctx, Table(keys, values))
+        return _setMetadata(ctx, Table(keys, values))
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.11 – Function Definitions                                           '''
@@ -403,7 +403,7 @@ class ParseTreeVisitor(LuaVisitor):
     def visitFunctiondef(self, ctx):
         # 'function' funcbody
         argsBlock = self.visit(ctx.children[1])
-        return setMetadata(ctx, Function(name='', args=argsBlock[0], body=argsBlock[1].body))
+        return _setMetadata(ctx, Function(name='', args=argsBlock[0], body=argsBlock[1].body))
 
     def visitFuncbody(self, ctx):
         # '(' parlist? ')' block 'end'
@@ -423,9 +423,9 @@ class ParseTreeVisitor(LuaVisitor):
         argsBlock = self.visit(ctx.children[2])
 
         if isinstance(name, Name):
-            return setMetadata(ctx, Function(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
+            return _setMetadata(ctx, Function(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
         else:
-            return setMetadata(ctx, Assign(
+            return _setMetadata(ctx, Assign(
                 targets=[name],
                 values =[Function(name='', args=argsBlock[0], body=argsBlock[1].body)]))
 
@@ -433,7 +433,7 @@ class ParseTreeVisitor(LuaVisitor):
         # 'local' 'function' name funcbody
         name      = self.visit(ctx.children[2])
         argsBlock = self.visit(ctx.children[3])
-        return setMetadata(ctx, LocalFunction(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
+        return _setMetadata(ctx, LocalFunction(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
 
 
     def visitFuncname(self, ctx):
@@ -445,7 +445,7 @@ class ParseTreeVisitor(LuaVisitor):
                 if isinstance(ctx.children[i], LuaParser.NameContext):
                     root = Index(value=child, idx=self.visit(ctx.children[i]).id)
                     child = root
-            return setMetadata(ctx, child)
+            return _setMetadata(ctx, child)
         else:
             return self.visitChildren(ctx)
 
@@ -457,4 +457,4 @@ class ParseTreeVisitor(LuaVisitor):
         comment = self.visitString(ctx).s
         if comment.startswith('--'):
             comment = comment[2:]
-        return setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
+        return _setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
