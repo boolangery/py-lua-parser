@@ -13,6 +13,23 @@ def parse(source):
     astVisitor = ParseTreeVisitor()
     return astVisitor.visit(parser.chunk())
 
+def walk(node):
+    # TODO: rewrite without recursion
+    if isinstance(node, Node):
+        yield(node)
+        # visit all object public attributes:
+        childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+        for child in childs:
+            yield from walk(node.__dict__[child])
+    if isinstance(node, list):
+        for n in node:
+            yield(n)
+            # visit all object public attributes:
+            childs = [attr for attr in n.__dict__.keys() if not attr.startswith("_")]
+            for child in childs:
+                yield from walk(n.__dict__[child])
+
+
 def _listify(obj):
     if not isinstance(obj, list):
         return [obj]
@@ -460,6 +477,7 @@ class ParseTreeVisitor(LuaVisitor):
         return _setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
 
 class ASTVisitor():
+    # TODO: rewrite without recursion
     def do_visit(self, node):
         if isinstance(node, Node):
             name = 'visit_' + node.__class__.__name__
