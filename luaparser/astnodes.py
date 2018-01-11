@@ -11,9 +11,28 @@
 class Node(object):
     """Base class for lua AST Node"""
     def __init__(self, name):
-        self.name = name
-        self.start = 0
-        self.stop = 0
+        self._name = name
+        self._start = 0
+        self._stop = 0
+
+    @property
+    def name(self):
+        return self._name
+    @property
+    def start(self):
+        return self._start
+
+    @start.setter
+    def start(self, value):
+        self._start = value
+
+    @property
+    def stop(self):
+        return self._stop
+
+    @start.setter
+    def stop(self, value):
+        self._stop = value
 
     def equalDicts(self, d1, d2, ignore_keys):
         ignored = set(ignore_keys)
@@ -28,7 +47,7 @@ class Node(object):
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(self, other.__class__):
-            return self.equalDicts(self.__dict__, other.__dict__, ['start', 'stop'])
+            return self.equalDicts(self.__dict__, other.__dict__, ['_start', '_stop'])
         return False
 
 class Chunk(Node):
