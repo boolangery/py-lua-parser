@@ -211,16 +211,6 @@ class Table(Expression):
         self.keys = keys
         self.values = values
 
-class Keys(Expression):
-    """Table keys"""
-    def __init__(self):
-        super(Keys, self).__init__('Keys')
-
-class Values(Expression):
-    """Table values"""
-    def __init__(self):
-        super(Values, self).__init__('Values')
-
 class Function(Expression):
     """Define the Lua function expression"""
     def __init__(self, name, args, body):
