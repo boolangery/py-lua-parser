@@ -70,94 +70,94 @@ class Statement(Node):
     """Base class for Lua statement"""
     pass
 
-class AssignStat(Statement):
+class Assign(Statement):
     """Define the 'set' lua statement"""
     def __init__(self, targets, values):
-        super(AssignStat, self).__init__('Assign')
+        super(Assign, self).__init__('Assign')
         self.targets = targets
         self.values  = values
 
-class LocalAssignStat(Statement):
+class LocalAssign(Statement):
     """Define the 'Local assign' lua statement"""
     def __init__(self, targets, values):
-        super(LocalAssignStat, self).__init__('LocalAssign')
+        super(LocalAssign, self).__init__('LocalAssign')
         self.targets = targets
         self.values  = values
 
-class WhileStat(Statement):
+class While(Statement):
     """Define the 'while' lua statement"""
     def __init__(self, test, body):
-        super(WhileStat, self).__init__('While')
+        super(While, self).__init__('While')
         self.test = test
         self.body = body
 
-class RepeatStat(Statement):
+class Repeat(Statement):
     """Define the 'Repeat' lua statement"""
     def __init__(self, body, test):
-        super(RepeatStat, self).__init__('Repeat')
+        super(Repeat, self).__init__('Repeat')
         self.body = body
         self.test = test
 
-class IfStat(Statement):
+class If(Statement):
     """Define the 'if' lua statement"""
     def __init__(self, test, body, orelse):
-        super(IfStat, self).__init__('If')
+        super(If, self).__init__('If')
         self.test = test
         self.body = body
         self.orelse = orelse
 
-class LabelStat(Statement):
+class Label(Statement):
     """Define the '::label::' lua statement"""
     def __init__(self, id):
-        super(LabelStat, self).__init__('Label')
+        super(Label, self).__init__('Label')
         self.id = id
 
-class GotoStat(Statement):
+class Goto(Statement):
     """Define the 'goto' lua statement"""
     def __init__(self, label):
-        super(GotoStat, self).__init__('Goto')
+        super(Goto, self).__init__('Goto')
         self.label = label
 
-class BreakStat(Statement):
+class Break(Statement):
     """Define the 'break' lua statement"""
     def __init__(self):
-        super(BreakStat, self).__init__('Break')
+        super(Break, self).__init__('Break')
 
-class FornumStat(Statement):
+class Fornum(Statement):
     """Define the 'Fornum' lua statement"""
     def __init__(self, start, stop, step):
-        super(FornumStat, self).__init__('Fornum')
+        super(Fornum, self).__init__('Fornum')
         self.start = start
         self.stop = stop
         self.step = step
 
-class ForinStat(Statement):
+class Forin(Statement):
     """Define the 'Forin' lua statement"""
     def __init__(self, body, iter, targets):
-        super(ForinStat, self).__init__('Forin')
+        super(Forin, self).__init__('Forin')
         self.body = body
         self.iter = iter
         self.targets = targets
 
-class CallStat(Statement):
+class Call(Statement):
     """Define the 'Call' lua statement"""
     def __init__(self, func, args):
-        super(CallStat, self).__init__('Call')
+        super(Call, self).__init__('Call')
         self.func = func
         self.args = args
 
-class InvokeStat(Statement):
+class Invoke(Statement):
     """Define the 'Invoke' lua statement"""
     def __init__(self, source, func, args):
-        super(InvokeStat, self).__init__('Invoke')
+        super(Invoke, self).__init__('Invoke')
         self.source = source
         self.func = func
         self.args = args
 
-class LocalFunctionExpr(Statement):
+class LocalFunction(Statement):
     """Define the Lua local function statement"""
     def __init__(self, name, args, body):
-        super(LocalFunctionExpr, self).__init__('LocalFunctionDef')
+        super(LocalFunction, self).__init__('LocalFunctionDef')
         self.id   = name
         self.args = args
         self.body = body
@@ -172,10 +172,10 @@ class Expression(Node):
 ''' ----------------------------------------------------------------------- '''
 ''' Types and values                                                        '''
 ''' ----------------------------------------------------------------------- '''
-class NilExpr(Expression):
+class Nil(Expression):
     """Define the Lua 'nil' expression"""
     def __init__(self):
-        super(NilExpr, self).__init__('Nil')
+        super(Nil, self).__init__('Nil')
 
 class TrueExpr(Expression):
     """Define the Lua 'true' expression"""
@@ -187,265 +187,250 @@ class FalseExpr(Expression):
     def __init__(self):
         super(FalseExpr, self).__init__('False')
 
-class NumberExpr(Expression):
+class Number(Expression):
     """Define the Lua number expression"""
     def __init__(self, n):
-        super(NumberExpr, self).__init__('Number')
+        super(Number, self).__init__('Number')
         self.n = n
 
-class StringExpr(Expression):
+class String(Expression):
     """Define the Lua string expression"""
     def __init__(self, s):
-        super(StringExpr, self).__init__('String')
+        super(String, self).__init__('String')
         self.s = s
 
-class DotsExpr(Expression):
+class Dots(Expression):
     """Define the Lua dots (...) expression"""
     def __init__(self):
-        super(DotsExpr, self).__init__('Dots')
+        super(Dots, self).__init__('Dots')
 
-class TableExpr(Expression):
+class Table(Expression):
     """Define the Lua table expression"""
     def __init__(self, keys, values):
-        super(TableExpr, self).__init__('Table')
+        super(Table, self).__init__('Table')
         self.keys = keys
         self.values = values
 
-class KeysExpr(Expression):
+class Keys(Expression):
     """Table keys"""
     def __init__(self):
-        super(KeysExpr, self).__init__('Keys')
+        super(Keys, self).__init__('Keys')
 
-class ValuesExpr(Expression):
+class Values(Expression):
     """Table values"""
     def __init__(self):
-        super(ValuesExpr, self).__init__('Values')
+        super(Values, self).__init__('Values')
 
-class FunctionExpr(Expression):
+class Function(Expression):
     """Define the Lua function expression"""
     def __init__(self, name, args, body):
-        super(FunctionExpr, self).__init__('FunctionDef')
+        super(Function, self).__init__('FunctionDef')
         self.id   = name # TODO: rename after refactor name
         self.args = args
         self.body = body
 
-class ArgsExpr(Expression):
-    """Define a Lua arg list expression"""
-    def __init__(self):
-        super(ArgsExpr, self).__init__('Args')
-
-class VarsExpr(Expression):
-    """Define a Lua var list expression"""
-    def __init__(self):
-        super(VarsExpr, self).__init__('Vars')
-
-class ExprsExpr(Expression):
-    """Define a Lua expression list expression"""
-    def __init__(self):
-        super(ExprsExpr, self).__init__('Exprs')
-
 ''' ----------------------------------------------------------------------- '''
 ''' Operators                                                               '''
 ''' ----------------------------------------------------------------------- '''
-class OpExpr(Expression):
+class Op(Expression):
     """Base class for operators"""
     pass
 
-class LeftRightOpExpr(OpExpr):
+class LeftRightOp(Op):
     """Base class for 'Left Op Right' Arithmetic Operators"""
     def __init__(self, name, left, right):
-        super(LeftRightOpExpr, self).__init__(name)
+        super(LeftRightOp, self).__init__(name)
         self.left = left
         self.right = right
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.1 – Arithmetic Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
-class AriOpExpr(LeftRightOpExpr):
+class AriOp(LeftRightOp):
     """Base class for Arithmetic Operators"""
     pass
 
-class AddOpExpr(AriOpExpr):
+class AddOp(AriOp):
     """+ operator"""
     def __init__(self, left, right):
-        super(AddOpExpr, self).__init__('AddOp', left, right)
+        super(AddOp, self).__init__('AddOp', left, right)
 
-class SubOpExpr(AriOpExpr):
+class SubOp(AriOp):
     """- operator"""
     def __init__(self, left, right):
-        super(SubOpExpr, self).__init__('SubOp', left, right)
+        super(SubOp, self).__init__('SubOp', left, right)
 
-class MultOpExpr(AriOpExpr):
+class MultOp(AriOp):
     """* operator"""
     def __init__(self, left, right):
-        super(MultOpExpr, self).__init__('MultOp', left, right)
+        super(MultOp, self).__init__('MultOp', left, right)
 
-class FloatDivOpExpr(AriOpExpr):
+class FloatDivOp(AriOp):
     """/ operator"""
     def __init__(self, left, right):
-        super(FloatDivOpExpr, self).__init__('FloatDivOp', left, right)
+        super(FloatDivOp, self).__init__('FloatDivOp', left, right)
 
-class FloorDivOpExpr(AriOpExpr):
+class FloorDivOp(AriOp):
     """// operator"""
     def __init__(self, left, right):
-        super(FloorDivOpExpr, self).__init__('FloorDivOp', left, right)
+        super(FloorDivOp, self).__init__('FloorDivOp', left, right)
 
-class ModOpExpr(AriOpExpr):
+class ModOp(AriOp):
     """# operator"""
     def __init__(self, left, right):
-        super(ModOpExpr, self).__init__('ModOp', left, right)
+        super(ModOp, self).__init__('ModOp', left, right)
 
-class ExpoOpExpr(AriOpExpr):
+class ExpoOp(AriOp):
     """^ operator"""
     def __init__(self, left, right):
-        super(ExpoOpExpr, self).__init__('ExpoOp', left, right)
+        super(ExpoOp, self).__init__('ExpoOp', left, right)
 
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.2 – Bitwise Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
-class BitOpExpr(LeftRightOpExpr):
+class BitOp(LeftRightOp):
     """Base class for Bitwise Operators"""
     pass
 
-class BAndOpExpr(BitOpExpr):
+class BAndOp(BitOp):
     """Bitwise And operator"""
     def __init__(self, left, right):
-        super(BAndOpExpr, self).__init__('BAndOp', left, right)
+        super(BAndOp, self).__init__('BAndOp', left, right)
 
-class BOrOpExpr(BitOpExpr):
+class BOrOp(BitOp):
     """Bitwise Or operator"""
     def __init__(self, left, right):
-        super(BOrOpExpr, self).__init__('BOrOp', left, right)
+        super(BOrOp, self).__init__('BOrOp', left, right)
 
-class BXorOpExpr(BitOpExpr):
+class BXorOp(BitOp):
     """Bitwise Xor operator"""
     def __init__(self, left, right):
-        super(BXorOpExpr, self).__init__('BXorOp', left, right)
+        super(BXorOp, self).__init__('BXorOp', left, right)
 
-class BShiftROpExpr(BitOpExpr):
+class BShiftROp(BitOp):
     """Bitwise Shift Right operator"""
     def __init__(self, left, right):
-        super(BShiftROpExpr, self).__init__('BShiftROp', left, right)
+        super(BShiftROp, self).__init__('BShiftROp', left, right)
 
-class BShiftLOpExpr(BitOpExpr):
+class BShiftLOp(BitOp):
     """Bitwise Shift Left operator"""
     def __init__(self, left, right):
-        super(BShiftLOpExpr, self).__init__('BShiftLOp', left, right)
+        super(BShiftLOp, self).__init__('BShiftLOp', left, right)
 
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.4 – Relational Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
-class RelOpExpr(LeftRightOpExpr):
+class RelOp(LeftRightOp):
     """Base class for Relational Operators """
     pass
 
-class LessThanOpExpr(RelOpExpr):
+class LessThanOp(RelOp):
     def __init__(self, left, right):
-        super(LessThanOpExpr, self).__init__('RLtOp', left, right)
+        super(LessThanOp, self).__init__('RLtOp', left, right)
 
-class GreaterThanOpExpr(RelOpExpr):
+class GreaterThanOp(RelOp):
     def __init__(self, left, right):
-        super(GreaterThanOpExpr, self).__init__('RGtOp', left, right)
+        super(GreaterThanOp, self).__init__('RGtOp', left, right)
 
-class LessOrEqThanOpExpr(RelOpExpr):
+class LessOrEqThanOp(RelOp):
     def __init__(self, left, right):
-        super(LessOrEqThanOpExpr, self).__init__('RLtEqOp', left, right)
+        super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right)
 
-class GreaterOrEqThanOpExpr(RelOpExpr):
+class GreaterOrEqThanOp(RelOp):
     def __init__(self, left, right):
-        super(GreaterOrEqThanOpExpr, self).__init__('RGtEqOp', left, right)
+        super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right)
 
-class EqToOpExpr(RelOpExpr):
+class EqToOp(RelOp):
     def __init__(self, left, right):
-        super(EqToOpExpr, self).__init__('REqOp', left, right)
+        super(EqToOp, self).__init__('REqOp', left, right)
 
-class NotEqToOpExpr(RelOpExpr):
+class NotEqToOp(RelOp):
     def __init__(self, left, right):
-        super(NotEqToOpExpr, self).__init__('RNotEqOp', left, right)
+        super(NotEqToOp, self).__init__('RNotEqOp', left, right)
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.5 – Logical Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
-class LoOpExpr(LeftRightOpExpr):
+class LoOp(LeftRightOp):
     """Base class for Logical Operators """
     pass
 
-class AndLoOpExpr(LoOpExpr):
+class AndLoOp(LoOp):
     """Logical And operator"""
     def __init__(self, left, right):
-        super(AndLoOpExpr, self).__init__('LAndOp', left, right)
+        super(AndLoOp, self).__init__('LAndOp', left, right)
 
-class OrLoOpExpr(LoOpExpr):
+class OrLoOp(LoOp):
     """Logical Or operator"""
     def __init__(self, left, right):
-        super(OrLoOpExpr, self).__init__('LOrOp', left, right)
+        super(OrLoOp, self).__init__('LOrOp', left, right)
 
 
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.6 – Concatenation operator                                          '''
 ''' ----------------------------------------------------------------------- '''
-class ConcatExpr(LeftRightOpExpr):
+class Concat(LeftRightOp):
     def __init__(self, left, right):
-        super(ConcatExpr, self).__init__('ConcatOp', left, right)
+        super(Concat, self).__init__('ConcatOp', left, right)
 
 '''
 Unitary Operators.
 '''
-class UnOpExpr(Expression):
+class UnOp(Expression):
     """Base class for Lua unitary operator"""
     def __init__(self, name, operand):
-        super(UnOpExpr, self).__init__(name)
+        super(UnOp, self).__init__(name)
         self.operand = operand
 
-class UBNotOpExpr(UnOpExpr):
+class UBNotOp(UnOp):
     """Lua binary not unitary operator expression"""
     def __init__(self, operand):
-        super(UBNotOpExpr, self).__init__('UBNotOp', operand)
+        super(UBNotOp, self).__init__('UBNotOp', operand)
 
-class USubOpExpr(UnOpExpr):
+class USubOp(UnOp):
     """Lua negation unitary operator expression"""
     def __init__(self, operand):
-        super(USubOpExpr, self).__init__('USubOp', operand)
+        super(USubOp, self).__init__('USubOp', operand)
 
-class ULNotOpExpr(UnOpExpr):
+class ULNotOp(UnOp):
     """Logical Not operator"""
     def __init__(self, operand):
-        super(ULNotOpExpr, self).__init__('ULNotOp', operand)
+        super(ULNotOp, self).__init__('ULNotOp', operand)
 
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.7 – The Length Operator                                             '''
 ''' ----------------------------------------------------------------------- '''
-class ULengthOP(UnOpExpr):
+class ULengthOP(UnOp):
     def __init__(self, operand):
         super(ULengthOP, self).__init__('ULengthOp', operand)
 
 '''
 Left Hand Side expression.
 '''
-class LhsExpr(Expression):
+class Lhs(Expression):
     """Define a Lua Left Hand Side expression"""
     pass
 
-class NameExpr(LhsExpr):
+class Name(Lhs):
     """Define a Lua Id expression"""
     def __init__(self, id):
-        super(NameExpr, self).__init__('Name')
+        super(Name, self).__init__('Name')
         self.id = id
 
-class IndexExpr(LhsExpr):
+class Index(Lhs):
     """Define a Lua Index expression"""
     def __init__(self, idx, value):
-        super(IndexExpr, self).__init__('Index')
+        super(Index, self).__init__('Index')
         self.idx    = idx
         self.value  = value
 
 ''' ----------------------------------------------------------------------- '''
 ''' Comments                                                                '''
 ''' ----------------------------------------------------------------------- '''
-class CommentStat(Statement):
+class Comment(Statement):
     def __init__(self, s):
-        super(CommentStat, self).__init__('Comment')
+        super(Comment, self).__init__('Comment')
         self.s = s
