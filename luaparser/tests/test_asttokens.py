@@ -61,8 +61,8 @@ class AstTokensTestCase(tests.TestCase):
             local a = 1
             local b, c = '11'""")
         exp= textwrap.dedent("""
-            global a = 1
-            global b, c = '11'""")
+            local _a = 1
+            local _b, _c = '11'""")
 
         tree = ast.parse(src)
         atokens = asttokens.parse(src)
@@ -70,8 +70,8 @@ class AstTokensTestCase(tests.TestCase):
         for node in ast.walk(tree):
             if isinstance(node, LocalAssign):
                 tokens = atokens.fromAST(node)
-                local = tokens.types(asttokens.Tokens.LOCAL).first()
-                local.text = 'global'
+                for name in tokens.types(asttokens.Tokens.NAME):
+                    name.text = '_' + name.text
 
         self.assertEqual(exp, atokens.toSource())
 
