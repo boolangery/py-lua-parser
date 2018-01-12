@@ -1,4 +1,3 @@
-import luaparser.asttokens
 import ast
 import re
 from antlr4 import *
@@ -6,6 +5,7 @@ from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astnodes import *
 from luaparser.parser.LuaParser import LuaParser
+from luaparser import printers
 
 def parse(source):
     lexer = LuaLexer(InputStream(source))
@@ -34,6 +34,9 @@ def walk(root):
             # append node list in reversal order
             for n in reversed(node):
                 nodeStack.append(n)
+
+def toPrettyStr(tree, indent=2):
+    return printers.PythonStyleVisitor(indent).visit(tree)
 
 def _listify(obj):
     if not isinstance(obj, list):

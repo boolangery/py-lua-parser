@@ -1,11 +1,13 @@
 from luaparser.astnodes import *
 from luaparser.utils.visitor import *
+from enum import Enum
 
+class Style(Enum):
+    PYTHON  = 1
 
 class PythonStyleVisitor():
-    def __init__(self, indent, indentValue):
-        self.indentEnabled = indent
-        self.indentValue = indentValue
+    def __init__(self, indent):
+        self.indentValue = indent
         self.currentIndent = 0
 
     @visitor(str)
@@ -23,20 +25,16 @@ class PythonStyleVisitor():
         return str(node)
 
     def indentStr(self, newLine=True):
-        res = ''
-        if self.indentEnabled:
-            res =  ' ' * self.currentIndent
+        res = ' ' * self.currentIndent
         if newLine:
             res = '\n' + res
         return res
 
     def indent(self):
-        if self.indentEnabled:
-            self.currentIndent += self.indentValue
+        self.currentIndent += self.indentValue
 
     def dedent(self):
-        if self.indentEnabled:
-            self.currentIndent -= self.indentValue
+        self.currentIndent -= self.indentValue
 
     def prettyCount(self, object, isList=False):
         res = ''
@@ -76,7 +74,7 @@ class PythonStyleVisitor():
 
         self.indent()
         for attr, attrValue in node.__dict__.items():
-            if attr != 'name':
+            if not attr.startswith('_'):
                 if isinstance(attrValue, Node) or isinstance(attrValue, list):
                     res += self.indentStr() + attr + ': ' + self.prettyCount(attrValue)
                     self.indent()
