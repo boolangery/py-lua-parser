@@ -18,6 +18,7 @@ class Node(object):
     @property
     def name(self):
         return self._name
+
     @property
     def start(self):
         return self._start
@@ -30,7 +31,7 @@ class Node(object):
     def stop(self):
         return self._stop
 
-    @start.setter
+    @stop.setter
     def stop(self, value):
         self._stop = value
 
