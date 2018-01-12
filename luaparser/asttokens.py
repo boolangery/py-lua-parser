@@ -81,14 +81,14 @@ class Tokens(Enum):
     WS=64
     SHEBANG=65
 
-
 class TokensEditor():
     def __init__(self, allTokens, tokensToEdit):
         self._all = allTokens
         self._tokens = tokensToEdit
 
     def __iter__(self):
-        return iter(self._tokens)
+        for token in self._tokens:
+            yield TokenEditor(self._all, token)
 
     def __len__(self):
         return len(self._tokens)
@@ -96,7 +96,33 @@ class TokensEditor():
     def toSource(self):
         return TokenPrinter().toStr(self._tokens)
 
-class ProgramEditor(TokensEditor):
+class GroupEditor(TokensEditor):
+    def types(self, types):
+        _types = []
+        # convert enum to int value
+        if not isinstance(types, list):
+            _types = [types.value]
+        else:
+            for t in types:
+                _types.append(t.value)
+        tokens = []
+        for token in self._tokens:
+            if token.type in _types:
+                tokens.append(token)
+        return GroupEditor(self._all, tokens)
+
+    def first(self):
+        """Retrieve the first token based on index.
+        """
+        if self._tokens:
+            first = self._tokens[0]
+            for token in self._tokens:
+                if token.tokenIndex < first.tokenIndex:
+                    first = token
+            return TokenEditor(self._all, first)
+        return None
+
+class ProgramEditor(GroupEditor):
     def lineCount(self):
         max = 0
         for token in self._tokens:
@@ -116,16 +142,15 @@ class ProgramEditor(TokensEditor):
             lines.append(LineEditor(self._all, ltokens))
         return lines
 
-    def types(self, types):
-        _types = types
-        if not isinstance(types, list):
-            _types = [types]
+    def range(self, start, stop):
         tokens = []
         for token in self._tokens:
-            if token.type in _types:
+            if token.tokenIndex >= start and token.tokenIndex <= stop:
                 tokens.append(token)
-        return tokens
+        return GroupEditor(self._all, tokens)
 
+    def fromAST(self, node):
+        return self.range(node.start, node.stop)
 
 class TokenEditor(TokensEditor):
     """Utility class to edit a specific token.
@@ -149,7 +174,7 @@ class TokenEditor(TokensEditor):
         self._tokens.text = text
         # apply offset to next token
         next = self.next()
-        if next:
+        if next is not Node:
             next.column = next.column + diff
 
     @property
@@ -193,6 +218,12 @@ class LineEditor(TokensEditor):
         first = self.first()
         if first != None:
             first.column = 0
+
+    def indent(self, count):
+        self.stripl()
+        first = self.first()
+        if first is not None:
+            first.column = count
 
 class TokenPrinter():
     """Class to render a token list to a string.
