@@ -46,7 +46,7 @@ class PythonStyleVisitor():
         elif isinstance(object, Node):
             if isList:
                 return '{} 1 key'
-            keyCount = len(object.__dict__.items()) - 1 # name
+            keyCount = len([attr for attr in object.__dict__.keys() if not attr.startswith("_")])
             res += '{} ' + str(keyCount) + ' '
             if keyCount > 1 : res += 'keys'
             else            : res += 'key'
