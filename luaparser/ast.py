@@ -6,10 +6,12 @@ from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astnodes import *
 from luaparser.parser.LuaParser import LuaParser
 from luaparser import printers
+from antlr4.error.ErrorListener import ErrorListener
 
 def parse(source):
     lexer = LuaLexer(InputStream(source))
     parser = LuaParser(CommonTokenStream(lexer))
+    parser.addErrorListener(ParserErrorListener())
     astVisitor = ParseTreeVisitor()
     return astVisitor.visit(parser.chunk())
 
@@ -511,3 +513,19 @@ class ASTVisitor():
                 for n in reversed(node):
                     nodeStack.append(n)
 
+
+class SyntaxException(Exception):
+    pass
+
+class ParserErrorListener(ErrorListener):
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+        raise SyntaxException(str(line) + ":" + str(column) + ': ' + str(msg))
+
+    def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
+        pass
+
+    def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
+        pass
+
+    def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
+        pass

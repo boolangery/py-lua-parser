@@ -37,3 +37,10 @@ class TokensTestCase(tests.TestCase):
         NumberVisitor().visit(tree)
         self.assertTrue(called)
 
+    def test_parse_error(self):
+        src = textwrap.dedent("""
+            local a = if
+            """)
+
+        self.assertRaises(ast.SyntaxException, ast.parse, src)
+
