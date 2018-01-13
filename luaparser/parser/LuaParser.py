@@ -7,7 +7,7 @@ import sys
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3C")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3B")
         buf.write("\u01dc\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
@@ -53,12 +53,12 @@ def serializedATN():
         buf.write("\3\'\3\'\3\'\3\'\3\'\3\'\3\'\5\'\u01ce\n\'\3(\3(\5(\u01d2")
         buf.write("\n(\3)\3)\3*\3*\3+\3+\3,\3,\3,\2\3\66-\2\4\6\b\n\f\16")
         buf.write("\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDF")
-        buf.write("HJLNPRTV\2\5\3\2<?\4\2\32\32\34\34\3\2@A\2\u0205\2X\3")
-        buf.write("\2\2\2\4^\3\2\2\2\6u\3\2\2\2\bw\3\2\2\2\n{\3\2\2\2\f\u0081")
-        buf.write("\3\2\2\2\16\u008a\3\2\2\2\20\u008e\3\2\2\2\22\u0090\3")
-        buf.write("\2\2\2\24\u0093\3\2\2\2\26\u0097\3\2\2\2\30\u009d\3\2")
-        buf.write("\2\2\32\u00a2\3\2\2\2\34\u00b1\3\2\2\2\36\u00bf\3\2\2")
-        buf.write("\2 \u00c7\3\2\2\2\"\u00cb\3\2\2\2$\u00d0\3\2\2\2&\u00d6")
+        buf.write("HJLNPRTV\2\4\3\2<?\4\2\32\32\34\34\2\u0205\2X\3\2\2\2")
+        buf.write("\4^\3\2\2\2\6u\3\2\2\2\bw\3\2\2\2\n{\3\2\2\2\f\u0081\3")
+        buf.write("\2\2\2\16\u008a\3\2\2\2\20\u008e\3\2\2\2\22\u0090\3\2")
+        buf.write("\2\2\24\u0093\3\2\2\2\26\u0097\3\2\2\2\30\u009d\3\2\2")
+        buf.write("\2\32\u00a2\3\2\2\2\34\u00b1\3\2\2\2\36\u00bf\3\2\2\2")
+        buf.write(" \u00c7\3\2\2\2\"\u00cb\3\2\2\2$\u00d0\3\2\2\2&\u00d6")
         buf.write("\3\2\2\2(\u00db\3\2\2\2*\u00de\3\2\2\2,\u00e5\3\2\2\2")
         buf.write(".\u00f1\3\2\2\2\60\u00f9\3\2\2\2\62\u0101\3\2\2\2\64\u0103")
         buf.write("\3\2\2\2\66\u011f\3\2\2\28\u0165\3\2\2\2:\u0171\3\2\2")
@@ -227,11 +227,11 @@ def serializedATN():
         buf.write("\5\62\32\2\u01d1\u01cf\3\2\2\2\u01d1\u01d0\3\2\2\2\u01d2")
         buf.write("O\3\2\2\2\u01d3\u01d4\5\66\34\2\u01d4Q\3\2\2\2\u01d5\u01d6")
         buf.write("\t\3\2\2\u01d6S\3\2\2\2\u01d7\u01d8\7;\2\2\u01d8U\3\2")
-        buf.write("\2\2\u01d9\u01da\t\4\2\2\u01daW\3\2\2\2&^bu\177\u0088")
-        buf.write("\u00a9\u00ad\u00b9\u00d4\u00e0\u00e3\u00ea\u00ef\u00f6")
-        buf.write("\u00fe\u0108\u011f\u0160\u0162\u0169\u0171\u0179\u017e")
-        buf.write("\u0184\u018d\u0191\u0197\u019c\u01a3\u01ac\u01af\u01b8")
-        buf.write("\u01bc\u01be\u01cd\u01d1")
+        buf.write("\2\2\u01d9\u01da\7@\2\2\u01daW\3\2\2\2&^bu\177\u0088\u00a9")
+        buf.write("\u00ad\u00b9\u00d4\u00e0\u00e3\u00ea\u00ef\u00f6\u00fe")
+        buf.write("\u0108\u011f\u0160\u0162\u0169\u0171\u0179\u017e\u0184")
+        buf.write("\u018d\u0191\u0197\u019c\u01a3\u01ac\u01af\u01b8\u01bc")
+        buf.write("\u01be\u01cd\u01d1")
         return buf.getvalue()
 
 
@@ -266,7 +266,7 @@ class LuaParser ( Parser ):
                       "OP_BIT_SR", "OP_BIT_SL", "OP_EXP", "OP_CONCAT", "OP_LT", 
                       "OP_GT", "OP_LTE", "OP_GTE", "OP_NEQ", "OP_EQ", "AND", 
                       "OR", "NAME", "STRING", "INT", "HEX", "FLOAT", "HEX_FLOAT", 
-                      "COMMENT", "LINE_COMMENT", "WS", "SHEBANG" ]
+                      "COMMENT", "WS", "SHEBANG" ]
 
     RULE_chunk = 0
     RULE_block = 1
@@ -384,9 +384,8 @@ class LuaParser ( Parser ):
     FLOAT=60
     HEX_FLOAT=61
     COMMENT=62
-    LINE_COMMENT=63
-    WS=64
-    SHEBANG=65
+    WS=63
+    SHEBANG=64
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -494,7 +493,7 @@ class LuaParser ( Parser ):
             self.state = 92
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.BREAK) | (1 << LuaParser.GOTO) | (1 << LuaParser.DO) | (1 << LuaParser.WHILE) | (1 << LuaParser.REPEAT) | (1 << LuaParser.IF) | (1 << LuaParser.FOR) | (1 << LuaParser.LOCAL) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.SEMI_COLON) | (1 << LuaParser.LABEL) | (1 << LuaParser.PARENT_R) | (1 << LuaParser.NAME) | (1 << LuaParser.COMMENT) | (1 << LuaParser.LINE_COMMENT))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.BREAK) | (1 << LuaParser.GOTO) | (1 << LuaParser.DO) | (1 << LuaParser.WHILE) | (1 << LuaParser.REPEAT) | (1 << LuaParser.IF) | (1 << LuaParser.FOR) | (1 << LuaParser.LOCAL) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.SEMI_COLON) | (1 << LuaParser.LABEL) | (1 << LuaParser.PARENT_R) | (1 << LuaParser.NAME) | (1 << LuaParser.COMMENT))) != 0):
                 self.state = 89
                 self.stat()
                 self.state = 94
@@ -4806,9 +4805,6 @@ class LuaParser ( Parser ):
         def COMMENT(self):
             return self.getToken(LuaParser.COMMENT, 0)
 
-        def LINE_COMMENT(self):
-            return self.getToken(LuaParser.LINE_COMMENT, 0)
-
         def getRuleIndex(self):
             return LuaParser.RULE_comment_rule
 
@@ -4833,16 +4829,10 @@ class LuaParser ( Parser ):
 
         localctx = LuaParser.Comment_ruleContext(self, self._ctx, self.state)
         self.enterRule(localctx, 84, self.RULE_comment_rule)
-        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 471
-            _la = self._input.LA(1)
-            if not(_la==LuaParser.COMMENT or _la==LuaParser.LINE_COMMENT):
-                self._errHandler.recoverInline(self)
-            else:
-                self._errHandler.reportMatch(self)
-                self.consume()
+            self.match(LuaParser.COMMENT)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
