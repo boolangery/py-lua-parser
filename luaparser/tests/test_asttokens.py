@@ -4,6 +4,26 @@ from luaparser import asttokens
 from luaparser.astnodes import *
 import textwrap
 
+src_1 = """
+Account = {}
+Account.__index = Account
+
+function Account:create(balance)
+   local acnt = {}             -- our new object
+   setmetatable(acnt,Account)  -- make Account handle lookup
+   acnt.balance = balance      -- initialize our object
+   return acnt
+end
+
+function Account:withdraw(amount)
+   self.balance = self.balance - amount
+end
+
+-- create and use an Account
+acc = Account:create(1000)
+acc:withdraw(100)
+"""
+
 class AstTokensTestCase(tests.TestCase):
     def test_line_editor_line(self):
         src = textwrap.dedent("""
@@ -75,3 +95,10 @@ class AstTokensTestCase(tests.TestCase):
 
         self.assertEqual(exp, atokens.toSource())
 
+    def test_editor_render_source(self):
+        atokens = asttokens.parse(src_1)
+
+        for token in atokens.types(asttokens.Tokens.COMMENT):
+            print(token)
+
+        self.assertEqual(src_1, atokens.toSource())
