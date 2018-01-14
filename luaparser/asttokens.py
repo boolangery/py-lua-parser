@@ -264,6 +264,11 @@ class LineEditor(GroupEditor):
                     t.lineNumber = first.lineNumber - 1
             nextLine = nextLine.next()
 
+    def toSource(self):
+        line = TokenPrinter().toStr(self._tokens)
+        return line.strip()
+
+
 class TokenPrinter():
     """Class to render a token list to a string.
     """
