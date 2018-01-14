@@ -219,7 +219,7 @@ class TokenEditor(TokensEditor):
                     if t.line == self._tokens.line:
                         t.column += diff
 
-class LineEditor(TokensEditor):
+class LineEditor(GroupEditor):
     """Utility class to edit a list of token representing a program line.
     """
     def next(self):
@@ -233,18 +233,6 @@ class LineEditor(TokensEditor):
         if not tokens:
             return None
         return LineEditor(self._all, tokens)
-
-    def first(self):
-        """Retrieve the first token on the line.
-        """
-        if self._tokens:
-            first = self._tokens[0]
-            for token in self._tokens:
-                if token.column < first.column:
-                    first = token
-            return TokenEditor(self._all, first)
-        return None
-
 
     def stripl(self):
         """Delete all left whitespace on a line.
