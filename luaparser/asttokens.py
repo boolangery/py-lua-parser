@@ -99,6 +99,25 @@ class TokensEditor():
         return TokenPrinter().toStr(self._tokens)
 
 class GroupEditor(TokensEditor):
+    def lineCount(self):
+        max = 0
+        for token in self._tokens:
+            if token.line > max:
+                max = token.line
+        return max
+
+    def lines(self):
+        lines = []
+        count = self.lineCount()
+        for i in range(1, count+1):
+            # grab all token on line i
+            ltokens = []
+            for token in self._tokens:
+                if token.line == i:
+                    ltokens.append(token)
+            lines.append(LineEditor(self._all, ltokens))
+        return lines
+
     def types(self, types):
         _types = []
         # convert enum to int value
@@ -125,25 +144,6 @@ class GroupEditor(TokensEditor):
         return None
 
 class ProgramEditor(GroupEditor):
-    def lineCount(self):
-        max = 0
-        for token in self._tokens:
-            if token.line > max:
-                max = token.line
-        return max
-
-    def lines(self):
-        lines = []
-        count = self.lineCount()
-        for i in range(1, count+1):
-            # grab all token on line i
-            ltokens = []
-            for token in self._tokens:
-                if token.line == i:
-                    ltokens.append(token)
-            lines.append(LineEditor(self._all, ltokens))
-        return lines
-
     def range(self, start, stop):
         tokens = []
         for token in self._tokens:
