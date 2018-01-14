@@ -95,6 +95,9 @@ class TokensEditor():
     def __len__(self):
         return len(self._tokens)
 
+    def __getitem__(self, i):
+        return self._tokens[i]
+
     def toSource(self):
         return TokenPrinter().toStr(self._tokens)
 
