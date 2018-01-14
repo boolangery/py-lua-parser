@@ -146,6 +146,13 @@ class GroupEditor(TokensEditor):
             return TokenEditor(self._all, first)
         return None
 
+    def nextOfType(self, type):
+        atypes = self.types(type)
+        if len(atypes) > 0:
+            return TokenEditor(self._all, atypes[0])
+        else:
+            return None
+
 class ProgramEditor(GroupEditor):
     def range(self, start, stop):
         tokens = []
@@ -183,6 +190,19 @@ class TokenEditor(TokensEditor):
             if t.line == self._tokens.line:
                 tokens.append(t)
         return LineEditor(self._all, tokens)
+
+    def grabUntil(self, type):
+        """Starting from self, return a list of tokens until the specified type if found"""
+        tokens = [self._tokens] # include this token
+        for t in self._all:
+            if t.tokenIndex > self._tokens.tokenIndex:
+                if t.type != type.value:
+                    tokens.append(t)
+                else:
+                    tokens.append(t)
+                    break
+        return GroupEditor(self._all, tokens)
+
 
     @property
     def text(self):
