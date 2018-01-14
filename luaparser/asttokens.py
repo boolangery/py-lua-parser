@@ -118,7 +118,8 @@ class GroupEditor(TokensEditor):
             for token in self._tokens:
                 if token.line == i:
                     ltokens.append(token)
-            lines.append(LineEditor(self._all, ltokens))
+            if len(ltokens) > 0:
+                lines.append(LineEditor(self._all, ltokens))
         return lines
 
     def types(self, types):

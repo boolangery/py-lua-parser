@@ -35,12 +35,11 @@ class AstTokensTestCase(tests.TestCase):
         atokens = asttokens.parse(src)
         tokens = atokens.lines()
 
-        self.assertEqual(5, len(tokens))
-        self.assertEqual(0, len(tokens[0]))
+        self.assertEqual(4, len(tokens))
+        self.assertEqual(1, len(tokens[0]))
         self.assertEqual(1, len(tokens[1]))
         self.assertEqual(1, len(tokens[2]))
-        self.assertEqual(1, len(tokens[3]))
-        self.assertEqual(2, len(tokens[4]))
+        self.assertEqual(2, len(tokens[3]))
 
     def test_to_source(self):
         src = textwrap.dedent("""local a = 1""")
