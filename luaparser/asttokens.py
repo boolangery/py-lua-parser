@@ -147,6 +147,12 @@ class GroupEditor(TokensEditor):
             return TokenEditor(self._all, first)
         return None
 
+    def last(self):
+        # tokens are ordered by tokenIndex
+        if self._tokens:
+            return TokenEditor(self._all, self._tokens[-1])
+        return None
+
     def nextOfType(self, type):
         atypes = self.types(type)
         if len(atypes) > 0:
@@ -183,6 +189,9 @@ class TokenEditor(TokensEditor):
 
     def __str__(self):
         return str(self._tokens)
+
+    def __eq__(self, other):
+        return isinstance(other, TokenEditor) and self._tokens == other._tokens
 
     def line(self):
         """Retrieve the line editor for this token."""
@@ -242,6 +251,10 @@ class TokenEditor(TokensEditor):
                 if t.tokenIndex > self._tokens.tokenIndex:
                     if t.line == self._tokens.line:
                         t.column += diff
+
+    @property
+    def type(self):
+        return self._tokens.type
 
 class LineEditor(GroupEditor):
     """Utility class to edit a list of token representing a program line.

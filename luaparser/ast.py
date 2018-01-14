@@ -516,6 +516,28 @@ class ASTVisitor():
                 for n in reversed(node):
                     nodeStack.append(n)
 
+class ASTRecursiveVisitor():
+    def visit(self, node):
+        if isinstance(node, Node):
+            # call enter node method
+            name = 'enter_' + node.__class__.__name__
+            visitor = getattr(self, name, None)
+            if visitor:
+                visitor(node)
+
+            # visit all object public attributes:
+            childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+            for child in childs:
+                self.visit(node.__dict__[child])
+
+            # call exit node method
+            name = 'exit_' + node.__class__.__name__
+            visitor = getattr(self, name, None)
+            if visitor:
+                visitor(node)
+        elif isinstance(node, list):
+            for n in node:
+                self.visit(n)
 
 class SyntaxException(Exception):
     pass
