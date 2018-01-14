@@ -164,7 +164,7 @@ class Invoke(Statement):
 class LocalFunction(Statement):
     """Define the Lua local function statement"""
     def __init__(self, name, args, body):
-        super(LocalFunction, self).__init__('LocalFunctionDef')
+        super(LocalFunction, self).__init__('LocalFunction')
         self.id   = name
         self.args = args
         self.body = body
@@ -221,7 +221,7 @@ class Table(Expression):
 class Function(Expression):
     """Define the Lua function expression"""
     def __init__(self, name, args, body):
-        super(Function, self).__init__('FunctionDef')
+        super(Function, self).__init__('Function')
         self.id   = name # TODO: rename after refactor name
         self.args = args
         self.body = body
