@@ -292,6 +292,11 @@ class LineEditor(GroupEditor):
         line = TokenPrinter().toStr(self._tokens)
         return line.strip()
 
+    @property
+    def lineNumber(self):
+        if self._tokens:
+            return self._tokens[0].line
+
 
 class TokenPrinter():
     """Class to render a token list to a string.
