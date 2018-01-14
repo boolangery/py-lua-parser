@@ -98,7 +98,4 @@ class AstTokensTestCase(tests.TestCase):
     def test_editor_render_source(self):
         atokens = asttokens.parse(src_1)
 
-        for token in atokens.types(asttokens.Tokens.COMMENT):
-            print(token)
-
         self.assertEqual(src_1, atokens.toSource())

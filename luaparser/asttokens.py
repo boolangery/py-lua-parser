@@ -12,20 +12,7 @@ def parse(source):
     parser = LuaParser(stream)
     parser.chunk()
     tokens = stream.tokens
-    return _sanitize(ProgramEditor(tokens, tokens))
-
-def _sanitize(atokens):
-    """ Remove newline in COMMENT token.
-    """
-    for token in atokens.types(Tokens.COMMENT):
-        if token.text.endswith('\n'):
-            token.text = token.text.rstrip()
-            nextLine = token.line().next()
-            if nextLine is not None:
-                print('delete')
-                nextLine.delete()
-
-    return atokens
+    return ProgramEditor(tokens, tokens)
 
 class Tokens(Enum):
     NIL = 1
