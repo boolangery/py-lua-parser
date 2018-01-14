@@ -371,7 +371,7 @@ class OrLoOp(LoOp):
 ''' ----------------------------------------------------------------------- '''
 class Concat(LeftRightOp):
     def __init__(self, left, right):
-        super(Concat, self).__init__('ConcatOp', left, right)
+        super(Concat, self).__init__('Concat', left, right)
 
 '''
 Unitary Operators.
