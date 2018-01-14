@@ -90,6 +90,19 @@ class StatementsTestCase(tests.TestCase):
         ]))
         self.assertEqual(exp, tree)
 
+    def test_do_end(self):
+        tree = ast.parse(textwrap.dedent("""
+            do
+              local foo = 'bar'
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            Do(
+                body=[LocalAssign(targets=[Name('foo')],values=[String('bar')])]
+            )
+        ]))
+        self.assertEqual(exp, tree)
+
     def test_while(self):
         tree = ast.parse(textwrap.dedent("""
             while true do

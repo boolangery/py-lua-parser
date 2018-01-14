@@ -92,6 +92,12 @@ class While(Statement):
         self.test = test
         self.body = body
 
+class Do(Statement):
+    """Define the 'do end' lua statement"""
+    def __init__(self, body):
+        super(Do, self).__init__('Do')
+        self.body = body
+
 class Repeat(Statement):
     """Define the 'Repeat' lua statement"""
     def __init__(self, body, test):

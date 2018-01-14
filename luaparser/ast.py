@@ -113,6 +113,9 @@ class ParseTreeVisitor(LuaVisitor):
             test=self.visit(ctx.children[1]),
             body=self.visit(ctx.children[3]).body))
 
+    def visitDo(self, ctx):
+        return _setMetadata(ctx, Do(self.visit(ctx.children[1]).body))
+
     def visitRepeat(self, ctx):
         # 'repeat' block 'until' exp ;
         return _setMetadata(ctx, Repeat(
