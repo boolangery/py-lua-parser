@@ -176,13 +176,15 @@ class ParseTreeVisitor(LuaVisitor):
             body=self.visit(ctx.children[3]).body,
             orelse=None)
         lastStat = mainIf
-        for node in ctx.children[4:-2]:
-            elseIfNodes = self.visit(node)
-            elseIf = If(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None)
-            lastStat.orelse = elseIf
-            lastStat = elseIf
-        if isinstance(ctx.children[-2], LuaParser.ElseStatContext):
-            lastStat.orelse = self.visit(ctx.children[-2])
+
+        for node in ctx.children[4:-1]:
+            if isinstance(node, LuaParser.ElseStatContext):
+                lastStat.orelse = self.visit(node)
+            else:
+                elseIfNodes = self.visit(node)
+                elseIf = If(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None)
+                lastStat.orelse = elseIf
+                lastStat = elseIf
         return _setMetadata(ctx, mainIf)
 
     def visitElseIfStat(self, ctx):

@@ -162,11 +162,12 @@ class StatementsTestCase(tests.TestCase):
             elseif false then     
             end
             """))
+        print(ast.toPrettyStr(tree))
         exp = Chunk(body=Block(body=[
             If(
                 test=TrueExpr(),
                 body=[],
-                orelse=None
+                orelse=If(test=FalseExpr(), body=[], orelse=None)
             )
         ]))
         self.assertEqual(exp, tree)
