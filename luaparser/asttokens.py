@@ -201,6 +201,10 @@ class TokenEditor(TokensEditor):
                 tokens.append(t)
         return LineEditor(self._all, tokens)
 
+    def isFirstOnLine(self):
+        line = self.line()
+        return self == line.first()
+
     def grabUntil(self, type):
         """Starting from self, return a list of tokens until the specified type if found"""
         tokens = [self._tokens] # include this token
