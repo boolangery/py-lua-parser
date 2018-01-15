@@ -153,13 +153,6 @@ class GroupEditor(TokensEditor):
             return TokenEditor(self._all, self._tokens[-1])
         return None
 
-    def nextOfType(self, type):
-        atypes = self.types(type)
-        if len(atypes) > 0:
-            return TokenEditor(self._all, atypes[0])
-        else:
-            return None
-
 class ProgramEditor(GroupEditor):
     def range(self, start, stop):
         tokens = []
@@ -185,6 +178,35 @@ class TokenEditor(TokensEditor):
                     return TokenEditor(self._all, self._all[i+1])
                 else:
                     return None
+        return None
+
+    def prev(self):
+        """Select previous token.
+        """
+        # tokens are sorted by index
+        for i, t in enumerate(self._all):
+            if t.tokenIndex == self._tokens.tokenIndex:
+                # return previous element if exist:
+                if (i-1) > 0:
+                    return TokenEditor(self._all, self._all[i-1])
+                else:
+                    return None
+        return None
+
+    def nextOfType(self, type):
+        next = self.next()
+        while next is not None:
+            if next.type == type.value:
+                return next
+            next = next.next()
+        return None
+
+    def prevOfType(self, type):
+        prev = self.prev()
+        while prev is not None:
+            if prev.type == type.value:
+                return prev
+            prev = prev.prev()
         return None
 
     def __str__(self):
