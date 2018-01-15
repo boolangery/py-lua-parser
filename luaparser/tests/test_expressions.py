@@ -475,8 +475,8 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_definition_2(self):
         tree = ast.parse(r'function t.a.b.c.f() end')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Index(
+        exp = Chunk(body=Block(body=[Function(
+            name=Index(
                 idx='f',
                 value=Index(
                     idx='c',
@@ -487,12 +487,9 @@ class ExpressionsTestCase(tests.TestCase):
                             value=Name(id='t')
                         )
                     )
-                ))],
-            values=[Function(
-                name='',
-                args=[],
-                body=[]
-            )]
+                )),
+            args=[],
+            body=[]
         )]))
         self.assertEqual(exp, tree)
 
@@ -524,6 +521,18 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[LocalFunction(
             name='f',
             args=[],
+            body=[]
+        )]))
+        self.assertEqual(exp, tree)
+
+    def test_function_definition_5(self):
+        tree = ast.parse(textwrap.dedent("""
+            function MetaTable.__call (func)
+            end
+            """))
+        exp = Chunk(body=Block(body=[Function(
+            name=Index(idx='__call', value=Name('MetaTable')),
+            args=[Name('func')],
             body=[]
         )]))
         self.assertEqual(exp, tree)

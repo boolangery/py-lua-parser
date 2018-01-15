@@ -444,7 +444,7 @@ class ParseTreeVisitor(LuaVisitor):
     def visitFuncbody(self, ctx):
         # '(' parlist? ')' block 'end'
         if isinstance(ctx.children[1], LuaParser.ParlistContext):
-            nodes = [self.visit(ctx.children[1]),
+            nodes = [_listify(self.visit(ctx.children[1])),
                      self.visit(ctx.children[3])]
         else:
             nodes = [[],self.visit(ctx.children[2])]
@@ -461,9 +461,7 @@ class ParseTreeVisitor(LuaVisitor):
         if isinstance(name, Name):
             return _setMetadata(ctx, Function(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
         else:
-            return _setMetadata(ctx, Assign(
-                targets=[name],
-                values =[Function(name='', args=argsBlock[0], body=argsBlock[1].body)]))
+            return _setMetadata(ctx, Function(name=name, args=argsBlock[0], body=argsBlock[1].body))
 
     def visitLocalfunc(self, ctx):
         # 'local' 'function' name funcbody
