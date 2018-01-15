@@ -167,7 +167,7 @@ class StatementsTestCase(tests.TestCase):
             If(
                 test=TrueExpr(),
                 body=[],
-                orelse=If(test=FalseExpr(), body=[], orelse=None)
+                orelse=ElseIf(test=FalseExpr(), body=[], orelse=None)
             )
         ]))
         self.assertEqual(exp, tree)
@@ -183,7 +183,7 @@ class StatementsTestCase(tests.TestCase):
             If(
                 test=TrueExpr(),
                 body=[],
-                orelse=If(
+                orelse=ElseIf(
                     test=FalseExpr(),
                     body=[],
                     orelse=[]
@@ -204,10 +204,10 @@ class StatementsTestCase(tests.TestCase):
             If(
                 test=TrueExpr(),
                 body=[],
-                orelse=If(
+                orelse=ElseIf(
                     test=FalseExpr(),
                     body=[],
-                    orelse=If(
+                    orelse=ElseIf(
                         test=Number(42),
                         body=[],
                         orelse=[]

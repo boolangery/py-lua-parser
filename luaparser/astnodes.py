@@ -113,6 +113,14 @@ class If(Statement):
         self.body = body
         self.orelse = orelse
 
+class ElseIf(Statement):
+    """Define the 'elseif' lua statement"""
+    def __init__(self, test, body, orelse):
+        super(ElseIf, self).__init__('ElseIf')
+        self.test = test
+        self.body = body
+        self.orelse = orelse
+
 class Label(Statement):
     """Define the '::label::' lua statement"""
     def __init__(self, id):
