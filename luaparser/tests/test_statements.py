@@ -259,6 +259,20 @@ class StatementsTestCase(tests.TestCase):
         ]))
         self.assertEqual(exp, tree)
 
+    def test_return(self):
+        tree = ast.parse(r'return nil')
+        exp = Chunk(body=Block(body=[Return([
+            Nil()
+        ])]))
+        self.assertEqual(exp, tree)
+
+    def test_return_multiple(self):
+        tree = ast.parse(r'return nil, "error", 42; ')
+        exp = Chunk(body=Block(body=[Return([
+            Nil(), String('error'), Number(42)
+        ])]))
+        self.assertEqual(exp, tree)
+
     def test_comment_line(self):
         tree = ast.parse(textwrap.dedent("""
             -- a basic comment

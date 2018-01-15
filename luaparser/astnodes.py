@@ -179,6 +179,12 @@ class LocalFunction(Statement):
         self.args = args
         self.body = body
 
+class Return(Statement):
+    """Define the Lua return statement"""
+    def __init__(self, values):
+        super(Return, self).__init__('Return')
+        self.values = values
+
 ''' ----------------------------------------------------------------------- '''
 ''' Lua Expression                                                          '''
 ''' ----------------------------------------------------------------------- '''

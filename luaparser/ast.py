@@ -471,6 +471,9 @@ class ParseTreeVisitor(LuaVisitor):
         argsBlock = self.visit(ctx.children[3])
         return _setMetadata(ctx, LocalFunction(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
 
+    def visitRetstat(self, ctx):
+        # RETURN explist? SEMI_COLON?
+        return _setMetadata(ctx, Return(_listify(self.visitChildren(ctx))))
 
     def visitFuncname(self, ctx):
         # name ('.' name)* (':' name)?
