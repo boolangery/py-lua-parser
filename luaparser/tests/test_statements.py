@@ -250,6 +250,14 @@ class StatementsTestCase(tests.TestCase):
         ]))
         self.assertEqual(exp, tree)
 
+    def test_label(self):
+        tree = ast.parse(textwrap.dedent("""
+            break
+            """))
+        exp = Chunk(body=Block(body=[
+            Break()
+        ]))
+        self.assertEqual(exp, tree)
 
     def test_comment_line(self):
         tree = ast.parse(textwrap.dedent("""

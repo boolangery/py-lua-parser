@@ -208,7 +208,7 @@ class ParseTreeVisitor(LuaVisitor):
         return _setMetadata(ctx, Goto(label=self.visit(ctx.children[1]).id))
 
     def visitBreakStat(self, ctx):
-        return _setMetadata(ctx, Break(self.visitChildren(ctx)))
+        return _setMetadata(ctx, Break())
 
     ''' 
     Visiting expressions.
