@@ -162,7 +162,6 @@ class StatementsTestCase(tests.TestCase):
             elseif false then     
             end
             """))
-        print(ast.toPrettyStr(tree))
         exp = Chunk(body=Block(body=[
             If(
                 test=TrueExpr(),

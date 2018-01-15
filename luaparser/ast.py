@@ -522,10 +522,17 @@ class ASTRecursiveVisitor():
     def visit(self, node):
         if isinstance(node, Node):
             # call enter node method
-            name = 'enter_' + node.__class__.__name__
-            visitor = getattr(self, name, None)
-            if visitor:
-                visitor(node)
+            # if no visitor method found for this arg type,
+            # search in parent arg type:
+            parentType = node.__class__
+            while parentType != object:
+                name = 'enter_' + node.__class__.__name__
+                visitor = getattr(self, name, None)
+                if visitor:
+                    visitor(node)
+                    break
+                else:
+                    parentType = parentType.__bases__[0]
 
             # visit all object public attributes:
             childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
@@ -533,10 +540,17 @@ class ASTRecursiveVisitor():
                 self.visit(node.__dict__[child])
 
             # call exit node method
-            name = 'exit_' + node.__class__.__name__
-            visitor = getattr(self, name, None)
-            if visitor:
-                visitor(node)
+            # if no visitor method found for this arg type,
+            # search in parent arg type:
+            parentType = node.__class__
+            while parentType != object:
+                name = 'exit_' + node.__class__.__name__
+                visitor = getattr(self, name, None)
+                if visitor:
+                    visitor(node)
+                    break
+                else:
+                    parentType = parentType.__bases__[0]
         elif isinstance(node, list):
             for n in node:
                 self.visit(n)
