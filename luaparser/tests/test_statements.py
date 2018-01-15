@@ -83,9 +83,11 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Fornum(
+                target=Name('i'),
                 start=Number(1),
                 stop=Number(10),
-                step=Number(2)
+                step=Number(2),
+                body=[Call(func=Name('print'), args=[Name('i')])]
             )
         ]))
         self.assertEqual(exp, tree)

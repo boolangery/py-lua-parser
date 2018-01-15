@@ -153,14 +153,18 @@ class ParseTreeVisitor(LuaVisitor):
         # if has step expr
         if len(ctx.children) > 8:
             return _setMetadata(ctx, Fornum(
+                target=self.visit(ctx.children[1]),
                 start=self.visit(ctx.children[3]),
                 stop=self.visit(ctx.children[5]),
-                step=self.visit(ctx.children[7])))
+                step=self.visit(ctx.children[7]),
+                body=self.visit(ctx.children[-2]).body))
         else:
             return _setMetadata(ctx, Fornum(
+                target=self.visit(ctx.children[1]),
                 start=self.visit(ctx.children[3]),
                 stop=self.visit(ctx.children[5]),
-                step=Number(1)))
+                step=Number(1),
+                body=self.visit(ctx.children[-2]).body))
 
     def visitForin(self, ctx):
         # 'for' namelist 'in' explist 'do' block 'end' ;

@@ -140,11 +140,13 @@ class Break(Statement):
 
 class Fornum(Statement):
     """Define the 'Fornum' lua statement"""
-    def __init__(self, start, stop, step):
+    def __init__(self, target, start, stop, step, body):
         super(Fornum, self).__init__('Fornum')
-        self.start = start
-        self.stop = stop
-        self.step = step
+        self.target = target
+        self.start  = start
+        self.stop   = stop
+        self.step   = step
+        self.body   = body
 
 class Forin(Statement):
     """Define the 'Forin' lua statement"""
