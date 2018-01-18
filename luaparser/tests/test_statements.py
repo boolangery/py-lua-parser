@@ -273,26 +273,3 @@ class StatementsTestCase(tests.TestCase):
         ])]))
         self.assertEqual(exp, tree)
 
-    def test_comment_line(self):
-        tree = ast.parse(textwrap.dedent("""
-            -- a basic comment
-            """))
-        exp = Chunk(body=Block(body=[
-            Comment('a basic comment')
-        ]))
-        self.assertEqual(exp, tree)
-
-    # def test_comment_enable_code(self):
-    #     tree = ast.parse(textwrap.dedent("""
-    #         ---[[The long handled doubleshovel means that this code will run
-    #         print "This will print because it is not a comment!"
-    #         -- We can still include comments by prefixing them with a doubledash
-    #         -- print "This will not print because it is commented out"
-    #         ]]
-    #         """))
-    #     exp = Chunk(body=Block(body=[
-    #         Goto(label='foo'),
-    #         Label(id='foo')
-    #     ]))
-    #     Printer.pprint(tree, Printer.Style.PYTHON, True)
-    #     self.assertEqual(exp, tree)

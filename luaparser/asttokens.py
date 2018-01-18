@@ -77,8 +77,9 @@ class Tokens(Enum):
     FLOAT = 60
     HEX_FLOAT = 61
     COMMENT = 62
-    WS = 63
-    SHEBANG = 64
+    LINE_COMMENT = 63
+    WS = 64
+    SHEBANG = 65
 
 class TokensEditor():
     def __init__(self, allTokens, tokensToEdit):

@@ -394,10 +394,5 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#comment_rule.
-    def visitComment_rule(self, ctx:LuaParser.Comment_ruleContext):
-        return self.visitChildren(ctx)
-
-
 
 del LuaParser

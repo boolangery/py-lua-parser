@@ -56,7 +56,6 @@ block: stat* retstat?;
 
 stat
     : SEMI_COLON
-    | comment_rule
     | setStat
     | call
     | invoke
@@ -199,9 +198,6 @@ string
     : STRING
     ;
 
-comment_rule
-    : COMMENT
-    ;
 
 //////////////////////////////////////////////////////////////////////////////////
 //                                    Lexer                                     //
@@ -352,13 +348,17 @@ HexDigit
     ;
 
 COMMENT
-    : ('--[' NESTED_STR ']')
-    | '--'
+    : '--[' NESTED_STR ']' -> channel(HIDDEN)
+    ;
+
+LINE_COMMENT
+    : '--'
     (                                               // --
     | '[' '='*                                      // --[==
     | '[' '='* ~('='|'['|'\r'|'\n') ~('\r'|'\n')*   // --[==AA
     | ~('['|'\r'|'\n') ~('\r'|'\n')*                // --AAA
     )
+    -> channel(HIDDEN)
     ;
 
 WS
