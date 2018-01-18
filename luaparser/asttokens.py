@@ -154,6 +154,11 @@ class GroupEditor(TokensEditor):
             return TokenEditor(self._all, self._tokens[-1])
         return None
 
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return GroupEditor(self._all, self._tokens[key])
+        return TokenEditor(self._all, self._tokens[key])
+
 class ProgramEditor(GroupEditor):
     def range(self, start, stop):
         tokens = []
