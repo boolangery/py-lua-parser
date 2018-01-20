@@ -26,6 +26,7 @@
  *
  * Project      : lua-parser; a Lua 5.2 grammar/parser
  * Developed by : Bart Kiers, bart@big-o.nl
+ *                Eliott Dumeix, (update to antlr4 + Lua 5.3 grammar)
  */
 grammar Lua;
 
@@ -152,19 +153,24 @@ add_expr
   ;
 
 mult_expr
-  : unary_expr ((MULT | DIV | MOD) unary_expr)*
+  : bitwise_expr ((MULT | DIV | MOD | FLOOR) bitwise_expr)*
+  ;
+
+bitwise_expr
+  : unary_expr ((BITAND | BITOR | BITNOT | BITRSHIFT | BITRLEFT) unary_expr)*
   ;
 
 unary_expr
   : MINUS unary_expr
   | LENGTH pow_expr
   | NOT unary_expr
+  | BITNOT unary_expr
   | pow_expr
   ;
 
 // right associative
 pow_expr
-  : (a+=atom) ((POW a+=atom)+)?
+  : atom (POW atom)*
   ;
 
 atom
@@ -184,8 +190,7 @@ var[bool assign]
   ;
 
 callee[bool assign]
-  : OPAR expr CPAR
-  | NAME
+  : OPAR expr CPAR | NAME
   ;
 
 tail
@@ -262,6 +267,7 @@ ADD       : '+';
 MINUS     : '-';
 MULT      : '*';
 DIV       : '/';
+FLOOR     : '//';
 MOD       : '%';
 POW       : '^';
 LENGTH    : '#';
@@ -272,6 +278,11 @@ GTEQ      : '>=';
 LT        : '<';
 GT        : '>';
 ASSIGN    : '=';
+BITAND    : '&';
+BITOR     : '|';
+BITNOT    : '~';
+BITRSHIFT : '>>';
+BITRLEFT  : '<<';
 OPAR      : '(';
 CPAR      : ')';
 OBRACE    : '{';

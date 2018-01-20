@@ -21,6 +21,7 @@ class ExpressionsTestCase(tests.TestCase):
                 )
             ]
         )]))
+        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_substraction(self):
@@ -47,6 +48,7 @@ class ExpressionsTestCase(tests.TestCase):
                 )
             ]
         )]))
+        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_float_division(self):
@@ -330,7 +332,7 @@ class ExpressionsTestCase(tests.TestCase):
                 name = 'bmw'
               },
               options = { radio = true }
-            };
+            };;;
             '''))
         exp = Chunk(body=Block(body=[Assign(
             targets=[Name(id='foo')],
@@ -345,6 +347,7 @@ class ExpressionsTestCase(tests.TestCase):
                 ]
             )]
         )]))
+        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_array(self):

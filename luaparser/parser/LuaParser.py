@@ -7,191 +7,196 @@ import sys
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3;")
-        buf.write("\u0193\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3A")
+        buf.write("\u019e\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
         buf.write("\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36\t\36")
         buf.write("\4\37\t\37\4 \t \4!\t!\4\"\t\"\4#\t#\4$\t$\4%\t%\4&\t")
-        buf.write("&\4\'\t\'\4(\t(\4)\t)\3\2\3\2\3\2\3\3\7\3W\n\3\f\3\16")
-        buf.write("\3Z\13\3\3\3\5\3]\n\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4")
-        buf.write("\3\4\3\4\3\4\3\4\3\4\5\4l\n\4\3\5\3\5\3\5\3\5\3\6\3\6")
-        buf.write("\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\t\3\t\3")
-        buf.write("\t\3\t\5\t\u0083\n\t\3\t\3\t\3\t\5\t\u0088\n\t\3\n\3\n")
-        buf.write("\3\n\3\13\3\13\3\13\3\13\3\13\7\13\u0092\n\13\f\13\16")
-        buf.write("\13\u0095\13\13\3\13\5\13\u0098\n\13\3\13\3\13\3\f\3\f")
-        buf.write("\3\f\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\16")
-        buf.write("\3\16\3\16\5\16\u00ac\n\16\3\16\3\16\3\16\3\16\3\16\3")
-        buf.write("\16\3\16\5\16\u00b5\n\16\3\17\3\17\3\17\3\17\3\17\3\17")
-        buf.write("\5\17\u00bd\n\17\3\20\3\20\3\20\7\20\u00c2\n\20\f\20\16")
-        buf.write("\20\u00c5\13\20\3\21\3\21\3\21\3\22\3\22\3\22\3\22\3\22")
-        buf.write("\3\22\3\23\3\23\3\23\5\23\u00d3\n\23\3\23\5\23\u00d6\n")
-        buf.write("\23\5\23\u00d8\n\23\3\24\3\24\5\24\u00dc\n\24\3\24\5\24")
-        buf.write("\u00df\n\24\3\25\3\25\3\26\3\26\3\26\7\26\u00e6\n\26\f")
-        buf.write("\26\16\26\u00e9\13\26\3\27\3\27\3\27\7\27\u00ee\n\27\f")
-        buf.write("\27\16\27\u00f1\13\27\3\30\3\30\3\30\5\30\u00f6\n\30\3")
-        buf.write("\31\3\31\3\31\7\31\u00fb\n\31\f\31\16\31\u00fe\13\31\3")
-        buf.write("\32\3\32\3\32\7\32\u0103\n\32\f\32\16\32\u0106\13\32\3")
-        buf.write("\33\3\33\3\33\7\33\u010b\n\33\f\33\16\33\u010e\13\33\3")
-        buf.write("\34\3\34\3\34\3\34\3\34\3\34\3\34\5\34\u0117\n\34\3\35")
-        buf.write("\3\35\3\35\6\35\u011c\n\35\r\35\16\35\u011d\5\35\u0120")
-        buf.write("\n\35\3\36\3\36\3\36\3\36\3\36\3\36\3\36\3\36\3\36\5\36")
-        buf.write("\u012b\n\36\3\37\3\37\7\37\u012f\n\37\f\37\16\37\u0132")
-        buf.write("\13\37\3 \3 \3 \3 \3 \5 \u0139\n \3!\3!\3!\3!\3!\3!\3")
-        buf.write("!\3!\3!\3!\5!\u0145\n!\3!\3!\3!\3!\3!\3!\3!\3!\3!\5!\u0150")
-        buf.write("\n!\3!\3!\3!\5!\u0155\n!\3\"\3\"\5\"\u0159\n\"\3\"\3\"")
-        buf.write("\3#\3#\3#\3#\7#\u0161\n#\f#\16#\u0164\13#\3#\5#\u0167")
-        buf.write("\n#\3$\3$\3$\3$\3$\3$\3$\3$\3$\3$\5$\u0173\n$\3%\3%\3")
-        buf.write("&\3&\3&\3&\3\'\3\'\3\'\7\'\u017e\n\'\f\'\16\'\u0181\13")
-        buf.write("\'\3(\3(\3(\7(\u0186\n(\f(\16(\u0189\13(\3)\3)\3)\7)\u018e")
-        buf.write("\n)\f)\16)\u0191\13)\3)\2\2*\2\4\6\b\n\f\16\20\22\24\26")
-        buf.write("\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNP\2\6\3\2")
-        buf.write(" %\3\2\31\32\3\2\33\35\4\2//\63\63\2\u01ab\2R\3\2\2\2")
-        buf.write("\4X\3\2\2\2\6k\3\2\2\2\bm\3\2\2\2\nq\3\2\2\2\fu\3\2\2")
-        buf.write("\2\16z\3\2\2\2\20~\3\2\2\2\22\u0089\3\2\2\2\24\u008c\3")
-        buf.write("\2\2\2\26\u009b\3\2\2\2\30\u00a0\3\2\2\2\32\u00a3\3\2")
-        buf.write("\2\2\34\u00b6\3\2\2\2\36\u00be\3\2\2\2 \u00c6\3\2\2\2")
-        buf.write("\"\u00c9\3\2\2\2$\u00d7\3\2\2\2&\u00d9\3\2\2\2(\u00e0")
-        buf.write("\3\2\2\2*\u00e2\3\2\2\2,\u00ea\3\2\2\2.\u00f2\3\2\2\2")
-        buf.write("\60\u00f7\3\2\2\2\62\u00ff\3\2\2\2\64\u0107\3\2\2\2\66")
-        buf.write("\u0116\3\2\2\28\u0118\3\2\2\2:\u012a\3\2\2\2<\u012c\3")
-        buf.write("\2\2\2>\u0138\3\2\2\2@\u0154\3\2\2\2B\u0156\3\2\2\2D\u015c")
-        buf.write("\3\2\2\2F\u0172\3\2\2\2H\u0174\3\2\2\2J\u0176\3\2\2\2")
-        buf.write("L\u017a\3\2\2\2N\u0182\3\2\2\2P\u018a\3\2\2\2RS\5\4\3")
-        buf.write("\2ST\7\2\2\3T\3\3\2\2\2UW\5\6\4\2VU\3\2\2\2WZ\3\2\2\2")
-        buf.write("XV\3\2\2\2XY\3\2\2\2Y\\\3\2\2\2ZX\3\2\2\2[]\5&\24\2\\")
-        buf.write("[\3\2\2\2\\]\3\2\2\2]\5\3\2\2\2^l\5\16\b\2_l\5<\37\2`")
-        buf.write("l\5\b\5\2al\5\n\6\2bl\5\f\7\2cl\5\20\t\2dl\5\22\n\2el")
-        buf.write("\5\24\13\2fl\5\32\16\2gl\5\34\17\2hl\5J&\2il\7\4\2\2j")
-        buf.write("l\7\63\2\2k^\3\2\2\2k_\3\2\2\2k`\3\2\2\2ka\3\2\2\2kb\3")
-        buf.write("\2\2\2kc\3\2\2\2kd\3\2\2\2ke\3\2\2\2kf\3\2\2\2kg\3\2\2")
-        buf.write("\2kh\3\2\2\2ki\3\2\2\2kj\3\2\2\2l\7\3\2\2\2mn\7\5\2\2")
-        buf.write("no\5\4\3\2op\7\b\2\2p\t\3\2\2\2qr\7\30\2\2rs\5(\25\2s")
-        buf.write("t\5\b\5\2t\13\3\2\2\2uv\7\23\2\2vw\5\4\3\2wx\7\27\2\2")
-        buf.write("xy\5(\25\2y\r\3\2\2\2z{\5L\'\2{|\7&\2\2|}\5N(\2}\17\3")
-        buf.write("\2\2\2~\u0087\7\17\2\2\177\u0082\5P)\2\u0080\u0081\7&")
-        buf.write("\2\2\u0081\u0083\5N(\2\u0082\u0080\3\2\2\2\u0082\u0083")
-        buf.write("\3\2\2\2\u0083\u0088\3\2\2\2\u0084\u0085\7\13\2\2\u0085")
-        buf.write("\u0086\7\64\2\2\u0086\u0088\5\"\22\2\u0087\177\3\2\2\2")
-        buf.write("\u0087\u0084\3\2\2\2\u0088\21\3\2\2\2\u0089\u008a\7\f")
-        buf.write("\2\2\u008a\u008b\7\64\2\2\u008b\23\3\2\2\2\u008c\u008d")
-        buf.write("\7\r\2\2\u008d\u008e\5(\25\2\u008e\u008f\7\25\2\2\u008f")
-        buf.write("\u0093\5\4\3\2\u0090\u0092\5\26\f\2\u0091\u0090\3\2\2")
-        buf.write("\2\u0092\u0095\3\2\2\2\u0093\u0091\3\2\2\2\u0093\u0094")
-        buf.write("\3\2\2\2\u0094\u0097\3\2\2\2\u0095\u0093\3\2\2\2\u0096")
-        buf.write("\u0098\5\30\r\2\u0097\u0096\3\2\2\2\u0097\u0098\3\2\2")
-        buf.write("\2\u0098\u0099\3\2\2\2\u0099\u009a\7\b\2\2\u009a\25\3")
-        buf.write("\2\2\2\u009b\u009c\7\7\2\2\u009c\u009d\5(\25\2\u009d\u009e")
-        buf.write("\7\25\2\2\u009e\u009f\5\4\3\2\u009f\27\3\2\2\2\u00a0\u00a1")
-        buf.write("\7\6\2\2\u00a1\u00a2\5\4\3\2\u00a2\31\3\2\2\2\u00a3\u00b4")
-        buf.write("\7\n\2\2\u00a4\u00a5\7\64\2\2\u00a5\u00a6\7&\2\2\u00a6")
-        buf.write("\u00a7\5(\25\2\u00a7\u00a8\7/\2\2\u00a8\u00ab\5(\25\2")
-        buf.write("\u00a9\u00aa\7/\2\2\u00aa\u00ac\5(\25\2\u00ab\u00a9\3")
-        buf.write("\2\2\2\u00ab\u00ac\3\2\2\2\u00ac\u00ad\3\2\2\2\u00ad\u00ae")
-        buf.write("\5\b\5\2\u00ae\u00b5\3\2\2\2\u00af\u00b0\5P)\2\u00b0\u00b1")
-        buf.write("\7\16\2\2\u00b1\u00b2\5N(\2\u00b2\u00b3\5\b\5\2\u00b3")
-        buf.write("\u00b5\3\2\2\2\u00b4\u00a4\3\2\2\2\u00b4\u00af\3\2\2\2")
-        buf.write("\u00b5\33\3\2\2\2\u00b6\u00b7\7\13\2\2\u00b7\u00bc\5\36")
-        buf.write("\20\2\u00b8\u00b9\7.\2\2\u00b9\u00ba\7\64\2\2\u00ba\u00bd")
-        buf.write("\5\"\22\2\u00bb\u00bd\5\"\22\2\u00bc\u00b8\3\2\2\2\u00bc")
-        buf.write("\u00bb\3\2\2\2\u00bd\35\3\2\2\2\u00be\u00c3\7\64\2\2\u00bf")
-        buf.write("\u00c0\7\62\2\2\u00c0\u00c2\7\64\2\2\u00c1\u00bf\3\2\2")
-        buf.write("\2\u00c2\u00c5\3\2\2\2\u00c3\u00c1\3\2\2\2\u00c3\u00c4")
-        buf.write("\3\2\2\2\u00c4\37\3\2\2\2\u00c5\u00c3\3\2\2\2\u00c6\u00c7")
-        buf.write("\7\13\2\2\u00c7\u00c8\5\"\22\2\u00c8!\3\2\2\2\u00c9\u00ca")
-        buf.write("\7\'\2\2\u00ca\u00cb\5$\23\2\u00cb\u00cc\7(\2\2\u00cc")
-        buf.write("\u00cd\5\4\3\2\u00cd\u00ce\7\b\2\2\u00ce#\3\2\2\2\u00cf")
-        buf.write("\u00d2\5P)\2\u00d0\u00d1\7/\2\2\u00d1\u00d3\7\60\2\2\u00d2")
-        buf.write("\u00d0\3\2\2\2\u00d2\u00d3\3\2\2\2\u00d3\u00d8\3\2\2\2")
-        buf.write("\u00d4\u00d6\7\60\2\2\u00d5\u00d4\3\2\2\2\u00d5\u00d6")
-        buf.write("\3\2\2\2\u00d6\u00d8\3\2\2\2\u00d7\u00cf\3\2\2\2\u00d7")
-        buf.write("\u00d5\3\2\2\2\u00d8%\3\2\2\2\u00d9\u00db\7\24\2\2\u00da")
-        buf.write("\u00dc\5N(\2\u00db\u00da\3\2\2\2\u00db\u00dc\3\2\2\2\u00dc")
-        buf.write("\u00de\3\2\2\2\u00dd\u00df\7\63\2\2\u00de\u00dd\3\2\2")
-        buf.write("\2\u00de\u00df\3\2\2\2\u00df\'\3\2\2\2\u00e0\u00e1\5*")
-        buf.write("\26\2\u00e1)\3\2\2\2\u00e2\u00e7\5,\27\2\u00e3\u00e4\7")
-        buf.write("\22\2\2\u00e4\u00e6\5,\27\2\u00e5\u00e3\3\2\2\2\u00e6")
-        buf.write("\u00e9\3\2\2\2\u00e7\u00e5\3\2\2\2\u00e7\u00e8\3\2\2\2")
-        buf.write("\u00e8+\3\2\2\2\u00e9\u00e7\3\2\2\2\u00ea\u00ef\5.\30")
-        buf.write("\2\u00eb\u00ec\7\3\2\2\u00ec\u00ee\5.\30\2\u00ed\u00eb")
-        buf.write("\3\2\2\2\u00ee\u00f1\3\2\2\2\u00ef\u00ed\3\2\2\2\u00ef")
-        buf.write("\u00f0\3\2\2\2\u00f0-\3\2\2\2\u00f1\u00ef\3\2\2\2\u00f2")
-        buf.write("\u00f5\5\60\31\2\u00f3\u00f4\t\2\2\2\u00f4\u00f6\5\60")
-        buf.write("\31\2\u00f5\u00f3\3\2\2\2\u00f5\u00f6\3\2\2\2\u00f6/\3")
-        buf.write("\2\2\2\u00f7\u00fc\5\62\32\2\u00f8\u00f9\7\61\2\2\u00f9")
-        buf.write("\u00fb\5\62\32\2\u00fa\u00f8\3\2\2\2\u00fb\u00fe\3\2\2")
-        buf.write("\2\u00fc\u00fa\3\2\2\2\u00fc\u00fd\3\2\2\2\u00fd\61\3")
-        buf.write("\2\2\2\u00fe\u00fc\3\2\2\2\u00ff\u0104\5\64\33\2\u0100")
-        buf.write("\u0101\t\3\2\2\u0101\u0103\5\64\33\2\u0102\u0100\3\2\2")
-        buf.write("\2\u0103\u0106\3\2\2\2\u0104\u0102\3\2\2\2\u0104\u0105")
-        buf.write("\3\2\2\2\u0105\63\3\2\2\2\u0106\u0104\3\2\2\2\u0107\u010c")
-        buf.write("\5\66\34\2\u0108\u0109\t\4\2\2\u0109\u010b\5\66\34\2\u010a")
-        buf.write("\u0108\3\2\2\2\u010b\u010e\3\2\2\2\u010c\u010a\3\2\2\2")
-        buf.write("\u010c\u010d\3\2\2\2\u010d\65\3\2\2\2\u010e\u010c\3\2")
-        buf.write("\2\2\u010f\u0110\7\32\2\2\u0110\u0117\5\66\34\2\u0111")
-        buf.write("\u0112\7\37\2\2\u0112\u0117\58\35\2\u0113\u0114\7\21\2")
-        buf.write("\2\u0114\u0117\5\66\34\2\u0115\u0117\58\35\2\u0116\u010f")
-        buf.write("\3\2\2\2\u0116\u0111\3\2\2\2\u0116\u0113\3\2\2\2\u0116")
-        buf.write("\u0115\3\2\2\2\u0117\67\3\2\2\2\u0118\u011f\5:\36\2\u0119")
-        buf.write("\u011a\7\36\2\2\u011a\u011c\5:\36\2\u011b\u0119\3\2\2")
-        buf.write("\2\u011c\u011d\3\2\2\2\u011d\u011b\3\2\2\2\u011d\u011e")
-        buf.write("\3\2\2\2\u011e\u0120\3\2\2\2\u011f\u011b\3\2\2\2\u011f")
-        buf.write("\u0120\3\2\2\2\u01209\3\2\2\2\u0121\u012b\5<\37\2\u0122")
-        buf.write("\u012b\5 \21\2\u0123\u012b\5B\"\2\u0124\u012b\7\60\2\2")
-        buf.write("\u0125\u012b\7\65\2\2\u0126\u012b\7\66\2\2\u0127\u012b")
-        buf.write("\7\20\2\2\u0128\u012b\7\26\2\2\u0129\u012b\7\t\2\2\u012a")
-        buf.write("\u0121\3\2\2\2\u012a\u0122\3\2\2\2\u012a\u0123\3\2\2\2")
-        buf.write("\u012a\u0124\3\2\2\2\u012a\u0125\3\2\2\2\u012a\u0126\3")
-        buf.write("\2\2\2\u012a\u0127\3\2\2\2\u012a\u0128\3\2\2\2\u012a\u0129")
-        buf.write("\3\2\2\2\u012b;\3\2\2\2\u012c\u0130\5> \2\u012d\u012f")
-        buf.write("\5@!\2\u012e\u012d\3\2\2\2\u012f\u0132\3\2\2\2\u0130\u012e")
-        buf.write("\3\2\2\2\u0130\u0131\3\2\2\2\u0131=\3\2\2\2\u0132\u0130")
-        buf.write("\3\2\2\2\u0133\u0134\7\'\2\2\u0134\u0135\5(\25\2\u0135")
-        buf.write("\u0136\7(\2\2\u0136\u0139\3\2\2\2\u0137\u0139\7\64\2\2")
-        buf.write("\u0138\u0133\3\2\2\2\u0138\u0137\3\2\2\2\u0139?\3\2\2")
-        buf.write("\2\u013a\u013b\7\62\2\2\u013b\u0155\7\64\2\2\u013c\u013d")
-        buf.write("\7+\2\2\u013d\u013e\5(\25\2\u013e\u013f\7,\2\2\u013f\u0155")
-        buf.write("\3\2\2\2\u0140\u0141\7.\2\2\u0141\u0142\7\64\2\2\u0142")
-        buf.write("\u0144\7\'\2\2\u0143\u0145\5N(\2\u0144\u0143\3\2\2\2\u0144")
-        buf.write("\u0145\3\2\2\2\u0145\u0146\3\2\2\2\u0146\u0155\7(\2\2")
-        buf.write("\u0147\u0148\7.\2\2\u0148\u0149\7\64\2\2\u0149\u0155\5")
-        buf.write("B\"\2\u014a\u014b\7.\2\2\u014b\u014c\7\64\2\2\u014c\u0155")
-        buf.write("\7\66\2\2\u014d\u014f\7\'\2\2\u014e\u0150\5N(\2\u014f")
-        buf.write("\u014e\3\2\2\2\u014f\u0150\3\2\2\2\u0150\u0151\3\2\2\2")
-        buf.write("\u0151\u0155\7(\2\2\u0152\u0155\5B\"\2\u0153\u0155\7\66")
-        buf.write("\2\2\u0154\u013a\3\2\2\2\u0154\u013c\3\2\2\2\u0154\u0140")
-        buf.write("\3\2\2\2\u0154\u0147\3\2\2\2\u0154\u014a\3\2\2\2\u0154")
-        buf.write("\u014d\3\2\2\2\u0154\u0152\3\2\2\2\u0154\u0153\3\2\2\2")
-        buf.write("\u0155A\3\2\2\2\u0156\u0158\7)\2\2\u0157\u0159\5D#\2\u0158")
-        buf.write("\u0157\3\2\2\2\u0158\u0159\3\2\2\2\u0159\u015a\3\2\2\2")
-        buf.write("\u015a\u015b\7*\2\2\u015bC\3\2\2\2\u015c\u0162\5F$\2\u015d")
-        buf.write("\u015e\5H%\2\u015e\u015f\5F$\2\u015f\u0161\3\2\2\2\u0160")
-        buf.write("\u015d\3\2\2\2\u0161\u0164\3\2\2\2\u0162\u0160\3\2\2\2")
-        buf.write("\u0162\u0163\3\2\2\2\u0163\u0166\3\2\2\2\u0164\u0162\3")
-        buf.write("\2\2\2\u0165\u0167\5H%\2\u0166\u0165\3\2\2\2\u0166\u0167")
-        buf.write("\3\2\2\2\u0167E\3\2\2\2\u0168\u0169\7+\2\2\u0169\u016a")
-        buf.write("\5(\25\2\u016a\u016b\7,\2\2\u016b\u016c\7&\2\2\u016c\u016d")
-        buf.write("\5(\25\2\u016d\u0173\3\2\2\2\u016e\u016f\7\64\2\2\u016f")
-        buf.write("\u0170\7&\2\2\u0170\u0173\5(\25\2\u0171\u0173\5(\25\2")
-        buf.write("\u0172\u0168\3\2\2\2\u0172\u016e\3\2\2\2\u0172\u0171\3")
-        buf.write("\2\2\2\u0173G\3\2\2\2\u0174\u0175\t\5\2\2\u0175I\3\2\2")
-        buf.write("\2\u0176\u0177\7-\2\2\u0177\u0178\7\64\2\2\u0178\u0179")
-        buf.write("\7-\2\2\u0179K\3\2\2\2\u017a\u017f\5<\37\2\u017b\u017c")
-        buf.write("\7/\2\2\u017c\u017e\5<\37\2\u017d\u017b\3\2\2\2\u017e")
-        buf.write("\u0181\3\2\2\2\u017f\u017d\3\2\2\2\u017f\u0180\3\2\2\2")
-        buf.write("\u0180M\3\2\2\2\u0181\u017f\3\2\2\2\u0182\u0187\5(\25")
-        buf.write("\2\u0183\u0184\7/\2\2\u0184\u0186\5(\25\2\u0185\u0183")
-        buf.write("\3\2\2\2\u0186\u0189\3\2\2\2\u0187\u0185\3\2\2\2\u0187")
-        buf.write("\u0188\3\2\2\2\u0188O\3\2\2\2\u0189\u0187\3\2\2\2\u018a")
-        buf.write("\u018f\7\64\2\2\u018b\u018c\7/\2\2\u018c\u018e\7\64\2")
-        buf.write("\2\u018d\u018b\3\2\2\2\u018e\u0191\3\2\2\2\u018f\u018d")
-        buf.write("\3\2\2\2\u018f\u0190\3\2\2\2\u0190Q\3\2\2\2\u0191\u018f")
-        buf.write("\3\2\2\2(X\\k\u0082\u0087\u0093\u0097\u00ab\u00b4\u00bc")
-        buf.write("\u00c3\u00d2\u00d5\u00d7\u00db\u00de\u00e7\u00ef\u00f5")
-        buf.write("\u00fc\u0104\u010c\u0116\u011d\u011f\u012a\u0130\u0138")
-        buf.write("\u0144\u014f\u0154\u0158\u0162\u0166\u0172\u017f\u0187")
-        buf.write("\u018f")
+        buf.write("&\4\'\t\'\4(\t(\4)\t)\4*\t*\3\2\3\2\3\2\3\3\7\3Y\n\3\f")
+        buf.write("\3\16\3\\\13\3\3\3\5\3_\n\3\3\4\3\4\3\4\3\4\3\4\3\4\3")
+        buf.write("\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4n\n\4\3\5\3\5\3\5\3\5\3")
+        buf.write("\6\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\t")
+        buf.write("\3\t\3\t\3\t\5\t\u0085\n\t\3\t\3\t\3\t\5\t\u008a\n\t\3")
+        buf.write("\n\3\n\3\n\3\13\3\13\3\13\3\13\3\13\7\13\u0094\n\13\f")
+        buf.write("\13\16\13\u0097\13\13\3\13\5\13\u009a\n\13\3\13\3\13\3")
+        buf.write("\f\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16")
+        buf.write("\3\16\3\16\3\16\5\16\u00ae\n\16\3\16\3\16\3\16\3\16\3")
+        buf.write("\16\3\16\3\16\5\16\u00b7\n\16\3\17\3\17\3\17\3\17\3\17")
+        buf.write("\3\17\5\17\u00bf\n\17\3\20\3\20\3\20\7\20\u00c4\n\20\f")
+        buf.write("\20\16\20\u00c7\13\20\3\21\3\21\3\21\3\22\3\22\3\22\3")
+        buf.write("\22\3\22\3\22\3\23\3\23\3\23\5\23\u00d5\n\23\3\23\5\23")
+        buf.write("\u00d8\n\23\5\23\u00da\n\23\3\24\3\24\5\24\u00de\n\24")
+        buf.write("\3\24\5\24\u00e1\n\24\3\25\3\25\3\26\3\26\3\26\7\26\u00e8")
+        buf.write("\n\26\f\26\16\26\u00eb\13\26\3\27\3\27\3\27\7\27\u00f0")
+        buf.write("\n\27\f\27\16\27\u00f3\13\27\3\30\3\30\3\30\5\30\u00f8")
+        buf.write("\n\30\3\31\3\31\3\31\7\31\u00fd\n\31\f\31\16\31\u0100")
+        buf.write("\13\31\3\32\3\32\3\32\7\32\u0105\n\32\f\32\16\32\u0108")
+        buf.write("\13\32\3\33\3\33\3\33\7\33\u010d\n\33\f\33\16\33\u0110")
+        buf.write("\13\33\3\34\3\34\3\34\7\34\u0115\n\34\f\34\16\34\u0118")
+        buf.write("\13\34\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35\5")
+        buf.write("\35\u0123\n\35\3\36\3\36\3\36\7\36\u0128\n\36\f\36\16")
+        buf.write("\36\u012b\13\36\3\37\3\37\3\37\3\37\3\37\3\37\3\37\3\37")
+        buf.write("\3\37\5\37\u0136\n\37\3 \3 \7 \u013a\n \f \16 \u013d\13")
+        buf.write(" \3!\3!\3!\3!\3!\5!\u0144\n!\3\"\3\"\3\"\3\"\3\"\3\"\3")
+        buf.write("\"\3\"\3\"\3\"\5\"\u0150\n\"\3\"\3\"\3\"\3\"\3\"\3\"\3")
+        buf.write("\"\3\"\3\"\5\"\u015b\n\"\3\"\3\"\3\"\5\"\u0160\n\"\3#")
+        buf.write("\3#\5#\u0164\n#\3#\3#\3$\3$\3$\3$\7$\u016c\n$\f$\16$\u016f")
+        buf.write("\13$\3$\5$\u0172\n$\3%\3%\3%\3%\3%\3%\3%\3%\3%\3%\5%\u017e")
+        buf.write("\n%\3&\3&\3\'\3\'\3\'\3\'\3(\3(\3(\7(\u0189\n(\f(\16(")
+        buf.write("\u018c\13(\3)\3)\3)\7)\u0191\n)\f)\16)\u0194\13)\3*\3")
+        buf.write("*\3*\7*\u0199\n*\f*\16*\u019c\13*\3*\2\2+\2\4\6\b\n\f")
+        buf.write("\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@")
+        buf.write("BDFHJLNPR\2\7\3\2!&\3\2\31\32\3\2\33\36\3\2(,\4\2\65\65")
+        buf.write("99\2\u01b6\2T\3\2\2\2\4Z\3\2\2\2\6m\3\2\2\2\bo\3\2\2\2")
+        buf.write("\ns\3\2\2\2\fw\3\2\2\2\16|\3\2\2\2\20\u0080\3\2\2\2\22")
+        buf.write("\u008b\3\2\2\2\24\u008e\3\2\2\2\26\u009d\3\2\2\2\30\u00a2")
+        buf.write("\3\2\2\2\32\u00a5\3\2\2\2\34\u00b8\3\2\2\2\36\u00c0\3")
+        buf.write("\2\2\2 \u00c8\3\2\2\2\"\u00cb\3\2\2\2$\u00d9\3\2\2\2&")
+        buf.write("\u00db\3\2\2\2(\u00e2\3\2\2\2*\u00e4\3\2\2\2,\u00ec\3")
+        buf.write("\2\2\2.\u00f4\3\2\2\2\60\u00f9\3\2\2\2\62\u0101\3\2\2")
+        buf.write("\2\64\u0109\3\2\2\2\66\u0111\3\2\2\28\u0122\3\2\2\2:\u0124")
+        buf.write("\3\2\2\2<\u0135\3\2\2\2>\u0137\3\2\2\2@\u0143\3\2\2\2")
+        buf.write("B\u015f\3\2\2\2D\u0161\3\2\2\2F\u0167\3\2\2\2H\u017d\3")
+        buf.write("\2\2\2J\u017f\3\2\2\2L\u0181\3\2\2\2N\u0185\3\2\2\2P\u018d")
+        buf.write("\3\2\2\2R\u0195\3\2\2\2TU\5\4\3\2UV\7\2\2\3V\3\3\2\2\2")
+        buf.write("WY\5\6\4\2XW\3\2\2\2Y\\\3\2\2\2ZX\3\2\2\2Z[\3\2\2\2[^")
+        buf.write("\3\2\2\2\\Z\3\2\2\2]_\5&\24\2^]\3\2\2\2^_\3\2\2\2_\5\3")
+        buf.write("\2\2\2`n\5\16\b\2an\5> \2bn\5\b\5\2cn\5\n\6\2dn\5\f\7")
+        buf.write("\2en\5\20\t\2fn\5\22\n\2gn\5\24\13\2hn\5\32\16\2in\5\34")
+        buf.write("\17\2jn\5L\'\2kn\7\4\2\2ln\79\2\2m`\3\2\2\2ma\3\2\2\2")
+        buf.write("mb\3\2\2\2mc\3\2\2\2md\3\2\2\2me\3\2\2\2mf\3\2\2\2mg\3")
+        buf.write("\2\2\2mh\3\2\2\2mi\3\2\2\2mj\3\2\2\2mk\3\2\2\2ml\3\2\2")
+        buf.write("\2n\7\3\2\2\2op\7\5\2\2pq\5\4\3\2qr\7\b\2\2r\t\3\2\2\2")
+        buf.write("st\7\30\2\2tu\5(\25\2uv\5\b\5\2v\13\3\2\2\2wx\7\23\2\2")
+        buf.write("xy\5\4\3\2yz\7\27\2\2z{\5(\25\2{\r\3\2\2\2|}\5N(\2}~\7")
+        buf.write("\'\2\2~\177\5P)\2\177\17\3\2\2\2\u0080\u0089\7\17\2\2")
+        buf.write("\u0081\u0084\5R*\2\u0082\u0083\7\'\2\2\u0083\u0085\5P")
+        buf.write(")\2\u0084\u0082\3\2\2\2\u0084\u0085\3\2\2\2\u0085\u008a")
+        buf.write("\3\2\2\2\u0086\u0087\7\13\2\2\u0087\u0088\7:\2\2\u0088")
+        buf.write("\u008a\5\"\22\2\u0089\u0081\3\2\2\2\u0089\u0086\3\2\2")
+        buf.write("\2\u008a\21\3\2\2\2\u008b\u008c\7\f\2\2\u008c\u008d\7")
+        buf.write(":\2\2\u008d\23\3\2\2\2\u008e\u008f\7\r\2\2\u008f\u0090")
+        buf.write("\5(\25\2\u0090\u0091\7\25\2\2\u0091\u0095\5\4\3\2\u0092")
+        buf.write("\u0094\5\26\f\2\u0093\u0092\3\2\2\2\u0094\u0097\3\2\2")
+        buf.write("\2\u0095\u0093\3\2\2\2\u0095\u0096\3\2\2\2\u0096\u0099")
+        buf.write("\3\2\2\2\u0097\u0095\3\2\2\2\u0098\u009a\5\30\r\2\u0099")
+        buf.write("\u0098\3\2\2\2\u0099\u009a\3\2\2\2\u009a\u009b\3\2\2\2")
+        buf.write("\u009b\u009c\7\b\2\2\u009c\25\3\2\2\2\u009d\u009e\7\7")
+        buf.write("\2\2\u009e\u009f\5(\25\2\u009f\u00a0\7\25\2\2\u00a0\u00a1")
+        buf.write("\5\4\3\2\u00a1\27\3\2\2\2\u00a2\u00a3\7\6\2\2\u00a3\u00a4")
+        buf.write("\5\4\3\2\u00a4\31\3\2\2\2\u00a5\u00b6\7\n\2\2\u00a6\u00a7")
+        buf.write("\7:\2\2\u00a7\u00a8\7\'\2\2\u00a8\u00a9\5(\25\2\u00a9")
+        buf.write("\u00aa\7\65\2\2\u00aa\u00ad\5(\25\2\u00ab\u00ac\7\65\2")
+        buf.write("\2\u00ac\u00ae\5(\25\2\u00ad\u00ab\3\2\2\2\u00ad\u00ae")
+        buf.write("\3\2\2\2\u00ae\u00af\3\2\2\2\u00af\u00b0\5\b\5\2\u00b0")
+        buf.write("\u00b7\3\2\2\2\u00b1\u00b2\5R*\2\u00b2\u00b3\7\16\2\2")
+        buf.write("\u00b3\u00b4\5P)\2\u00b4\u00b5\5\b\5\2\u00b5\u00b7\3\2")
+        buf.write("\2\2\u00b6\u00a6\3\2\2\2\u00b6\u00b1\3\2\2\2\u00b7\33")
+        buf.write("\3\2\2\2\u00b8\u00b9\7\13\2\2\u00b9\u00be\5\36\20\2\u00ba")
+        buf.write("\u00bb\7\64\2\2\u00bb\u00bc\7:\2\2\u00bc\u00bf\5\"\22")
+        buf.write("\2\u00bd\u00bf\5\"\22\2\u00be\u00ba\3\2\2\2\u00be\u00bd")
+        buf.write("\3\2\2\2\u00bf\35\3\2\2\2\u00c0\u00c5\7:\2\2\u00c1\u00c2")
+        buf.write("\78\2\2\u00c2\u00c4\7:\2\2\u00c3\u00c1\3\2\2\2\u00c4\u00c7")
+        buf.write("\3\2\2\2\u00c5\u00c3\3\2\2\2\u00c5\u00c6\3\2\2\2\u00c6")
+        buf.write("\37\3\2\2\2\u00c7\u00c5\3\2\2\2\u00c8\u00c9\7\13\2\2\u00c9")
+        buf.write("\u00ca\5\"\22\2\u00ca!\3\2\2\2\u00cb\u00cc\7-\2\2\u00cc")
+        buf.write("\u00cd\5$\23\2\u00cd\u00ce\7.\2\2\u00ce\u00cf\5\4\3\2")
+        buf.write("\u00cf\u00d0\7\b\2\2\u00d0#\3\2\2\2\u00d1\u00d4\5R*\2")
+        buf.write("\u00d2\u00d3\7\65\2\2\u00d3\u00d5\7\66\2\2\u00d4\u00d2")
+        buf.write("\3\2\2\2\u00d4\u00d5\3\2\2\2\u00d5\u00da\3\2\2\2\u00d6")
+        buf.write("\u00d8\7\66\2\2\u00d7\u00d6\3\2\2\2\u00d7\u00d8\3\2\2")
+        buf.write("\2\u00d8\u00da\3\2\2\2\u00d9\u00d1\3\2\2\2\u00d9\u00d7")
+        buf.write("\3\2\2\2\u00da%\3\2\2\2\u00db\u00dd\7\24\2\2\u00dc\u00de")
+        buf.write("\5P)\2\u00dd\u00dc\3\2\2\2\u00dd\u00de\3\2\2\2\u00de\u00e0")
+        buf.write("\3\2\2\2\u00df\u00e1\79\2\2\u00e0\u00df\3\2\2\2\u00e0")
+        buf.write("\u00e1\3\2\2\2\u00e1\'\3\2\2\2\u00e2\u00e3\5*\26\2\u00e3")
+        buf.write(")\3\2\2\2\u00e4\u00e9\5,\27\2\u00e5\u00e6\7\22\2\2\u00e6")
+        buf.write("\u00e8\5,\27\2\u00e7\u00e5\3\2\2\2\u00e8\u00eb\3\2\2\2")
+        buf.write("\u00e9\u00e7\3\2\2\2\u00e9\u00ea\3\2\2\2\u00ea+\3\2\2")
+        buf.write("\2\u00eb\u00e9\3\2\2\2\u00ec\u00f1\5.\30\2\u00ed\u00ee")
+        buf.write("\7\3\2\2\u00ee\u00f0\5.\30\2\u00ef\u00ed\3\2\2\2\u00f0")
+        buf.write("\u00f3\3\2\2\2\u00f1\u00ef\3\2\2\2\u00f1\u00f2\3\2\2\2")
+        buf.write("\u00f2-\3\2\2\2\u00f3\u00f1\3\2\2\2\u00f4\u00f7\5\60\31")
+        buf.write("\2\u00f5\u00f6\t\2\2\2\u00f6\u00f8\5\60\31\2\u00f7\u00f5")
+        buf.write("\3\2\2\2\u00f7\u00f8\3\2\2\2\u00f8/\3\2\2\2\u00f9\u00fe")
+        buf.write("\5\62\32\2\u00fa\u00fb\7\67\2\2\u00fb\u00fd\5\62\32\2")
+        buf.write("\u00fc\u00fa\3\2\2\2\u00fd\u0100\3\2\2\2\u00fe\u00fc\3")
+        buf.write("\2\2\2\u00fe\u00ff\3\2\2\2\u00ff\61\3\2\2\2\u0100\u00fe")
+        buf.write("\3\2\2\2\u0101\u0106\5\64\33\2\u0102\u0103\t\3\2\2\u0103")
+        buf.write("\u0105\5\64\33\2\u0104\u0102\3\2\2\2\u0105\u0108\3\2\2")
+        buf.write("\2\u0106\u0104\3\2\2\2\u0106\u0107\3\2\2\2\u0107\63\3")
+        buf.write("\2\2\2\u0108\u0106\3\2\2\2\u0109\u010e\5\66\34\2\u010a")
+        buf.write("\u010b\t\4\2\2\u010b\u010d\5\66\34\2\u010c\u010a\3\2\2")
+        buf.write("\2\u010d\u0110\3\2\2\2\u010e\u010c\3\2\2\2\u010e\u010f")
+        buf.write("\3\2\2\2\u010f\65\3\2\2\2\u0110\u010e\3\2\2\2\u0111\u0116")
+        buf.write("\58\35\2\u0112\u0113\t\5\2\2\u0113\u0115\58\35\2\u0114")
+        buf.write("\u0112\3\2\2\2\u0115\u0118\3\2\2\2\u0116\u0114\3\2\2\2")
+        buf.write("\u0116\u0117\3\2\2\2\u0117\67\3\2\2\2\u0118\u0116\3\2")
+        buf.write("\2\2\u0119\u011a\7\32\2\2\u011a\u0123\58\35\2\u011b\u011c")
+        buf.write("\7 \2\2\u011c\u0123\5:\36\2\u011d\u011e\7\21\2\2\u011e")
+        buf.write("\u0123\58\35\2\u011f\u0120\7*\2\2\u0120\u0123\58\35\2")
+        buf.write("\u0121\u0123\5:\36\2\u0122\u0119\3\2\2\2\u0122\u011b\3")
+        buf.write("\2\2\2\u0122\u011d\3\2\2\2\u0122\u011f\3\2\2\2\u0122\u0121")
+        buf.write("\3\2\2\2\u01239\3\2\2\2\u0124\u0129\5<\37\2\u0125\u0126")
+        buf.write("\7\37\2\2\u0126\u0128\5<\37\2\u0127\u0125\3\2\2\2\u0128")
+        buf.write("\u012b\3\2\2\2\u0129\u0127\3\2\2\2\u0129\u012a\3\2\2\2")
+        buf.write("\u012a;\3\2\2\2\u012b\u0129\3\2\2\2\u012c\u0136\5> \2")
+        buf.write("\u012d\u0136\5 \21\2\u012e\u0136\5D#\2\u012f\u0136\7\66")
+        buf.write("\2\2\u0130\u0136\7;\2\2\u0131\u0136\7<\2\2\u0132\u0136")
+        buf.write("\7\20\2\2\u0133\u0136\7\26\2\2\u0134\u0136\7\t\2\2\u0135")
+        buf.write("\u012c\3\2\2\2\u0135\u012d\3\2\2\2\u0135\u012e\3\2\2\2")
+        buf.write("\u0135\u012f\3\2\2\2\u0135\u0130\3\2\2\2\u0135\u0131\3")
+        buf.write("\2\2\2\u0135\u0132\3\2\2\2\u0135\u0133\3\2\2\2\u0135\u0134")
+        buf.write("\3\2\2\2\u0136=\3\2\2\2\u0137\u013b\5@!\2\u0138\u013a")
+        buf.write("\5B\"\2\u0139\u0138\3\2\2\2\u013a\u013d\3\2\2\2\u013b")
+        buf.write("\u0139\3\2\2\2\u013b\u013c\3\2\2\2\u013c?\3\2\2\2\u013d")
+        buf.write("\u013b\3\2\2\2\u013e\u013f\7-\2\2\u013f\u0140\5(\25\2")
+        buf.write("\u0140\u0141\7.\2\2\u0141\u0144\3\2\2\2\u0142\u0144\7")
+        buf.write(":\2\2\u0143\u013e\3\2\2\2\u0143\u0142\3\2\2\2\u0144A\3")
+        buf.write("\2\2\2\u0145\u0146\78\2\2\u0146\u0160\7:\2\2\u0147\u0148")
+        buf.write("\7\61\2\2\u0148\u0149\5(\25\2\u0149\u014a\7\62\2\2\u014a")
+        buf.write("\u0160\3\2\2\2\u014b\u014c\7\64\2\2\u014c\u014d\7:\2\2")
+        buf.write("\u014d\u014f\7-\2\2\u014e\u0150\5P)\2\u014f\u014e\3\2")
+        buf.write("\2\2\u014f\u0150\3\2\2\2\u0150\u0151\3\2\2\2\u0151\u0160")
+        buf.write("\7.\2\2\u0152\u0153\7\64\2\2\u0153\u0154\7:\2\2\u0154")
+        buf.write("\u0160\5D#\2\u0155\u0156\7\64\2\2\u0156\u0157\7:\2\2\u0157")
+        buf.write("\u0160\7<\2\2\u0158\u015a\7-\2\2\u0159\u015b\5P)\2\u015a")
+        buf.write("\u0159\3\2\2\2\u015a\u015b\3\2\2\2\u015b\u015c\3\2\2\2")
+        buf.write("\u015c\u0160\7.\2\2\u015d\u0160\5D#\2\u015e\u0160\7<\2")
+        buf.write("\2\u015f\u0145\3\2\2\2\u015f\u0147\3\2\2\2\u015f\u014b")
+        buf.write("\3\2\2\2\u015f\u0152\3\2\2\2\u015f\u0155\3\2\2\2\u015f")
+        buf.write("\u0158\3\2\2\2\u015f\u015d\3\2\2\2\u015f\u015e\3\2\2\2")
+        buf.write("\u0160C\3\2\2\2\u0161\u0163\7/\2\2\u0162\u0164\5F$\2\u0163")
+        buf.write("\u0162\3\2\2\2\u0163\u0164\3\2\2\2\u0164\u0165\3\2\2\2")
+        buf.write("\u0165\u0166\7\60\2\2\u0166E\3\2\2\2\u0167\u016d\5H%\2")
+        buf.write("\u0168\u0169\5J&\2\u0169\u016a\5H%\2\u016a\u016c\3\2\2")
+        buf.write("\2\u016b\u0168\3\2\2\2\u016c\u016f\3\2\2\2\u016d\u016b")
+        buf.write("\3\2\2\2\u016d\u016e\3\2\2\2\u016e\u0171\3\2\2\2\u016f")
+        buf.write("\u016d\3\2\2\2\u0170\u0172\5J&\2\u0171\u0170\3\2\2\2\u0171")
+        buf.write("\u0172\3\2\2\2\u0172G\3\2\2\2\u0173\u0174\7\61\2\2\u0174")
+        buf.write("\u0175\5(\25\2\u0175\u0176\7\62\2\2\u0176\u0177\7\'\2")
+        buf.write("\2\u0177\u0178\5(\25\2\u0178\u017e\3\2\2\2\u0179\u017a")
+        buf.write("\7:\2\2\u017a\u017b\7\'\2\2\u017b\u017e\5(\25\2\u017c")
+        buf.write("\u017e\5(\25\2\u017d\u0173\3\2\2\2\u017d\u0179\3\2\2\2")
+        buf.write("\u017d\u017c\3\2\2\2\u017eI\3\2\2\2\u017f\u0180\t\6\2")
+        buf.write("\2\u0180K\3\2\2\2\u0181\u0182\7\63\2\2\u0182\u0183\7:")
+        buf.write("\2\2\u0183\u0184\7\63\2\2\u0184M\3\2\2\2\u0185\u018a\5")
+        buf.write("> \2\u0186\u0187\7\65\2\2\u0187\u0189\5> \2\u0188\u0186")
+        buf.write("\3\2\2\2\u0189\u018c\3\2\2\2\u018a\u0188\3\2\2\2\u018a")
+        buf.write("\u018b\3\2\2\2\u018bO\3\2\2\2\u018c\u018a\3\2\2\2\u018d")
+        buf.write("\u0192\5(\25\2\u018e\u018f\7\65\2\2\u018f\u0191\5(\25")
+        buf.write("\2\u0190\u018e\3\2\2\2\u0191\u0194\3\2\2\2\u0192\u0190")
+        buf.write("\3\2\2\2\u0192\u0193\3\2\2\2\u0193Q\3\2\2\2\u0194\u0192")
+        buf.write("\3\2\2\2\u0195\u019a\7:\2\2\u0196\u0197\7\65\2\2\u0197")
+        buf.write("\u0199\7:\2\2\u0198\u0196\3\2\2\2\u0199\u019c\3\2\2\2")
+        buf.write("\u019a\u0198\3\2\2\2\u019a\u019b\3\2\2\2\u019bS\3\2\2")
+        buf.write("\2\u019c\u019a\3\2\2\2(Z^m\u0084\u0089\u0095\u0099\u00ad")
+        buf.write("\u00b6\u00be\u00c5\u00d4\u00d7\u00d9\u00dd\u00e0\u00e9")
+        buf.write("\u00f1\u00f7\u00fe\u0106\u010e\u0116\u0122\u0129\u0135")
+        buf.write("\u013b\u0143\u014f\u015a\u015f\u0163\u016d\u0171\u017d")
+        buf.write("\u018a\u0192\u019a")
         return buf.getvalue()
 
 
@@ -209,21 +214,23 @@ class LuaParser ( Parser ):
                      "'elseif'", "'end'", "'false'", "'for'", "'function'", 
                      "'goto'", "'if'", "'in'", "'local'", "'nil'", "'not'", 
                      "'or'", "'repeat'", "'return'", "'then'", "'true'", 
-                     "'until'", "'while'", "'+'", "'-'", "'*'", "'/'", "'%'", 
-                     "'^'", "'#'", "'=='", "'~='", "'<='", "'>='", "'<'", 
-                     "'>'", "'='", "'('", "')'", "'{'", "'}'", "'['", "']'", 
-                     "'::'", "':'", "','", "'...'", "'..'", "'.'", "';'" ]
+                     "'until'", "'while'", "'+'", "'-'", "'*'", "'/'", "'//'", 
+                     "'%'", "'^'", "'#'", "'=='", "'~='", "'<='", "'>='", 
+                     "'<'", "'>'", "'='", "'&'", "'|'", "'~'", "'>>'", "'<<'", 
+                     "'('", "')'", "'{'", "'}'", "'['", "']'", "'::'", "':'", 
+                     "','", "'...'", "'..'", "'.'", "';'" ]
 
     symbolicNames = [ "<INVALID>", "AND", "BREAK", "DO", "ELSE", "ELSEIF", 
                       "END", "FALSE", "FOR", "FUNCTION", "GOTO", "IF", "IN", 
                       "LOCAL", "NIL", "NOT", "OR", "REPEAT", "RETURN", "THEN", 
                       "TRUE", "UNTIL", "WHILE", "ADD", "MINUS", "MULT", 
-                      "DIV", "MOD", "POW", "LENGTH", "EQ", "NEQ", "LTEQ", 
-                      "GTEQ", "LT", "GT", "ASSIGN", "OPAR", "CPAR", "OBRACE", 
-                      "CBRACE", "OBRACK", "CBRACK", "COLCOL", "COL", "COMMA", 
-                      "VARARGS", "CONCAT", "DOT", "SEMCOL", "NAME", "NUMBER", 
-                      "STRING", "COMMENT", "LINE_COMMENT", "SPACE", "SHEBANG", 
-                      "LongBracket" ]
+                      "DIV", "FLOOR", "MOD", "POW", "LENGTH", "EQ", "NEQ", 
+                      "LTEQ", "GTEQ", "LT", "GT", "ASSIGN", "BITAND", "BITOR", 
+                      "BITNOT", "BITRSHIFT", "BITRLEFT", "OPAR", "CPAR", 
+                      "OBRACE", "CBRACE", "OBRACK", "CBRACK", "COLCOL", 
+                      "COL", "COMMA", "VARARGS", "CONCAT", "DOT", "SEMCOL", 
+                      "NAME", "NUMBER", "STRING", "COMMENT", "LINE_COMMENT", 
+                      "SPACE", "SHEBANG", "LongBracket" ]
 
     RULE_chunk = 0
     RULE_block = 1
@@ -251,29 +258,31 @@ class LuaParser ( Parser ):
     RULE_concat_expr = 23
     RULE_add_expr = 24
     RULE_mult_expr = 25
-    RULE_unary_expr = 26
-    RULE_pow_expr = 27
-    RULE_atom = 28
-    RULE_var = 29
-    RULE_callee = 30
-    RULE_tail = 31
-    RULE_table_constructor = 32
-    RULE_field_list = 33
-    RULE_field = 34
-    RULE_field_sep = 35
-    RULE_label = 36
-    RULE_var_list = 37
-    RULE_expr_list = 38
-    RULE_name_list = 39
+    RULE_bitwise_expr = 26
+    RULE_unary_expr = 27
+    RULE_pow_expr = 28
+    RULE_atom = 29
+    RULE_var = 30
+    RULE_callee = 31
+    RULE_tail = 32
+    RULE_table_constructor = 33
+    RULE_field_list = 34
+    RULE_field = 35
+    RULE_field_sep = 36
+    RULE_label = 37
+    RULE_var_list = 38
+    RULE_expr_list = 39
+    RULE_name_list = 40
 
     ruleNames =  [ "chunk", "block", "stat", "do_block", "while_stat", "repeat_stat", 
                    "assignment", "local", "goto_stat", "if_stat", "elseif_stat", 
                    "else_stat", "for_stat", "function", "names", "function_literal", 
                    "func_body", "param_list", "ret_stat", "expr", "or_expr", 
                    "and_expr", "rel_expr", "concat_expr", "add_expr", "mult_expr", 
-                   "unary_expr", "pow_expr", "atom", "var", "callee", "tail", 
-                   "table_constructor", "field_list", "field", "field_sep", 
-                   "label", "var_list", "expr_list", "name_list" ]
+                   "bitwise_expr", "unary_expr", "pow_expr", "atom", "var", 
+                   "callee", "tail", "table_constructor", "field_list", 
+                   "field", "field_sep", "label", "var_list", "expr_list", 
+                   "name_list" ]
 
     EOF = Token.EOF
     AND=1
@@ -302,37 +311,43 @@ class LuaParser ( Parser ):
     MINUS=24
     MULT=25
     DIV=26
-    MOD=27
-    POW=28
-    LENGTH=29
-    EQ=30
-    NEQ=31
-    LTEQ=32
-    GTEQ=33
-    LT=34
-    GT=35
-    ASSIGN=36
-    OPAR=37
-    CPAR=38
-    OBRACE=39
-    CBRACE=40
-    OBRACK=41
-    CBRACK=42
-    COLCOL=43
-    COL=44
-    COMMA=45
-    VARARGS=46
-    CONCAT=47
-    DOT=48
-    SEMCOL=49
-    NAME=50
-    NUMBER=51
-    STRING=52
-    COMMENT=53
-    LINE_COMMENT=54
-    SPACE=55
-    SHEBANG=56
-    LongBracket=57
+    FLOOR=27
+    MOD=28
+    POW=29
+    LENGTH=30
+    EQ=31
+    NEQ=32
+    LTEQ=33
+    GTEQ=34
+    LT=35
+    GT=36
+    ASSIGN=37
+    BITAND=38
+    BITOR=39
+    BITNOT=40
+    BITRSHIFT=41
+    BITRLEFT=42
+    OPAR=43
+    CPAR=44
+    OBRACE=45
+    CBRACE=46
+    OBRACK=47
+    CBRACK=48
+    COLCOL=49
+    COL=50
+    COMMA=51
+    VARARGS=52
+    CONCAT=53
+    DOT=54
+    SEMCOL=55
+    NAME=56
+    NUMBER=57
+    STRING=58
+    COMMENT=59
+    LINE_COMMENT=60
+    SPACE=61
+    SHEBANG=62
+    LongBracket=63
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -381,9 +396,9 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 0, self.RULE_chunk)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 80
+            self.state = 82
             self.block()
-            self.state = 81
+            self.state = 83
             self.match(LuaParser.EOF)
         except RecognitionException as re:
             localctx.exception = re
@@ -437,21 +452,21 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 86
+            self.state = 88
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.BREAK) | (1 << LuaParser.DO) | (1 << LuaParser.FOR) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.GOTO) | (1 << LuaParser.IF) | (1 << LuaParser.LOCAL) | (1 << LuaParser.REPEAT) | (1 << LuaParser.WHILE) | (1 << LuaParser.OPAR) | (1 << LuaParser.COLCOL) | (1 << LuaParser.SEMCOL) | (1 << LuaParser.NAME))) != 0):
-                self.state = 83
+                self.state = 85
                 self.stat()
-                self.state = 88
+                self.state = 90
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 90
+            self.state = 92
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==LuaParser.RETURN:
-                self.state = 89
+                self.state = 91
                 self.ret_stat()
 
 
@@ -544,84 +559,84 @@ class LuaParser ( Parser ):
         localctx = LuaParser.StatContext(self, self._ctx, self.state)
         self.enterRule(localctx, 4, self.RULE_stat)
         try:
-            self.state = 105
+            self.state = 107
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,2,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 92
+                self.state = 94
                 self.assignment()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 93
+                self.state = 95
                 self.var(False)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 94
+                self.state = 96
                 self.do_block()
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 95
+                self.state = 97
                 self.while_stat()
                 pass
 
             elif la_ == 5:
                 self.enterOuterAlt(localctx, 5)
-                self.state = 96
+                self.state = 98
                 self.repeat_stat()
                 pass
 
             elif la_ == 6:
                 self.enterOuterAlt(localctx, 6)
-                self.state = 97
+                self.state = 99
                 self.local()
                 pass
 
             elif la_ == 7:
                 self.enterOuterAlt(localctx, 7)
-                self.state = 98
+                self.state = 100
                 self.goto_stat()
                 pass
 
             elif la_ == 8:
                 self.enterOuterAlt(localctx, 8)
-                self.state = 99
+                self.state = 101
                 self.if_stat()
                 pass
 
             elif la_ == 9:
                 self.enterOuterAlt(localctx, 9)
-                self.state = 100
+                self.state = 102
                 self.for_stat()
                 pass
 
             elif la_ == 10:
                 self.enterOuterAlt(localctx, 10)
-                self.state = 101
+                self.state = 103
                 self.function()
                 pass
 
             elif la_ == 11:
                 self.enterOuterAlt(localctx, 11)
-                self.state = 102
+                self.state = 104
                 self.label()
                 pass
 
             elif la_ == 12:
                 self.enterOuterAlt(localctx, 12)
-                self.state = 103
+                self.state = 105
                 self.match(LuaParser.BREAK)
                 pass
 
             elif la_ == 13:
                 self.enterOuterAlt(localctx, 13)
-                self.state = 104
+                self.state = 106
                 self.match(LuaParser.SEMCOL)
                 pass
 
@@ -676,11 +691,11 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 6, self.RULE_do_block)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 107
-            self.match(LuaParser.DO)
-            self.state = 108
-            self.block()
             self.state = 109
+            self.match(LuaParser.DO)
+            self.state = 110
+            self.block()
+            self.state = 111
             self.match(LuaParser.END)
         except RecognitionException as re:
             localctx.exception = re
@@ -733,11 +748,11 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 8, self.RULE_while_stat)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 111
-            self.match(LuaParser.WHILE)
-            self.state = 112
-            self.expr()
             self.state = 113
+            self.match(LuaParser.WHILE)
+            self.state = 114
+            self.expr()
+            self.state = 115
             self.do_block()
         except RecognitionException as re:
             localctx.exception = re
@@ -793,13 +808,13 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 10, self.RULE_repeat_stat)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 115
-            self.match(LuaParser.REPEAT)
-            self.state = 116
-            self.block()
             self.state = 117
-            self.match(LuaParser.UNTIL)
+            self.match(LuaParser.REPEAT)
             self.state = 118
+            self.block()
+            self.state = 119
+            self.match(LuaParser.UNTIL)
+            self.state = 120
             self.expr()
         except RecognitionException as re:
             localctx.exception = re
@@ -852,11 +867,11 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 12, self.RULE_assignment)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 120
-            self.var_list()
-            self.state = 121
-            self.match(LuaParser.ASSIGN)
             self.state = 122
+            self.var_list()
+            self.state = 123
+            self.match(LuaParser.ASSIGN)
+            self.state = 124
             self.expr_list()
         except RecognitionException as re:
             localctx.exception = re
@@ -923,31 +938,31 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 124
+            self.state = 126
             self.match(LuaParser.LOCAL)
-            self.state = 133
+            self.state = 135
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [LuaParser.NAME]:
-                self.state = 125
+                self.state = 127
                 self.name_list()
-                self.state = 128
+                self.state = 130
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==LuaParser.ASSIGN:
-                    self.state = 126
+                    self.state = 128
                     self.match(LuaParser.ASSIGN)
-                    self.state = 127
+                    self.state = 129
                     self.expr_list()
 
 
                 pass
             elif token in [LuaParser.FUNCTION]:
-                self.state = 130
-                self.match(LuaParser.FUNCTION)
-                self.state = 131
-                self.match(LuaParser.NAME)
                 self.state = 132
+                self.match(LuaParser.FUNCTION)
+                self.state = 133
+                self.match(LuaParser.NAME)
+                self.state = 134
                 self.func_body()
                 pass
             else:
@@ -999,9 +1014,9 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 16, self.RULE_goto_stat)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 135
+            self.state = 137
             self.match(LuaParser.GOTO)
-            self.state = 136
+            self.state = 138
             self.match(LuaParser.NAME)
         except RecognitionException as re:
             localctx.exception = re
@@ -1072,33 +1087,33 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 138
-            self.match(LuaParser.IF)
-            self.state = 139
-            self.expr()
             self.state = 140
-            self.match(LuaParser.THEN)
+            self.match(LuaParser.IF)
             self.state = 141
+            self.expr()
+            self.state = 142
+            self.match(LuaParser.THEN)
+            self.state = 143
             self.block()
-            self.state = 145
+            self.state = 147
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.ELSEIF:
-                self.state = 142
+                self.state = 144
                 self.elseif_stat()
-                self.state = 147
+                self.state = 149
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 149
+            self.state = 151
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==LuaParser.ELSE:
-                self.state = 148
+                self.state = 150
                 self.else_stat()
 
 
-            self.state = 151
+            self.state = 153
             self.match(LuaParser.END)
         except RecognitionException as re:
             localctx.exception = re
@@ -1154,13 +1169,13 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 20, self.RULE_elseif_stat)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 153
-            self.match(LuaParser.ELSEIF)
-            self.state = 154
-            self.expr()
             self.state = 155
-            self.match(LuaParser.THEN)
+            self.match(LuaParser.ELSEIF)
             self.state = 156
+            self.expr()
+            self.state = 157
+            self.match(LuaParser.THEN)
+            self.state = 158
             self.block()
         except RecognitionException as re:
             localctx.exception = re
@@ -1209,9 +1224,9 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 22, self.RULE_else_stat)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 158
+            self.state = 160
             self.match(LuaParser.ELSE)
-            self.state = 159
+            self.state = 161
             self.block()
         except RecognitionException as re:
             localctx.exception = re
@@ -1291,44 +1306,44 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 161
+            self.state = 163
             self.match(LuaParser.FOR)
-            self.state = 178
+            self.state = 180
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
             if la_ == 1:
-                self.state = 162
-                self.match(LuaParser.NAME)
-                self.state = 163
-                self.match(LuaParser.ASSIGN)
                 self.state = 164
-                self.expr()
+                self.match(LuaParser.NAME)
                 self.state = 165
-                self.match(LuaParser.COMMA)
+                self.match(LuaParser.ASSIGN)
                 self.state = 166
                 self.expr()
-                self.state = 169
+                self.state = 167
+                self.match(LuaParser.COMMA)
+                self.state = 168
+                self.expr()
+                self.state = 171
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==LuaParser.COMMA:
-                    self.state = 167
+                    self.state = 169
                     self.match(LuaParser.COMMA)
-                    self.state = 168
+                    self.state = 170
                     self.expr()
 
 
-                self.state = 171
+                self.state = 173
                 self.do_block()
                 pass
 
             elif la_ == 2:
-                self.state = 173
-                self.name_list()
-                self.state = 174
-                self.match(LuaParser.IN)
                 self.state = 175
-                self.expr_list()
+                self.name_list()
                 self.state = 176
+                self.match(LuaParser.IN)
+                self.state = 177
+                self.expr_list()
+                self.state = 178
                 self.do_block()
                 pass
 
@@ -1390,23 +1405,23 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 26, self.RULE_function)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 180
+            self.state = 182
             self.match(LuaParser.FUNCTION)
-            self.state = 181
+            self.state = 183
             self.names()
-            self.state = 186
+            self.state = 188
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [LuaParser.COL]:
-                self.state = 182
-                self.match(LuaParser.COL)
-                self.state = 183
-                self.match(LuaParser.NAME)
                 self.state = 184
+                self.match(LuaParser.COL)
+                self.state = 185
+                self.match(LuaParser.NAME)
+                self.state = 186
                 self.func_body()
                 pass
             elif token in [LuaParser.OPAR]:
-                self.state = 185
+                self.state = 187
                 self.func_body()
                 pass
             else:
@@ -1465,17 +1480,17 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 188
+            self.state = 190
             self.match(LuaParser.NAME)
-            self.state = 193
+            self.state = 195
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.DOT:
-                self.state = 189
+                self.state = 191
                 self.match(LuaParser.DOT)
-                self.state = 190
+                self.state = 192
                 self.match(LuaParser.NAME)
-                self.state = 195
+                self.state = 197
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1526,9 +1541,9 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 30, self.RULE_function_literal)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 196
+            self.state = 198
             self.match(LuaParser.FUNCTION)
-            self.state = 197
+            self.state = 199
             self.func_body()
         except RecognitionException as re:
             localctx.exception = re
@@ -1587,15 +1602,15 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 32, self.RULE_func_body)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 199
-            self.match(LuaParser.OPAR)
-            self.state = 200
-            self.param_list()
             self.state = 201
-            self.match(LuaParser.CPAR)
+            self.match(LuaParser.OPAR)
             self.state = 202
-            self.block()
+            self.param_list()
             self.state = 203
+            self.match(LuaParser.CPAR)
+            self.state = 204
+            self.block()
+            self.state = 205
             self.match(LuaParser.END)
         except RecognitionException as re:
             localctx.exception = re
@@ -1647,31 +1662,31 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 34, self.RULE_param_list)
         self._la = 0 # Token type
         try:
-            self.state = 213
+            self.state = 215
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [LuaParser.NAME]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 205
+                self.state = 207
                 self.name_list()
-                self.state = 208
+                self.state = 210
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==LuaParser.COMMA:
-                    self.state = 206
+                    self.state = 208
                     self.match(LuaParser.COMMA)
-                    self.state = 207
+                    self.state = 209
                     self.match(LuaParser.VARARGS)
 
 
                 pass
             elif token in [LuaParser.CPAR, LuaParser.VARARGS]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 211
+                self.state = 213
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==LuaParser.VARARGS:
-                    self.state = 210
+                    self.state = 212
                     self.match(LuaParser.VARARGS)
 
 
@@ -1730,21 +1745,21 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 215
-            self.match(LuaParser.RETURN)
             self.state = 217
+            self.match(LuaParser.RETURN)
+            self.state = 219
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
-                self.state = 216
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.BITNOT) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
+                self.state = 218
                 self.expr_list()
 
 
-            self.state = 220
+            self.state = 222
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==LuaParser.SEMCOL:
-                self.state = 219
+                self.state = 221
                 self.match(LuaParser.SEMCOL)
 
 
@@ -1792,7 +1807,7 @@ class LuaParser ( Parser ):
         self.enterRule(localctx, 38, self.RULE_expr)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 222
+            self.state = 224
             self.or_expr()
         except RecognitionException as re:
             localctx.exception = re
@@ -1848,17 +1863,17 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 224
+            self.state = 226
             self.and_expr()
-            self.state = 229
+            self.state = 231
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.OR:
-                self.state = 225
+                self.state = 227
                 self.match(LuaParser.OR)
-                self.state = 226
+                self.state = 228
                 self.and_expr()
-                self.state = 231
+                self.state = 233
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1916,17 +1931,17 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 232
+            self.state = 234
             self.rel_expr()
-            self.state = 237
+            self.state = 239
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.AND:
-                self.state = 233
+                self.state = 235
                 self.match(LuaParser.AND)
-                self.state = 234
+                self.state = 236
                 self.rel_expr()
-                self.state = 239
+                self.state = 241
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1996,20 +2011,20 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 240
+            self.state = 242
             self.concat_expr()
-            self.state = 243
+            self.state = 245
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.EQ) | (1 << LuaParser.NEQ) | (1 << LuaParser.LTEQ) | (1 << LuaParser.GTEQ) | (1 << LuaParser.LT) | (1 << LuaParser.GT))) != 0):
-                self.state = 241
+                self.state = 243
                 _la = self._input.LA(1)
                 if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.EQ) | (1 << LuaParser.NEQ) | (1 << LuaParser.LTEQ) | (1 << LuaParser.GTEQ) | (1 << LuaParser.LT) | (1 << LuaParser.GT))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 242
+                self.state = 244
                 self.concat_expr()
 
 
@@ -2067,17 +2082,17 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 245
+            self.state = 247
             self.add_expr()
-            self.state = 250
+            self.state = 252
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.CONCAT:
-                self.state = 246
+                self.state = 248
                 self.match(LuaParser.CONCAT)
-                self.state = 247
+                self.state = 249
                 self.add_expr()
-                self.state = 252
+                self.state = 254
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -2141,22 +2156,22 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 253
+            self.state = 255
             self.mult_expr()
-            self.state = 258
+            self.state = 260
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.ADD or _la==LuaParser.MINUS:
-                self.state = 254
+                self.state = 256
                 _la = self._input.LA(1)
                 if not(_la==LuaParser.ADD or _la==LuaParser.MINUS):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 255
+                self.state = 257
                 self.mult_expr()
-                self.state = 260
+                self.state = 262
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -2174,11 +2189,11 @@ class LuaParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def unary_expr(self, i:int=None):
+        def bitwise_expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(LuaParser.Unary_exprContext)
+                return self.getTypedRuleContexts(LuaParser.Bitwise_exprContext)
             else:
-                return self.getTypedRuleContext(LuaParser.Unary_exprContext,i)
+                return self.getTypedRuleContext(LuaParser.Bitwise_exprContext,i)
 
 
         def MULT(self, i:int=None):
@@ -2198,6 +2213,12 @@ class LuaParser ( Parser ):
                 return self.getTokens(LuaParser.MOD)
             else:
                 return self.getToken(LuaParser.MOD, i)
+
+        def FLOOR(self, i:int=None):
+            if i is None:
+                return self.getTokens(LuaParser.FLOOR)
+            else:
+                return self.getToken(LuaParser.FLOOR, i)
 
         def getRuleIndex(self):
             return LuaParser.RULE_mult_expr
@@ -2226,22 +2247,119 @@ class LuaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 261
-            self.unary_expr()
-            self.state = 266
+            self.state = 263
+            self.bitwise_expr()
+            self.state = 268
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.MULT) | (1 << LuaParser.DIV) | (1 << LuaParser.MOD))) != 0):
-                self.state = 262
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.MULT) | (1 << LuaParser.DIV) | (1 << LuaParser.FLOOR) | (1 << LuaParser.MOD))) != 0):
+                self.state = 264
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.MULT) | (1 << LuaParser.DIV) | (1 << LuaParser.MOD))) != 0)):
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.MULT) | (1 << LuaParser.DIV) | (1 << LuaParser.FLOOR) | (1 << LuaParser.MOD))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 263
+                self.state = 265
+                self.bitwise_expr()
+                self.state = 270
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+
+        except RecognitionException as re:
+            localctx.exception = re
+            self._errHandler.reportError(self, re)
+            self._errHandler.recover(self, re)
+        finally:
+            self.exitRule()
+        return localctx
+
+    class Bitwise_exprContext(ParserRuleContext):
+
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
+            self.parser = parser
+
+        def unary_expr(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(LuaParser.Unary_exprContext)
+            else:
+                return self.getTypedRuleContext(LuaParser.Unary_exprContext,i)
+
+
+        def BITAND(self, i:int=None):
+            if i is None:
+                return self.getTokens(LuaParser.BITAND)
+            else:
+                return self.getToken(LuaParser.BITAND, i)
+
+        def BITOR(self, i:int=None):
+            if i is None:
+                return self.getTokens(LuaParser.BITOR)
+            else:
+                return self.getToken(LuaParser.BITOR, i)
+
+        def BITNOT(self, i:int=None):
+            if i is None:
+                return self.getTokens(LuaParser.BITNOT)
+            else:
+                return self.getToken(LuaParser.BITNOT, i)
+
+        def BITRSHIFT(self, i:int=None):
+            if i is None:
+                return self.getTokens(LuaParser.BITRSHIFT)
+            else:
+                return self.getToken(LuaParser.BITRSHIFT, i)
+
+        def BITRLEFT(self, i:int=None):
+            if i is None:
+                return self.getTokens(LuaParser.BITRLEFT)
+            else:
+                return self.getToken(LuaParser.BITRLEFT, i)
+
+        def getRuleIndex(self):
+            return LuaParser.RULE_bitwise_expr
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterBitwise_expr" ):
+                listener.enterBitwise_expr(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitBitwise_expr" ):
+                listener.exitBitwise_expr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBitwise_expr" ):
+                return visitor.visitBitwise_expr(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+
+
+    def bitwise_expr(self):
+
+        localctx = LuaParser.Bitwise_exprContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 52, self.RULE_bitwise_expr)
+        self._la = 0 # Token type
+        try:
+            self.enterOuterAlt(localctx, 1)
+            self.state = 271
+            self.unary_expr()
+            self.state = 276
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.BITAND) | (1 << LuaParser.BITOR) | (1 << LuaParser.BITNOT) | (1 << LuaParser.BITRSHIFT) | (1 << LuaParser.BITRLEFT))) != 0):
+                self.state = 272
+                _la = self._input.LA(1)
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.BITAND) | (1 << LuaParser.BITOR) | (1 << LuaParser.BITNOT) | (1 << LuaParser.BITRSHIFT) | (1 << LuaParser.BITRLEFT))) != 0)):
+                    self._errHandler.recoverInline(self)
+                else:
+                    self._errHandler.reportMatch(self)
+                    self.consume()
+                self.state = 273
                 self.unary_expr()
-                self.state = 268
+                self.state = 278
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -2276,6 +2394,9 @@ class LuaParser ( Parser ):
         def NOT(self):
             return self.getToken(LuaParser.NOT, 0)
 
+        def BITNOT(self):
+            return self.getToken(LuaParser.BITNOT, 0)
+
         def getRuleIndex(self):
             return LuaParser.RULE_unary_expr
 
@@ -2299,35 +2420,42 @@ class LuaParser ( Parser ):
     def unary_expr(self):
 
         localctx = LuaParser.Unary_exprContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 52, self.RULE_unary_expr)
+        self.enterRule(localctx, 54, self.RULE_unary_expr)
         try:
-            self.state = 276
+            self.state = 288
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [LuaParser.MINUS]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 269
+                self.state = 279
                 self.match(LuaParser.MINUS)
-                self.state = 270
+                self.state = 280
                 self.unary_expr()
                 pass
             elif token in [LuaParser.LENGTH]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 271
+                self.state = 281
                 self.match(LuaParser.LENGTH)
-                self.state = 272
+                self.state = 282
                 self.pow_expr()
                 pass
             elif token in [LuaParser.NOT]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 273
+                self.state = 283
                 self.match(LuaParser.NOT)
-                self.state = 274
+                self.state = 284
+                self.unary_expr()
+                pass
+            elif token in [LuaParser.BITNOT]:
+                self.enterOuterAlt(localctx, 4)
+                self.state = 285
+                self.match(LuaParser.BITNOT)
+                self.state = 286
                 self.unary_expr()
                 pass
             elif token in [LuaParser.FALSE, LuaParser.FUNCTION, LuaParser.NIL, LuaParser.TRUE, LuaParser.OPAR, LuaParser.OBRACE, LuaParser.VARARGS, LuaParser.NAME, LuaParser.NUMBER, LuaParser.STRING]:
-                self.enterOuterAlt(localctx, 4)
-                self.state = 275
+                self.enterOuterAlt(localctx, 5)
+                self.state = 287
                 self.pow_expr()
                 pass
             else:
@@ -2346,8 +2474,6 @@ class LuaParser ( Parser ):
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
-            self._atom = None # AtomContext
-            self.a = list() # of AtomContexts
 
         def atom(self, i:int=None):
             if i is None:
@@ -2385,33 +2511,23 @@ class LuaParser ( Parser ):
     def pow_expr(self):
 
         localctx = LuaParser.Pow_exprContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 54, self.RULE_pow_expr)
+        self.enterRule(localctx, 56, self.RULE_pow_expr)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 278
-            localctx._atom = self.atom()
-            localctx.a.append(localctx._atom)
-            self.state = 285
+            self.state = 290
+            self.atom()
+            self.state = 295
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==LuaParser.POW:
-                self.state = 281 
+            while _la==LuaParser.POW:
+                self.state = 291
+                self.match(LuaParser.POW)
+                self.state = 292
+                self.atom()
+                self.state = 297
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while True:
-                    self.state = 279
-                    self.match(LuaParser.POW)
-                    self.state = 280
-                    localctx._atom = self.atom()
-                    localctx.a.append(localctx._atom)
-                    self.state = 283 
-                    self._errHandler.sync(self)
-                    _la = self._input.LA(1)
-                    if not (_la==LuaParser.POW):
-                        break
-
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -2480,54 +2596,54 @@ class LuaParser ( Parser ):
     def atom(self):
 
         localctx = LuaParser.AtomContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 56, self.RULE_atom)
+        self.enterRule(localctx, 58, self.RULE_atom)
         try:
-            self.state = 296
+            self.state = 307
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [LuaParser.OPAR, LuaParser.NAME]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 287
+                self.state = 298
                 self.var(False)
                 pass
             elif token in [LuaParser.FUNCTION]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 288
+                self.state = 299
                 self.function_literal()
                 pass
             elif token in [LuaParser.OBRACE]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 289
+                self.state = 300
                 self.table_constructor()
                 pass
             elif token in [LuaParser.VARARGS]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 290
+                self.state = 301
                 self.match(LuaParser.VARARGS)
                 pass
             elif token in [LuaParser.NUMBER]:
                 self.enterOuterAlt(localctx, 5)
-                self.state = 291
+                self.state = 302
                 self.match(LuaParser.NUMBER)
                 pass
             elif token in [LuaParser.STRING]:
                 self.enterOuterAlt(localctx, 6)
-                self.state = 292
+                self.state = 303
                 self.match(LuaParser.STRING)
                 pass
             elif token in [LuaParser.NIL]:
                 self.enterOuterAlt(localctx, 7)
-                self.state = 293
+                self.state = 304
                 self.match(LuaParser.NIL)
                 pass
             elif token in [LuaParser.TRUE]:
                 self.enterOuterAlt(localctx, 8)
-                self.state = 294
+                self.state = 305
                 self.match(LuaParser.TRUE)
                 pass
             elif token in [LuaParser.FALSE]:
                 self.enterOuterAlt(localctx, 9)
-                self.state = 295
+                self.state = 306
                 self.match(LuaParser.FALSE)
                 pass
             else:
@@ -2583,19 +2699,19 @@ class LuaParser ( Parser ):
     def var(self, assign:bool):
 
         localctx = LuaParser.VarContext(self, self._ctx, self.state, assign)
-        self.enterRule(localctx, 58, self.RULE_var)
+        self.enterRule(localctx, 60, self.RULE_var)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 298
+            self.state = 309
             self.callee(assign)
-            self.state = 302
+            self.state = 313
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,26,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 299
+                    self.state = 310
                     self.tail() 
-                self.state = 304
+                self.state = 315
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,26,self._ctx)
 
@@ -2651,23 +2767,23 @@ class LuaParser ( Parser ):
     def callee(self, assign:bool):
 
         localctx = LuaParser.CalleeContext(self, self._ctx, self.state, assign)
-        self.enterRule(localctx, 60, self.RULE_callee)
+        self.enterRule(localctx, 62, self.RULE_callee)
         try:
-            self.state = 310
+            self.state = 321
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [LuaParser.OPAR]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 305
+                self.state = 316
                 self.match(LuaParser.OPAR)
-                self.state = 306
+                self.state = 317
                 self.expr()
-                self.state = 307
+                self.state = 318
                 self.match(LuaParser.CPAR)
                 pass
             elif token in [LuaParser.NAME]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 309
+                self.state = 320
                 self.match(LuaParser.NAME)
                 pass
             else:
@@ -2746,78 +2862,42 @@ class LuaParser ( Parser ):
     def tail(self):
 
         localctx = LuaParser.TailContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 62, self.RULE_tail)
+        self.enterRule(localctx, 64, self.RULE_tail)
         self._la = 0 # Token type
         try:
-            self.state = 338
+            self.state = 349
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,30,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 312
+                self.state = 323
                 self.match(LuaParser.DOT)
-                self.state = 313
+                self.state = 324
                 self.match(LuaParser.NAME)
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 314
+                self.state = 325
                 self.match(LuaParser.OBRACK)
-                self.state = 315
+                self.state = 326
                 self.expr()
-                self.state = 316
+                self.state = 327
                 self.match(LuaParser.CBRACK)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 318
-                self.match(LuaParser.COL)
-                self.state = 319
-                self.match(LuaParser.NAME)
-                self.state = 320
-                self.match(LuaParser.OPAR)
-                self.state = 322
-                self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
-                    self.state = 321
-                    self.expr_list()
-
-
-                self.state = 324
-                self.match(LuaParser.CPAR)
-                pass
-
-            elif la_ == 4:
-                self.enterOuterAlt(localctx, 4)
-                self.state = 325
-                self.match(LuaParser.COL)
-                self.state = 326
-                self.match(LuaParser.NAME)
-                self.state = 327
-                self.table_constructor()
-                pass
-
-            elif la_ == 5:
-                self.enterOuterAlt(localctx, 5)
-                self.state = 328
-                self.match(LuaParser.COL)
                 self.state = 329
-                self.match(LuaParser.NAME)
+                self.match(LuaParser.COL)
                 self.state = 330
-                self.match(LuaParser.STRING)
-                pass
-
-            elif la_ == 6:
-                self.enterOuterAlt(localctx, 6)
+                self.match(LuaParser.NAME)
                 self.state = 331
                 self.match(LuaParser.OPAR)
                 self.state = 333
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.BITNOT) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
                     self.state = 332
                     self.expr_list()
 
@@ -2826,15 +2906,51 @@ class LuaParser ( Parser ):
                 self.match(LuaParser.CPAR)
                 pass
 
+            elif la_ == 4:
+                self.enterOuterAlt(localctx, 4)
+                self.state = 336
+                self.match(LuaParser.COL)
+                self.state = 337
+                self.match(LuaParser.NAME)
+                self.state = 338
+                self.table_constructor()
+                pass
+
+            elif la_ == 5:
+                self.enterOuterAlt(localctx, 5)
+                self.state = 339
+                self.match(LuaParser.COL)
+                self.state = 340
+                self.match(LuaParser.NAME)
+                self.state = 341
+                self.match(LuaParser.STRING)
+                pass
+
+            elif la_ == 6:
+                self.enterOuterAlt(localctx, 6)
+                self.state = 342
+                self.match(LuaParser.OPAR)
+                self.state = 344
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.BITNOT) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
+                    self.state = 343
+                    self.expr_list()
+
+
+                self.state = 346
+                self.match(LuaParser.CPAR)
+                pass
+
             elif la_ == 7:
                 self.enterOuterAlt(localctx, 7)
-                self.state = 336
+                self.state = 347
                 self.table_constructor()
                 pass
 
             elif la_ == 8:
                 self.enterOuterAlt(localctx, 8)
-                self.state = 337
+                self.state = 348
                 self.match(LuaParser.STRING)
                 pass
 
@@ -2886,21 +3002,21 @@ class LuaParser ( Parser ):
     def table_constructor(self):
 
         localctx = LuaParser.Table_constructorContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 64, self.RULE_table_constructor)
+        self.enterRule(localctx, 66, self.RULE_table_constructor)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 340
+            self.state = 351
             self.match(LuaParser.OBRACE)
-            self.state = 342
+            self.state = 353
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.OBRACK) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
-                self.state = 341
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << LuaParser.FALSE) | (1 << LuaParser.FUNCTION) | (1 << LuaParser.NIL) | (1 << LuaParser.NOT) | (1 << LuaParser.TRUE) | (1 << LuaParser.MINUS) | (1 << LuaParser.LENGTH) | (1 << LuaParser.BITNOT) | (1 << LuaParser.OPAR) | (1 << LuaParser.OBRACE) | (1 << LuaParser.OBRACK) | (1 << LuaParser.VARARGS) | (1 << LuaParser.NAME) | (1 << LuaParser.NUMBER) | (1 << LuaParser.STRING))) != 0):
+                self.state = 352
                 self.field_list()
 
 
-            self.state = 344
+            self.state = 355
             self.match(LuaParser.CBRACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -2953,30 +3069,30 @@ class LuaParser ( Parser ):
     def field_list(self):
 
         localctx = LuaParser.Field_listContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 66, self.RULE_field_list)
+        self.enterRule(localctx, 68, self.RULE_field_list)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 346
+            self.state = 357
             self.field()
-            self.state = 352
+            self.state = 363
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,32,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 347
+                    self.state = 358
                     self.field_sep()
-                    self.state = 348
+                    self.state = 359
                     self.field() 
-                self.state = 354
+                self.state = 365
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,32,self._ctx)
 
-            self.state = 356
+            self.state = 367
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==LuaParser.COMMA or _la==LuaParser.SEMCOL:
-                self.state = 355
+                self.state = 366
                 self.field_sep()
 
 
@@ -3036,38 +3152,38 @@ class LuaParser ( Parser ):
     def field(self):
 
         localctx = LuaParser.FieldContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 68, self.RULE_field)
+        self.enterRule(localctx, 70, self.RULE_field)
         try:
-            self.state = 368
+            self.state = 379
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,34,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 358
+                self.state = 369
                 self.match(LuaParser.OBRACK)
-                self.state = 359
+                self.state = 370
                 self.expr()
-                self.state = 360
+                self.state = 371
                 self.match(LuaParser.CBRACK)
-                self.state = 361
+                self.state = 372
                 self.match(LuaParser.ASSIGN)
-                self.state = 362
+                self.state = 373
                 self.expr()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 364
+                self.state = 375
                 self.match(LuaParser.NAME)
-                self.state = 365
+                self.state = 376
                 self.match(LuaParser.ASSIGN)
-                self.state = 366
+                self.state = 377
                 self.expr()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 367
+                self.state = 378
                 self.expr()
                 pass
 
@@ -3115,11 +3231,11 @@ class LuaParser ( Parser ):
     def field_sep(self):
 
         localctx = LuaParser.Field_sepContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 70, self.RULE_field_sep)
+        self.enterRule(localctx, 72, self.RULE_field_sep)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 370
+            self.state = 381
             _la = self._input.LA(1)
             if not(_la==LuaParser.COMMA or _la==LuaParser.SEMCOL):
                 self._errHandler.recoverInline(self)
@@ -3172,14 +3288,14 @@ class LuaParser ( Parser ):
     def label(self):
 
         localctx = LuaParser.LabelContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 72, self.RULE_label)
+        self.enterRule(localctx, 74, self.RULE_label)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 372
+            self.state = 383
             self.match(LuaParser.COLCOL)
-            self.state = 373
+            self.state = 384
             self.match(LuaParser.NAME)
-            self.state = 374
+            self.state = 385
             self.match(LuaParser.COLCOL)
         except RecognitionException as re:
             localctx.exception = re
@@ -3231,21 +3347,21 @@ class LuaParser ( Parser ):
     def var_list(self):
 
         localctx = LuaParser.Var_listContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 74, self.RULE_var_list)
+        self.enterRule(localctx, 76, self.RULE_var_list)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 376
+            self.state = 387
             self.var(True)
-            self.state = 381
+            self.state = 392
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.COMMA:
-                self.state = 377
+                self.state = 388
                 self.match(LuaParser.COMMA)
-                self.state = 378
+                self.state = 389
                 self.var(True)
-                self.state = 383
+                self.state = 394
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -3299,21 +3415,21 @@ class LuaParser ( Parser ):
     def expr_list(self):
 
         localctx = LuaParser.Expr_listContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 76, self.RULE_expr_list)
+        self.enterRule(localctx, 78, self.RULE_expr_list)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 384
+            self.state = 395
             self.expr()
-            self.state = 389
+            self.state = 400
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==LuaParser.COMMA:
-                self.state = 385
+                self.state = 396
                 self.match(LuaParser.COMMA)
-                self.state = 386
+                self.state = 397
                 self.expr()
-                self.state = 391
+                self.state = 402
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -3366,21 +3482,21 @@ class LuaParser ( Parser ):
     def name_list(self):
 
         localctx = LuaParser.Name_listContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 78, self.RULE_name_list)
+        self.enterRule(localctx, 80, self.RULE_name_list)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 392
+            self.state = 403
             self.match(LuaParser.NAME)
-            self.state = 397
+            self.state = 408
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,37,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 393
+                    self.state = 404
                     self.match(LuaParser.COMMA)
-                    self.state = 394
+                    self.state = 405
                     self.match(LuaParser.NAME) 
-                self.state = 399
+                self.state = 410
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,37,self._ctx)
 

@@ -139,6 +139,11 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#bitwise_expr.
+    def visitBitwise_expr(self, ctx:LuaParser.Bitwise_exprContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#unary_expr.
     def visitUnary_expr(self, ctx:LuaParser.Unary_exprContext):
         return self.visitChildren(ctx)

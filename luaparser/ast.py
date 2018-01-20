@@ -4,6 +4,7 @@ from antlr4 import *
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astnodes import *
+from luaparser.asttokens import Tokens
 from luaparser.parser.LuaParser import LuaParser
 from luaparser import printers
 from antlr4.error.ErrorListener import ErrorListener
@@ -79,7 +80,6 @@ class ParseTreeVisitor(LuaVisitor):
         else:
             return []
 
-
     ''' Visiting root nodes.
     '''
     def visitChunk(self, ctx):
@@ -88,14 +88,285 @@ class ParseTreeVisitor(LuaVisitor):
     def visitBlock(self, ctx):
         return _setMetadata(ctx, Block(_listify(self.visitChildren(ctx))))
 
+    def visitStat(self, ctx):
+        return self.visit(ctx.children[0])
+
+    ''' Statements '''
+    def visitAssignment(self, ctx):
+        # var_list ASSIGN expr_list
+        return _setMetadata(ctx, Assign(
+            targets=_listify(self.visit(ctx.children[0])),
+            values=_listify(self.visit(ctx.children[2]))))
+
+    def visitLocal(self, ctx):
+        """local
+        : LOCAL
+        ( name_list (ASSIGN expr_list)?
+        | FUNCTION NAME func_body)"""
+        # LOCAL name_list (ASSIGN expr_list)?
+        if isinstance(ctx.children[1], LuaParser.Name_listContext):
+            # LOCAL name_list (ASSIGN expr_list)?
+            if len(ctx.children)>2:
+                return _setMetadata(ctx, LocalAssign(
+                    targets=_listify(self.visit(ctx.children[1])),
+                    values=_listify(self.visit(ctx.children[3]))))
+            # LOCAL name_list
+            else:
+                return _setMetadata(ctx, LocalAssign(
+                    targets=_listify(self.visit(ctx.children[1])),
+                    values=[]))
+
+        # LOCAL FUNCTION NAME func_body
+        else:
+            name     = self.visit(ctx.children[2]).id
+            funcBody = self.visit(ctx.children[3])
+            return _setMetadata(ctx, LocalFunction(name=name, args=funcBody[0], body=funcBody[1]))
+
+    def visitFunc_body(self, ctx):
+        """func_body
+        : OPAR param_list CPAR block END"""
+        params = self.visit(ctx.children[1])
+        body   = self.visit(ctx.children[3]).body
+        return (params, body)
+
+    def visitVar_list(self, ctx):
+        # var[True] (COMMA var[True])*
+        return self.visitChildren(ctx)
+
+    def visitVar(self, ctx):
+        """var[bool assign]
+        : (callee[assign]) tail*"""
+        return self.visitChildren(ctx)
+
+    def visitCallee(self, ctx):
+        """callee[bool assign]
+        : OPAR expr CPAR | NAME"""
+        return self.visitChildren(ctx)
+
+    def visitTail(self, ctx):
+        """ tail
+        : DOT NAME
+        | OBRACK expr CBRACK
+        | COL NAME OPAR expr_list? CPAR
+        | COL NAME table_constructor
+        | COL NAME STRING
+        | OPAR expr_list? CPAR
+        | table_constructor
+        | STRING"""
+        return 'rr'
+
+    def visitTerminal(self, ctx):
+        def NilHandler(ctx): return Nil()
+        def NameHandler(ctx): return Name(ctx.getText())
+        def TrueHandler(ctx):return TrueExpr()
+        def FalseHandler(ctx):return FalseExpr()
+        def NumberHandler(ctx):
+            # using python number eval to parse lua number
+            number = ast.literal_eval(ctx.getText())
+            return Number(number)
+        def StringHandler(ctx):
+            luaStr = ctx.getText()
+            p = re.compile('^\[=+\[(.*)\]=+\]')  # nested quote pattern
+            # try remove double quote:
+            if luaStr.startswith('"') and luaStr.endswith('"'):
+                luaStr = luaStr[1:-1]
+            # try remove single quote:
+            elif luaStr.startswith("'") and luaStr.endswith("'"):
+                luaStr = luaStr[1:-1]
+            # try remove double square bracket:
+            elif luaStr.startswith("[[") and luaStr.endswith("]]"):
+                luaStr = luaStr[2:-2]
+            # nested quote
+            elif p.match(luaStr):
+                luaStr = p.search(luaStr).group(1)
+            return String(luaStr)
+
+        handlers = {
+            Tokens.NIL.value    : NilHandler,
+            Tokens.NAME.value   : NameHandler,
+            Tokens.TRUE.value   : TrueHandler,
+            Tokens.FALSE.value  : FalseHandler,
+            Tokens.NUMBER.value : NumberHandler,
+            Tokens.STRING.value : StringHandler,
+        }
+
+        if ctx.symbol.type in handlers:
+            return handlers[ctx.symbol.type](ctx)
+        else:
+            return None
+
+    '''Operators'''
+    def visitLeftRightOperator(self, ctx, nodeOnToken):
+        """transform context of type: expr ((TOKEN_1 | TOKEN_N) expr)*
+        to nodes.
+        :param nodeOnToken dictionary of Node class per token type"""
+        # expr ((TOKEN_1 | TOKEN_N) expr)*
+        if len(ctx.children)>1:
+            left = self.visit(ctx.children[0])
+            for i in range(1, len(ctx.children), 2):
+                right = self.visit(ctx.children[i + 1])
+                root  = nodeOnToken[ctx.children[i].symbol.type](
+                    left=left,
+                    right=right)
+                left = root
+            return left
+        # expr
+        else:
+            return self.visit(ctx.children[0])
+
+    def visitAdd_expr(self, ctx):
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.ADD.value    : AddOp,
+            Tokens.MINUS.value  : SubOp,
+        })
+
+    def visitMult_expr(self, ctx):
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.MULT.value   : MultOp,
+            Tokens.DIV.value    : FloatDivOp,
+            Tokens.FLOOR.value  : FloorDivOp,
+            Tokens.MOD.value    : ModOp,
+        })
+
+    def visitUnary_expr(self, ctx):
+        """unary_expr
+        : MINUS unary_expr
+        | LENGTH pow_expr
+        | NOT unary_expr
+        | BITNOT unary_expr
+        | pow_expr"""
+        if len(ctx.children)>1:
+            if ctx.children[0].symbol.type == Tokens.MINUS.value:
+                return _setMetadata(ctx, USubOp(self.visit(ctx.children[1])))
+            elif ctx.children[0].symbol.type == Tokens.LENGTH.value:
+                return _setMetadata(ctx, ULengthOP(self.visit(ctx.children[1])))
+            elif ctx.children[0].symbol.type == Tokens.NOT.value:
+                return _setMetadata(ctx, ULNotOp(self.visit(ctx.children[1])))
+            else:
+                return _setMetadata(ctx, UBNotOp(self.visit(ctx.children[1])))
+        else:
+            return self.visit(ctx.children[0])
+
+    def visitPow_expr(self, ctx):
+        """pow_expr
+        : atom (POW atom)*"""
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.POW.value: ExpoOp,
+        })
+
+    def visitBitwise_expr(self, ctx):
+        """bitwise_expr
+        : unary_expr ((BITAND | BITOR | BITXOR | BITRSHIFT | BITRLEFT | BITNOT) unary_expr)*"""
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.BITAND.value     : BAndOp,
+            Tokens.BITOR.value      : BOrOp,
+            Tokens.BITNOT.value     : BXorOp,
+            Tokens.BITRSHIFT.value  : BShiftROp,
+            Tokens.BITRLEFT.value   : BShiftLOp,
+        })
+
+    def visitRel_expr(self, ctx):
+        """rel_expr
+        : concat_expr ((LT | GT | LTEQ | GTEQ | NEQ | EQ) concat_expr)?"""
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.LT.value     : LessThanOp,
+            Tokens.GT.value     : GreaterThanOp,
+            Tokens.LTEQ.value   : LessOrEqThanOp,
+            Tokens.GTEQ.value   : GreaterOrEqThanOp,
+            Tokens.NEQ.value    : NotEqToOp,
+            Tokens.EQ.value     : EqToOp,
+        })
+
+    def visitOr_expr(self, ctx):
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.OR.value: OrLoOp,
+        })
+
+    def visitAnd_expr(self, ctx):
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.AND.value: AndLoOp,
+        })
+
+    def visitConcat_expr(self, ctx):
+        return self.visitLeftRightOperator(ctx, {
+            Tokens.CONCAT.value: Concat,
+        })
+
+
+    def visitTable_constructor(self, ctx):
+        """table_constructor
+        : OBRACE field_list? CBRACE"""
+        if len(ctx.children) > 2:
+            keys   = []
+            values = []
+            fields = self.visit(ctx.children[1])
+            tableIndex = 1
+            for field in fields:
+                # no key, array like table
+                if field[0] is None:
+                    keys.append(Number(tableIndex))
+                    tableIndex += 1
+                else:
+                    keys.append(field[0])
+                values.append(field[1])
+            return _setMetadata(ctx, Table(keys, values))
+        else:
+            return _setMetadata(ctx, Table([], []))
+
+    def visitField_list(self, ctx):
+        """field_list
+        : field (field_sep field)* field_sep?"""
+        fields = []
+        for child in ctx.children:
+            if isinstance(child, LuaParser.FieldContext):
+                fields.append(self.visit(child))
+        return fields
+
+    def visitField(self, ctx):
+        """field
+        : OBRACK expr CBRACK ASSIGN expr
+        | NAME ASSIGN expr
+        | expr"""
+        lenght = len(ctx.children)
+        # OBRACK expr CBRACK ASSIGN expr
+        if lenght > 3:
+            return (self.visit(ctx.children[1]), self.visit(ctx.children[4]))
+        # NAME ASSIGN expr
+        elif lenght > 2:
+            return (self.visit(ctx.children[0]), self.visit(ctx.children[2]))
+        # expr
+        else:
+            return (None, self.visit(ctx.children[0]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    """
+
+
     ''' ----------------------------------------------------------------------- '''
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
-    def visitSetStat(self, ctx):
-        return _setMetadata(ctx, Assign(
-            targets=_listify(self.visit(ctx.children[0])), \
-            values=_listify(self.visit(ctx.children[2]))))
-
+    
     def visitLocalset(self, ctx):
         # 'local' namelist ('=' explist)?
         if len(ctx.children) > 2:
@@ -173,6 +444,42 @@ class ParseTreeVisitor(LuaVisitor):
             iter=self.visit(ctx.children[3]),
             targets=_listify(self.visit(ctx.children[1]))))
 
+    def visitPrefixexp(self, ctx):
+        # varOrExp nameAndArgs*
+
+        nodes = self.visitChildren(ctx, True)
+        print('\nvisitPrefixexp')
+        print(vars(ctx))
+        print(nodes)
+
+        if isinstance(nodes, list):
+            if len(nodes) > 1:
+                if isinstance(nodes[0], Name) or isinstance(nodes[0], Index):
+                    if isinstance(nodes[-1], Invoke):
+                        nodes[-1].source = nodes[0]
+                        for i in range(len(nodes)-1, 0, -1):
+                            if isinstance(nodes[i], Invoke):
+                                nodes[i].source = nodes[i-1]
+                        return _setMetadata(ctx, nodes[-1])
+                    else:
+                        return _setMetadata(ctx, Call(
+                            func=nodes[0],
+                            args=nodes[1:]
+                        ))
+
+
+        return self.visitChildren(ctx)
+
+    def visitNameAndArgs(self, ctx):
+        # (COLON name)? args
+        if len(ctx.children)>1:
+            return _setMetadata(ctx, Invoke(
+                source=None, # will be filled in parent visitor
+                func=self.visit(ctx.children[1]),
+                args=_listify(self.visit(ctx.children[2]))))
+        else:
+            return self.visit(ctx.children[0])
+
     def visitIfStat(self, ctx):
         # 'if' exp 'then' block elseIfStat* elseStat? 'end' ;
         mainIf = If(
@@ -247,13 +554,13 @@ class ParseTreeVisitor(LuaVisitor):
             luaStr = p.search(luaStr).group(1)
         return _setMetadata(ctx, String(luaStr))
 
-    def visitName(self, ctx):
+    def _visitName(self, ctx):
         return _setMetadata(ctx, Name(ctx.children[0].getText()))
 
     def visitArgs(self, ctx):
         return self.visitChildren(ctx, mergeList=True)
 
-    def visitVar(self, ctx):
+    def _visitVar(self, ctx):
         # : (name | '(' exp ')' varSuffix) varSuffix*
         # if name varSuffix*
         if len(ctx.children)>1 and isinstance(ctx.children[1], LuaParser.VarSuffixContext):
@@ -261,6 +568,7 @@ class ParseTreeVisitor(LuaVisitor):
             for i in range(2, len(ctx.children)):
                 root = Index(value=child, idx=self.visit(ctx.children[i]))
                 child = root
+            print(toPrettyStr(child))
             return _setMetadata(ctx, child)
         else:
             return self.visitChildren(ctx)
@@ -410,7 +718,7 @@ class ParseTreeVisitor(LuaVisitor):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.9 – Table Constructors                                              '''
     ''' ----------------------------------------------------------------------- '''
-    def visitTableconstructor(self, ctx):
+    def visitdTableconstructor(self, ctx):
         # table      : '{' (field (fieldsep field)* fieldsep?)? '}'
         # field      : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
         # tableKey   : exp | name
@@ -495,6 +803,7 @@ class ParseTreeVisitor(LuaVisitor):
         if comment.startswith('--'):
             comment = comment[2:]
         return _setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
+"""
 
 class ASTVisitor():
     def visit(self, root):

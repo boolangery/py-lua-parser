@@ -4,6 +4,7 @@
 
     Contains all Ast Node definitions.
 """
+from enum import Enum
 
 ''' ----------------------------------------------------------------------- '''
 ''' AST base nodes                                                          '''

@@ -20,6 +20,14 @@ class VariablesTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
+    def test_empty_local_var(self):
+        tree = ast.parse("local foo, bar")
+        exp = Chunk(body=Block(body=[LocalAssign(
+            targets=[Name(id='foo'), Name(id='bar')],
+            values=[]
+        )]))
+        self.assertEqual(exp, tree)
+
     def test_multi_var(self):
         tree = ast.parse("a,b,c = 1,2")
         exp = Chunk(body=Block(body=[Assign(

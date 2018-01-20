@@ -62,7 +62,7 @@ class StatementsTestCase(tests.TestCase):
     '''
     3.3.4 – Control Structures
     '''
-    def test_for_in(self):
+    def test_for_in_1(self):
         tree = ast.parse(textwrap.dedent("""
             for k, v in pairs({}) do
               print(k, v)
@@ -75,6 +75,93 @@ class StatementsTestCase(tests.TestCase):
                 targets=[Name('k'), Name('v')]
             )
         ]))
+        print(ast.toPrettyStr(tree))
+        self.assertEqual(exp, tree)
+
+    def test_for_in_2(self):
+        tree = ast.parse(textwrap.dedent("""
+            for k, v in foo.pairs({}) do
+              print(k, v)
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            Forin(
+                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                iter=Call(func=Index(Name('pairs'), Name('foo')), args=[Table(keys=[], values=[])]),
+                targets=[Name('k'), Name('v')]
+            )
+        ]))
+        print(ast.toPrettyStr(tree))
+        self.assertEqual(exp, tree)
+
+    def test_for_in_3(self):
+        tree = ast.parse(textwrap.dedent("""
+            for k, v in foo:pairs({}) do
+              print(k, v)
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            Forin(
+                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                iter=Invoke(source=Name('foo'), func=Name('pairs'), args=[Table(keys=[], values=[])]),
+                targets=[Name('k'), Name('v')]
+            )
+        ]))
+        print(ast.toPrettyStr(tree))
+        self.assertEqual(exp, tree)
+
+    def test_for_in_4(self):
+        tree = ast.parse(textwrap.dedent("""
+            for k, v in bar.foo:pairs({}) do
+              print(k, v)
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            Forin(
+                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                iter=Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table(keys=[], values=[])]),
+                targets=[Name('k'), Name('v')]
+            )
+        ]))
+        print(ast.toPrettyStr(tree))
+        self.assertEqual(exp, tree)
+
+    def test_for_in_5(self):
+        tree = ast.parse(textwrap.dedent("""
+            for k, v in bar:foo(42):pairs({}) do
+              print(k, v)
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            Forin(
+                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                iter=Invoke(
+                    source=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)]),
+                    func=Name('pairs'),
+                    args=[Table(keys=[], values=[])]),
+                targets=[Name('k'), Name('v')]
+            )
+        ]))
+        print(ast.toPrettyStr(tree))
+        self.assertEqual(exp, tree)
+
+    def test_for_in_6(self):
+        tree = ast.parse(textwrap.dedent("""
+            for k, v in bar:foo(42).pairs({}) do
+              print(k, v)
+            end
+            """))
+        exp = Chunk(body=Block(body=[
+            Forin(
+                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                iter=Invoke(
+                    source=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)]),
+                    func=Name('pairs'),
+                    args=[Table(keys=[], values=[])]),
+                targets=[Name('k'), Name('v')]
+            )
+        ]))
+        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_numeric_for(self):
