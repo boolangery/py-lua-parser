@@ -24,308 +24,133 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#setStat.
-    def visitSetStat(self, ctx:LuaParser.SetStatContext):
+    # Visit a parse tree produced by LuaParser#do_block.
+    def visitDo_block(self, ctx:LuaParser.Do_blockContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#call.
-    def visitCall(self, ctx:LuaParser.CallContext):
+    # Visit a parse tree produced by LuaParser#while_stat.
+    def visitWhile_stat(self, ctx:LuaParser.While_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#invoke.
-    def visitInvoke(self, ctx:LuaParser.InvokeContext):
+    # Visit a parse tree produced by LuaParser#repeat_stat.
+    def visitRepeat_stat(self, ctx:LuaParser.Repeat_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#label.
-    def visitLabel(self, ctx:LuaParser.LabelContext):
+    # Visit a parse tree produced by LuaParser#assignment.
+    def visitAssignment(self, ctx:LuaParser.AssignmentContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#breakStat.
-    def visitBreakStat(self, ctx:LuaParser.BreakStatContext):
+    # Visit a parse tree produced by LuaParser#local.
+    def visitLocal(self, ctx:LuaParser.LocalContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#goto.
-    def visitGoto(self, ctx:LuaParser.GotoContext):
+    # Visit a parse tree produced by LuaParser#goto_stat.
+    def visitGoto_stat(self, ctx:LuaParser.Goto_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#do.
-    def visitDo(self, ctx:LuaParser.DoContext):
+    # Visit a parse tree produced by LuaParser#if_stat.
+    def visitIf_stat(self, ctx:LuaParser.If_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#whileStat.
-    def visitWhileStat(self, ctx:LuaParser.WhileStatContext):
+    # Visit a parse tree produced by LuaParser#elseif_stat.
+    def visitElseif_stat(self, ctx:LuaParser.Elseif_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#repeat.
-    def visitRepeat(self, ctx:LuaParser.RepeatContext):
+    # Visit a parse tree produced by LuaParser#else_stat.
+    def visitElse_stat(self, ctx:LuaParser.Else_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#ifStat.
-    def visitIfStat(self, ctx:LuaParser.IfStatContext):
+    # Visit a parse tree produced by LuaParser#for_stat.
+    def visitFor_stat(self, ctx:LuaParser.For_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#fornum.
-    def visitFornum(self, ctx:LuaParser.FornumContext):
+    # Visit a parse tree produced by LuaParser#function.
+    def visitFunction(self, ctx:LuaParser.FunctionContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#forin.
-    def visitForin(self, ctx:LuaParser.ForinContext):
+    # Visit a parse tree produced by LuaParser#names.
+    def visitNames(self, ctx:LuaParser.NamesContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#func.
-    def visitFunc(self, ctx:LuaParser.FuncContext):
+    # Visit a parse tree produced by LuaParser#function_literal.
+    def visitFunction_literal(self, ctx:LuaParser.Function_literalContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#localfunc.
-    def visitLocalfunc(self, ctx:LuaParser.LocalfuncContext):
+    # Visit a parse tree produced by LuaParser#func_body.
+    def visitFunc_body(self, ctx:LuaParser.Func_bodyContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#localset.
-    def visitLocalset(self, ctx:LuaParser.LocalsetContext):
+    # Visit a parse tree produced by LuaParser#param_list.
+    def visitParam_list(self, ctx:LuaParser.Param_listContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#elseIfStat.
-    def visitElseIfStat(self, ctx:LuaParser.ElseIfStatContext):
+    # Visit a parse tree produced by LuaParser#ret_stat.
+    def visitRet_stat(self, ctx:LuaParser.Ret_statContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#elseStat.
-    def visitElseStat(self, ctx:LuaParser.ElseStatContext):
+    # Visit a parse tree produced by LuaParser#expr.
+    def visitExpr(self, ctx:LuaParser.ExprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#retstat.
-    def visitRetstat(self, ctx:LuaParser.RetstatContext):
+    # Visit a parse tree produced by LuaParser#or_expr.
+    def visitOr_expr(self, ctx:LuaParser.Or_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#funcname.
-    def visitFuncname(self, ctx:LuaParser.FuncnameContext):
+    # Visit a parse tree produced by LuaParser#and_expr.
+    def visitAnd_expr(self, ctx:LuaParser.And_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#varlist.
-    def visitVarlist(self, ctx:LuaParser.VarlistContext):
+    # Visit a parse tree produced by LuaParser#rel_expr.
+    def visitRel_expr(self, ctx:LuaParser.Rel_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#namelist.
-    def visitNamelist(self, ctx:LuaParser.NamelistContext):
+    # Visit a parse tree produced by LuaParser#concat_expr.
+    def visitConcat_expr(self, ctx:LuaParser.Concat_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#name.
-    def visitName(self, ctx:LuaParser.NameContext):
+    # Visit a parse tree produced by LuaParser#add_expr.
+    def visitAdd_expr(self, ctx:LuaParser.Add_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#explist.
-    def visitExplist(self, ctx:LuaParser.ExplistContext):
+    # Visit a parse tree produced by LuaParser#mult_expr.
+    def visitMult_expr(self, ctx:LuaParser.Mult_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#unOpLength.
-    def visitUnOpLength(self, ctx:LuaParser.UnOpLengthContext):
+    # Visit a parse tree produced by LuaParser#unary_expr.
+    def visitUnary_expr(self, ctx:LuaParser.Unary_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#relOpLessEq.
-    def visitRelOpLessEq(self, ctx:LuaParser.RelOpLessEqContext):
+    # Visit a parse tree produced by LuaParser#pow_expr.
+    def visitPow_expr(self, ctx:LuaParser.Pow_exprContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#bitOpOr.
-    def visitBitOpOr(self, ctx:LuaParser.BitOpOrContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opExpo.
-    def visitOpExpo(self, ctx:LuaParser.OpExpoContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#relOpGreaterEq.
-    def visitRelOpGreaterEq(self, ctx:LuaParser.RelOpGreaterEqContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opMult.
-    def visitOpMult(self, ctx:LuaParser.OpMultContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#bitOpAnd.
-    def visitBitOpAnd(self, ctx:LuaParser.BitOpAndContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#bitOpShiftL.
-    def visitBitOpShiftL(self, ctx:LuaParser.BitOpShiftLContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#loOpOr.
-    def visitLoOpOr(self, ctx:LuaParser.LoOpOrContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#unOpBitNot.
-    def visitUnOpBitNot(self, ctx:LuaParser.UnOpBitNotContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#bitOpXor.
-    def visitBitOpXor(self, ctx:LuaParser.BitOpXorContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opSub.
-    def visitOpSub(self, ctx:LuaParser.OpSubContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#bitOpShiftR.
-    def visitBitOpShiftR(self, ctx:LuaParser.BitOpShiftRContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#nil.
-    def visitNil(self, ctx:LuaParser.NilContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opAdd.
-    def visitOpAdd(self, ctx:LuaParser.OpAddContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opFloorDiv.
-    def visitOpFloorDiv(self, ctx:LuaParser.OpFloorDivContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#number.
-    def visitNumber(self, ctx:LuaParser.NumberContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#relOpEq.
-    def visitRelOpEq(self, ctx:LuaParser.RelOpEqContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#relOpGreater.
-    def visitRelOpGreater(self, ctx:LuaParser.RelOpGreaterContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#relOpLess.
-    def visitRelOpLess(self, ctx:LuaParser.RelOpLessContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#table.
-    def visitTable(self, ctx:LuaParser.TableContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#unOpNot.
-    def visitUnOpNot(self, ctx:LuaParser.UnOpNotContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#unOpMin.
-    def visitUnOpMin(self, ctx:LuaParser.UnOpMinContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opFloatDiv.
-    def visitOpFloatDiv(self, ctx:LuaParser.OpFloatDivContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo6.
-    def visitTodo6(self, ctx:LuaParser.Todo6Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#false.
-    def visitFalse(self, ctx:LuaParser.FalseContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#concat.
-    def visitConcat(self, ctx:LuaParser.ConcatContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#loOpAnd.
-    def visitLoOpAnd(self, ctx:LuaParser.LoOpAndContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#opMod.
-    def visitOpMod(self, ctx:LuaParser.OpModContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#true.
-    def visitTrue(self, ctx:LuaParser.TrueContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo4.
-    def visitTodo4(self, ctx:LuaParser.Todo4Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#relOpNotEq.
-    def visitRelOpNotEq(self, ctx:LuaParser.RelOpNotEqContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo5.
-    def visitTodo5(self, ctx:LuaParser.Todo5Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo2.
-    def visitTodo2(self, ctx:LuaParser.Todo2Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#stringExp.
-    def visitStringExp(self, ctx:LuaParser.StringExpContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#todo3.
-    def visitTodo3(self, ctx:LuaParser.Todo3Context):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#prefixexp.
-    def visitPrefixexp(self, ctx:LuaParser.PrefixexpContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#varOrExp.
-    def visitVarOrExp(self, ctx:LuaParser.VarOrExpContext):
+    # Visit a parse tree produced by LuaParser#atom.
+    def visitAtom(self, ctx:LuaParser.AtomContext):
         return self.visitChildren(ctx)
 
 
@@ -334,38 +159,23 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#varSuffix.
-    def visitVarSuffix(self, ctx:LuaParser.VarSuffixContext):
+    # Visit a parse tree produced by LuaParser#callee.
+    def visitCallee(self, ctx:LuaParser.CalleeContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#nameAndArgs.
-    def visitNameAndArgs(self, ctx:LuaParser.NameAndArgsContext):
+    # Visit a parse tree produced by LuaParser#tail.
+    def visitTail(self, ctx:LuaParser.TailContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#args.
-    def visitArgs(self, ctx:LuaParser.ArgsContext):
+    # Visit a parse tree produced by LuaParser#table_constructor.
+    def visitTable_constructor(self, ctx:LuaParser.Table_constructorContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#functiondef.
-    def visitFunctiondef(self, ctx:LuaParser.FunctiondefContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#funcbody.
-    def visitFuncbody(self, ctx:LuaParser.FuncbodyContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#parlist.
-    def visitParlist(self, ctx:LuaParser.ParlistContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by LuaParser#tableconstructor.
-    def visitTableconstructor(self, ctx:LuaParser.TableconstructorContext):
+    # Visit a parse tree produced by LuaParser#field_list.
+    def visitField_list(self, ctx:LuaParser.Field_listContext):
         return self.visitChildren(ctx)
 
 
@@ -374,23 +184,28 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#tableKey.
-    def visitTableKey(self, ctx:LuaParser.TableKeyContext):
+    # Visit a parse tree produced by LuaParser#field_sep.
+    def visitField_sep(self, ctx:LuaParser.Field_sepContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#tableValue.
-    def visitTableValue(self, ctx:LuaParser.TableValueContext):
+    # Visit a parse tree produced by LuaParser#label.
+    def visitLabel(self, ctx:LuaParser.LabelContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#fieldsep.
-    def visitFieldsep(self, ctx:LuaParser.FieldsepContext):
+    # Visit a parse tree produced by LuaParser#var_list.
+    def visitVar_list(self, ctx:LuaParser.Var_listContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#string.
-    def visitString(self, ctx:LuaParser.StringContext):
+    # Visit a parse tree produced by LuaParser#expr_list.
+    def visitExpr_list(self, ctx:LuaParser.Expr_listContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#name_list.
+    def visitName_list(self, ctx:LuaParser.Name_listContext):
         return self.visitChildren(ctx)
 
 
