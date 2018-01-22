@@ -118,7 +118,7 @@ class ParseTreeVisitor(LuaVisitor):
 
         # LOCAL FUNCTION NAME func_body
         else:
-            name     = self.visit(ctx.children[2]).id
+            name     = self.visit(ctx.children[2])
             funcBody = self.visit(ctx.children[3])
             return _setMetadata(ctx, LocalFunction(name=name, args=funcBody[0], body=funcBody[1]))
 
@@ -404,9 +404,97 @@ class ParseTreeVisitor(LuaVisitor):
             return (None, self.visit(ctx.children[0]))
 
 
+    def visitFunction(self, ctx):
+        """function
+        : FUNCTION names (COL NAME func_body | func_body)"""
+        names = self.visit(ctx.children[1])
+        # FUNCTION names COL NAME func_body
+        if len(ctx.children) > 3:
+            funcBody = self.visit(ctx.children[4])
+            return _setMetadata(ctx, Method(
+                source=names,
+                name=self.visit(ctx.children[3]),
+                args=funcBody[0],
+                body=funcBody[1]))
+        # FUNCTION names func_body
+        else:
+            funcBody = self.visit(ctx.children[2])
+            return _setMetadata(ctx, Function(
+                name=names,
+                args=funcBody[0],
+                body=funcBody[1]))
+
+    def visitNames(self, ctx):
+        """names
+        : NAME (DOT NAME)*"""
+        if len(ctx.children) > 1:
+            child = Index(
+                value=self.visit(ctx.children[0]),
+                idx=self.visit(ctx.children[2]))
+            for i in range(3, len(ctx.children), 2):
+                root = Index(
+                    value=child,
+                    idx=self.visit(ctx.children[i+1]))
+                child = root
+            return _setMetadata(ctx, child)
+        else:
+            return self.visitChildren(ctx)
 
 
+    def visitFunction_literal(self, ctx):
+        """function_literal
+        : FUNCTION func_body"""
+        funcBody = self.visit(ctx.children[1])
+        return _setMetadata(ctx, AnonymousFunction(
+            args=funcBody[0],
+            body=funcBody[1]))
 
+    def visitDo_block(self, ctx):
+        """do_block
+        : DO block END"""
+        return _setMetadata(ctx, Do(self.visit(ctx.children[1]).body))
+
+    def visitFor_stat(self, ctx):
+        """for_stat
+        : FOR
+        ( NAME ASSIGN expr COMMA expr (COMMA expr)? do_block
+        | name_list IN expr_list do_block
+        )"""
+        # FOR NAME ASSIGN expr COMMA expr (COMMA expr)? do_block
+        if len(ctx.children) > 5:
+            start = self.visit(ctx.children[3])
+            stop  = self.visit(ctx.children[5])
+            step  = 1
+            # if has step
+            if len(ctx.children) > 6:
+                step = self.visit(ctx.children[7])
+
+            return _setMetadata(ctx, Fornum(
+                target=self.visit(ctx.children[1]),
+                start=start,
+                stop=stop,
+                step=step,
+                body=self.visit(ctx.children[-1]).body)) # visitDo_block
+        # FOR name_list IN expr_list do_block
+        else:
+            return _setMetadata(ctx, Forin(
+                body=self.visit(ctx.children[4]).body,
+                iter=self.visit(ctx.children[3]),
+                targets=_listify(self.visit(ctx.children[1]))))
+
+    def visitWhile_stat(self, ctx):
+        """while_stat
+        : WHILE expr do_block"""
+        return _setMetadata(ctx, While(
+            test=self.visit(ctx.children[1]),
+            body=self.visit(ctx.children[2]).body))
+
+    def visitRepeat_stat(self, ctx):
+        """repeat_stat
+        : REPEAT block UNTIL expr"""
+        return _setMetadata(ctx, Repeat(
+            body=self.visit(ctx.children[1]).body,
+            test=self.visit(ctx.children[3])))
 
 
 

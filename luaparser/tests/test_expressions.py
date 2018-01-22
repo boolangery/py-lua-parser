@@ -21,7 +21,6 @@ class ExpressionsTestCase(tests.TestCase):
                 )
             ]
         )]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_substraction(self):
@@ -48,7 +47,6 @@ class ExpressionsTestCase(tests.TestCase):
                 )
             ]
         )]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_float_division(self):
@@ -347,7 +345,6 @@ class ExpressionsTestCase(tests.TestCase):
                 ]
             )]
         )]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_array(self):
@@ -468,12 +465,11 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.11 – Function Definitions                                           '''
     ''' ----------------------------------------------------------------------- '''
-    def test_function_definition(self):
+    def test_function_def_anonymous(self):
         tree = ast.parse(r'f = function() local a end')
         exp = Chunk(body=Block(body=[Assign(
             targets=[Name(id='f')],
-            values=[Function(
-                name='',
+            values=[AnonymousFunction(
                 args=[],
                 body=[LocalAssign(
                     targets=[Name(id='a')],
@@ -483,26 +479,35 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-    def test_function_definition_1(self):
+    def test_function_def_global(self):
         tree = ast.parse(r'function f() end')
         exp = Chunk(body=Block(body=[Function(
-            name='f',
+            name=Name('f'),
             args=[],
             body=[]
         )]))
         self.assertEqual(exp, tree)
 
-    def test_function_definition_2(self):
+    def test_function_def_local(self):
+        tree = ast.parse(r'local function _process() end')
+        exp = Chunk(body=Block(body=[LocalFunction(
+            name=Name('_process'),
+            args=[],
+            body=[]
+        )]))
+        self.assertEqual(exp, tree)
+
+    def test_function_def_indexed_name_global(self):
         tree = ast.parse(r'function t.a.b.c.f() end')
         exp = Chunk(body=Block(body=[Function(
             name=Index(
-                idx='f',
+                idx=Name('f'),
                 value=Index(
-                    idx='c',
+                    idx=Name('c'),
                     value=Index(
-                        idx='b',
+                        idx=Name('b'),
                         value=Index(
-                            idx='a',
+                            idx=Name('a'),
                             value=Name(id='t')
                         )
                     )
@@ -512,7 +517,7 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-    def test_function_definition_3(self):
+    def test_function_def_global_assign(self):
         tree = ast.parse(r't.a.b.c.f = function () end')
         exp = Chunk(body=Block(body=[Assign(
             targets=[Index(
@@ -527,31 +532,9 @@ class ExpressionsTestCase(tests.TestCase):
                         )
                     )
                 ))],
-            values=[Function(
-                name='',
+            values=[AnonymousFunction(
                 args=[],
                 body=[]
             )]
-        )]))
-        self.assertEqual(exp, tree)
-
-    def test_function_definition_4(self):
-        tree = ast.parse(r'local function f () end')
-        exp = Chunk(body=Block(body=[LocalFunction(
-            name='f',
-            args=[],
-            body=[]
-        )]))
-        self.assertEqual(exp, tree)
-
-    def test_function_definition_5(self):
-        tree = ast.parse(textwrap.dedent("""
-            function MetaTable.__call (func)
-            end
-            """))
-        exp = Chunk(body=Block(body=[Function(
-            name=Index(idx='__call', value=Name('MetaTable')),
-            args=[Name('func')],
-            body=[]
         )]))
         self.assertEqual(exp, tree)

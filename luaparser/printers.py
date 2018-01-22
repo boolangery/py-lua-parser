@@ -70,7 +70,7 @@ class PythonStyleVisitor():
 
     @visitor(Node)
     def visit(self, node):
-        res = self.indentStr() + node.name + ': ' + self.prettyCount(node)
+        res = self.indentStr() + node.displayName + ': ' + self.prettyCount(node)
 
         self.indent()
         for attr, attrValue in node.__dict__.items():

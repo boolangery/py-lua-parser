@@ -75,7 +75,6 @@ class StatementsTestCase(tests.TestCase):
                 targets=[Name('k'), Name('v')]
             )
         ]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_for_in_2(self):
@@ -91,7 +90,6 @@ class StatementsTestCase(tests.TestCase):
                 targets=[Name('k'), Name('v')]
             )
         ]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_for_in_3(self):
@@ -107,7 +105,6 @@ class StatementsTestCase(tests.TestCase):
                 targets=[Name('k'), Name('v')]
             )
         ]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_for_in_4(self):
@@ -123,7 +120,6 @@ class StatementsTestCase(tests.TestCase):
                 targets=[Name('k'), Name('v')]
             )
         ]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_for_in_5(self):
@@ -142,7 +138,6 @@ class StatementsTestCase(tests.TestCase):
                 targets=[Name('k'), Name('v')]
             )
         ]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_for_in_6(self):
@@ -154,14 +149,12 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[
             Forin(
                 body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
-                iter=Invoke(
-                    source=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)]),
-                    func=Name('pairs'),
+                iter=Call(
+                    func=Index(idx=Name('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
                     args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
         ]))
-        print(ast.toPrettyStr(tree))
         self.assertEqual(exp, tree)
 
     def test_numeric_for(self):

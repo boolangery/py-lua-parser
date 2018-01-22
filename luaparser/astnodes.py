@@ -17,7 +17,7 @@ class Node(object):
         self._stop = 0
 
     @property
-    def name(self):
+    def displayName(self):
         return self._name
 
     @property
@@ -172,11 +172,28 @@ class Invoke(Statement):
         self.func = func
         self.args = args
 
+class Function(Statement):
+    """Define the Lua function statement"""
+    def __init__(self, name, args, body):
+        super(Function, self).__init__('Function')
+        self.name = name
+        self.args = args
+        self.body = body
+
 class LocalFunction(Statement):
     """Define the Lua local function statement"""
     def __init__(self, name, args, body):
         super(LocalFunction, self).__init__('LocalFunction')
-        self.id   = name
+        self.name = name
+        self.args = args
+        self.body = body
+
+class Method(Statement):
+    """Define the Lua Object Oriented function statement"""
+    def __init__(self, source, name, args, body):
+        super(Method, self).__init__('Method')
+        self.source = source
+        self.name = name
         self.args = args
         self.body = body
 
@@ -235,11 +252,10 @@ class Table(Expression):
         self.keys = keys
         self.values = values
 
-class Function(Expression):
-    """Define the Lua function expression"""
-    def __init__(self, name, args, body):
-        super(Function, self).__init__('Function')
-        self.id   = name # TODO: rename after refactor name
+class AnonymousFunction(Statement):
+    """Define the Lua anonymous function expression"""
+    def __init__(self, args, body):
+        super(AnonymousFunction, self).__init__('AnonymousFunction')
         self.args = args
         self.body = body
 
