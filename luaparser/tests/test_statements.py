@@ -303,34 +303,22 @@ class StatementsTestCase(tests.TestCase):
             ::foo::
             """))
         exp = Chunk(body=Block(body=[
-            If(
-                test=TrueExpr(),
-                body=[],
-                orelse=If(
-                    test=FalseExpr(),
-                    body=[],
-                    orelse=If(
-                        test=Number(42),
-                        body=[],
-                        orelse=[]
-                    )
-                )
-            )
+            Label(id=Name('foo'))
         ]))
         self.assertEqual(exp, tree)
 
-    def test_label(self):
+    def test_goto(self):
         tree = ast.parse(textwrap.dedent("""
             goto foo
             ::foo::
             """))
         exp = Chunk(body=Block(body=[
-            Goto(label='foo'),
-            Label(id='foo')
+            Goto(label=Name('foo')),
+            Label(id=Name('foo'))
         ]))
         self.assertEqual(exp, tree)
 
-    def test_label(self):
+    def test_break(self):
         tree = ast.parse(textwrap.dedent("""
             break
             """))

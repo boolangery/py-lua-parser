@@ -245,6 +245,7 @@ class ParseTreeVisitor(LuaVisitor):
             elif p.match(luaStr):
                 luaStr = p.search(luaStr).group(1)
             return String(luaStr)
+        def BreakHandler(ctx): return Break()
 
         handlers = {
             Tokens.NIL.value    : NilHandler,
@@ -253,6 +254,7 @@ class ParseTreeVisitor(LuaVisitor):
             Tokens.FALSE.value  : FalseHandler,
             Tokens.NUMBER.value : NumberHandler,
             Tokens.STRING.value : StringHandler,
+            Tokens.BREAK.value  : BreakHandler,
         }
 
         if ctx.symbol.type in handlers:
@@ -496,13 +498,49 @@ class ParseTreeVisitor(LuaVisitor):
             body=self.visit(ctx.children[1]).body,
             test=self.visit(ctx.children[3])))
 
+    def visitIf_stat(self, ctx):
+        """if_stat
+        : IF expr THEN block elseif_stat* else_stat? END"""
+        mainIf = If(
+            test=self.visit(ctx.children[1]),
+            body=self.visit(ctx.children[3]).body,
+            orelse=None)
+        lastStat = mainIf
 
+        for node in ctx.children[4:-1]:
+            if isinstance(node, LuaParser.Else_statContext):
+                lastStat.orelse = self.visit(node)
+            else:
+                elseIfNodes = self.visit(node)
+                elseIf = ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None)
+                lastStat.orelse = elseIf
+                lastStat = elseIf
+        return _setMetadata(ctx, mainIf)
 
+    def visitElseif_stat(self, ctx):
+        """elseif_stat
+        : ELSEIF expr THEN block"""
+        return [
+            self.visit(ctx.children[1]),
+            self.visit(ctx.children[3]).body]
 
+    def visitElse_stat(self, ctx):
+        """else_stat
+        : ELSE block"""
+        return self.visit(ctx.children[1]).body
 
+    def visitLabel(self, ctx):
+        """label
+        : COLCOL NAME COLCOL"""
+        return _setMetadata(ctx, Label(id=self.visit(ctx.children[1])))
 
+    def visitGoto_stat(self, ctx):
+        return _setMetadata(ctx, Goto(label=self.visit(ctx.children[1])))
 
-
+    def visitRet_stat(self, ctx):
+        """ret_stat
+        : RETURN expr_list? SEMCOL?"""
+        return _setMetadata(ctx, Return(_listify(self.visitChildren(ctx))))
 
 
 
@@ -515,11 +553,10 @@ class ParseTreeVisitor(LuaVisitor):
 
     """
 
-
     ''' ----------------------------------------------------------------------- '''
     ''' 3.3 – Statements                                                        '''
     ''' ----------------------------------------------------------------------- '''
-    
+
     def visitLocalset(self, ctx):
         # 'local' namelist ('=' explist)?
         if len(ctx.children) > 2:
@@ -670,10 +707,10 @@ class ParseTreeVisitor(LuaVisitor):
     def visitBreakStat(self, ctx):
         return _setMetadata(ctx, Break())
 
-    ''' 
+    '''
     Visiting expressions.
     '''
-    ''' 
+    '''
     Types and values
     '''
     def visitNil(self, ctx):
