@@ -186,7 +186,7 @@ atom
   ;
 
 var[bool assign]
-  : (callee[assign]) tail*
+  : callee[assign] tail*
   ;
 
 callee[bool assign]
@@ -194,14 +194,14 @@ callee[bool assign]
   ;
 
 tail
-  : DOT NAME
-  | OBRACK expr CBRACK
-  | COL NAME OPAR expr_list? CPAR
-  | COL NAME table_constructor
-  | COL NAME STRING
-  | OPAR expr_list? CPAR
-  | table_constructor
-  | STRING
+  : DOT NAME                      # tail_dot_index
+  | OBRACK expr CBRACK            # tail_brack_index
+  | COL NAME OPAR expr_list? CPAR # tail_invoke
+  | COL NAME table_constructor    # tail_invoke_table
+  | COL NAME STRING               # tail_invoke_str
+  | OPAR expr_list? CPAR          # tail_call
+  | table_constructor             # tail_table
+  | STRING                        # tail_string
   ;
 
 table_constructor

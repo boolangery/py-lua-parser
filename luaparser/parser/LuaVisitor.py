@@ -169,8 +169,43 @@ class LuaVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#tail.
-    def visitTail(self, ctx:LuaParser.TailContext):
+    # Visit a parse tree produced by LuaParser#tail_dot_index.
+    def visitTail_dot_index(self, ctx:LuaParser.Tail_dot_indexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_brack_index.
+    def visitTail_brack_index(self, ctx:LuaParser.Tail_brack_indexContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_invoke.
+    def visitTail_invoke(self, ctx:LuaParser.Tail_invokeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_invoke_table.
+    def visitTail_invoke_table(self, ctx:LuaParser.Tail_invoke_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_invoke_str.
+    def visitTail_invoke_str(self, ctx:LuaParser.Tail_invoke_strContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_call.
+    def visitTail_call(self, ctx:LuaParser.Tail_callContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_table.
+    def visitTail_table(self, ctx:LuaParser.Tail_tableContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#tail_string.
+    def visitTail_string(self, ctx:LuaParser.Tail_stringContext):
         return self.visitChildren(ctx)
 
 

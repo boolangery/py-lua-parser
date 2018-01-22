@@ -403,7 +403,7 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.10 – Function Calls                                                 '''
     ''' ----------------------------------------------------------------------- '''
-    def test_function_call(self):
+    def test_function_call_simple(self):
         tree = ast.parse(r'print("hello")')
         exp = Chunk(body=Block(body=[Call(
             func=Name(id='print'),
@@ -411,11 +411,27 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-    def test_function_call_no_parent(self):
+    def test_function_call_no_par_string(self):
         tree = ast.parse(r'print "hello"')
         exp = Chunk(body=Block(body=[Call(
             func=Name(id='print'),
             args=[String('hello')]
+        )]))
+        self.assertEqual(exp, tree)
+
+    def test_function_call_no_par_table(self):
+        tree = ast.parse(r'print {}')
+        exp = Chunk(body=Block(body=[Call(
+            func=Name(id='print'),
+            args=[Table([], [])]
+        )]))
+        self.assertEqual(exp, tree)
+
+    def test_index_function_call(self):
+        tree = ast.parse(r'foo.print {}')
+        exp = Chunk(body=Block(body=[Call(
+            func=Index(Name(id='print'), Name(id='foo')),
+            args=[Table([], [])]
         )]))
         self.assertEqual(exp, tree)
 

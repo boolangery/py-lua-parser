@@ -135,8 +135,26 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitVar(self, ctx):
         """var[bool assign]
-        : (callee[assign]) tail*"""
-        return self.visitChildren(ctx)
+        : callee[assign] tail*"""
+        if len(ctx.children) < 2:
+            return self.visit(ctx.children[0])
+        else:
+            root = self.visit(ctx.children[0])
+            for i in range(1, len(ctx.children)):
+                tail = self.visit(ctx.children[i])
+                if isinstance(tail, Index):
+                    tail.value = root
+                elif isinstance(tail, Invoke):
+                    tail.source = root
+                elif isinstance(tail, Call):
+                    tail.func = root
+                else:
+                    tail = Call(
+                        func=root,
+                        args=_listify(tail))
+                root = tail
+            return root
+
 
     def visitCallee(self, ctx):
         """callee[bool assign]
@@ -154,6 +172,53 @@ class ParseTreeVisitor(LuaVisitor):
         | table_constructor
         | STRING"""
         return 'rr'
+
+    def visitTail_dot_index(self, ctx):
+        """DOT NAME"""
+        return Index(
+            value=None, # to set in parent
+            idx=self.visit(ctx.children[1]))
+
+    def visitTail_brack_index(self, ctx):
+        """OBRACK expr CBRACK"""
+        return Index(
+            value=None,  # to set in parent
+            idx=self.visit(ctx.children[1]))
+
+    def visitTail_invoke(self, ctx):
+        """COL NAME OPAR expr_list? CPAR"""
+        return Invoke(
+            source=None,  # to set in parent
+            func=self.visit(ctx.children[1]),
+            args=_listify(self.visit(ctx.children[3]) or []))
+
+    def visitTail_invoke_table(self, ctx):
+        """COL NAME table_constructor"""
+        return Invoke(
+            source=None,  # to set in parent
+            func=self.visit(ctx.children[1]),
+            args=_listify(self.visit(ctx.children[2]) or []))
+
+    def visitTail_invoke_str(self, ctx):
+        """COL NAME STRING"""
+        return Invoke(
+            source=None,  # to set in parent
+            func=self.visit(ctx.children[1]),
+            args=_listify(self.visit(ctx.children[2]) or []))
+
+    def visitTail_call(self, ctx):
+        """OPAR expr_list? CPAR"""
+        return Call(
+            func=None,  # to set in parent
+            args=_listify(self.visit(ctx.children[1]) or []))
+
+    def visitTail_table(self, ctx):
+        """table_constructor"""
+        return self.visit(ctx.children[0])
+
+    def visitTail_string(self, ctx):
+        """STRING"""
+        return self.visit(ctx.children[0])
 
     def visitTerminal(self, ctx):
         def NilHandler(ctx): return Nil()

@@ -2803,59 +2803,237 @@ class LuaParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def DOT(self):
-            return self.getToken(LuaParser.DOT, 0)
 
+        def getRuleIndex(self):
+            return LuaParser.RULE_tail
+
+     
+        def copyFrom(self, ctx:ParserRuleContext):
+            super().copyFrom(ctx)
+
+
+
+    class Tail_invokeContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def COL(self):
+            return self.getToken(LuaParser.COL, 0)
         def NAME(self):
             return self.getToken(LuaParser.NAME, 0)
+        def OPAR(self):
+            return self.getToken(LuaParser.OPAR, 0)
+        def CPAR(self):
+            return self.getToken(LuaParser.CPAR, 0)
+        def expr_list(self):
+            return self.getTypedRuleContext(LuaParser.Expr_listContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_invoke" ):
+                listener.enterTail_invoke(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_invoke" ):
+                listener.exitTail_invoke(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_invoke" ):
+                return visitor.visitTail_invoke(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Tail_brack_indexContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
 
         def OBRACK(self):
             return self.getToken(LuaParser.OBRACK, 0)
-
         def expr(self):
             return self.getTypedRuleContext(LuaParser.ExprContext,0)
-
 
         def CBRACK(self):
             return self.getToken(LuaParser.CBRACK, 0)
 
-        def COL(self):
-            return self.getToken(LuaParser.COL, 0)
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_brack_index" ):
+                listener.enterTail_brack_index(self)
 
-        def OPAR(self):
-            return self.getToken(LuaParser.OPAR, 0)
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_brack_index" ):
+                listener.exitTail_brack_index(self)
 
-        def CPAR(self):
-            return self.getToken(LuaParser.CPAR, 0)
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_brack_index" ):
+                return visitor.visitTail_brack_index(self)
+            else:
+                return visitor.visitChildren(self)
 
-        def expr_list(self):
-            return self.getTypedRuleContext(LuaParser.Expr_listContext,0)
 
+    class Tail_tableContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
 
         def table_constructor(self):
             return self.getTypedRuleContext(LuaParser.Table_constructorContext,0)
 
 
-        def STRING(self):
-            return self.getToken(LuaParser.STRING, 0)
-
-        def getRuleIndex(self):
-            return LuaParser.RULE_tail
-
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterTail" ):
-                listener.enterTail(self)
+            if hasattr( listener, "enterTail_table" ):
+                listener.enterTail_table(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitTail" ):
-                listener.exitTail(self)
+            if hasattr( listener, "exitTail_table" ):
+                listener.exitTail_table(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitTail" ):
-                return visitor.visitTail(self)
+            if hasattr( visitor, "visitTail_table" ):
+                return visitor.visitTail_table(self)
             else:
                 return visitor.visitChildren(self)
 
+
+    class Tail_invoke_tableContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def COL(self):
+            return self.getToken(LuaParser.COL, 0)
+        def NAME(self):
+            return self.getToken(LuaParser.NAME, 0)
+        def table_constructor(self):
+            return self.getTypedRuleContext(LuaParser.Table_constructorContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_invoke_table" ):
+                listener.enterTail_invoke_table(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_invoke_table" ):
+                listener.exitTail_invoke_table(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_invoke_table" ):
+                return visitor.visitTail_invoke_table(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Tail_invoke_strContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def COL(self):
+            return self.getToken(LuaParser.COL, 0)
+        def NAME(self):
+            return self.getToken(LuaParser.NAME, 0)
+        def STRING(self):
+            return self.getToken(LuaParser.STRING, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_invoke_str" ):
+                listener.enterTail_invoke_str(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_invoke_str" ):
+                listener.exitTail_invoke_str(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_invoke_str" ):
+                return visitor.visitTail_invoke_str(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Tail_callContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def OPAR(self):
+            return self.getToken(LuaParser.OPAR, 0)
+        def CPAR(self):
+            return self.getToken(LuaParser.CPAR, 0)
+        def expr_list(self):
+            return self.getTypedRuleContext(LuaParser.Expr_listContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_call" ):
+                listener.enterTail_call(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_call" ):
+                listener.exitTail_call(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_call" ):
+                return visitor.visitTail_call(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Tail_stringContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def STRING(self):
+            return self.getToken(LuaParser.STRING, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_string" ):
+                listener.enterTail_string(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_string" ):
+                listener.exitTail_string(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_string" ):
+                return visitor.visitTail_string(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class Tail_dot_indexContext(TailContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a LuaParser.TailContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def DOT(self):
+            return self.getToken(LuaParser.DOT, 0)
+        def NAME(self):
+            return self.getToken(LuaParser.NAME, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTail_dot_index" ):
+                listener.enterTail_dot_index(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTail_dot_index" ):
+                listener.exitTail_dot_index(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitTail_dot_index" ):
+                return visitor.visitTail_dot_index(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2869,6 +3047,7 @@ class LuaParser ( Parser ):
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,30,self._ctx)
             if la_ == 1:
+                localctx = LuaParser.Tail_dot_indexContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 323
                 self.match(LuaParser.DOT)
@@ -2877,6 +3056,7 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 2:
+                localctx = LuaParser.Tail_brack_indexContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 325
                 self.match(LuaParser.OBRACK)
@@ -2887,6 +3067,7 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 3:
+                localctx = LuaParser.Tail_invokeContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 329
                 self.match(LuaParser.COL)
@@ -2907,6 +3088,7 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 4:
+                localctx = LuaParser.Tail_invoke_tableContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 336
                 self.match(LuaParser.COL)
@@ -2917,6 +3099,7 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 5:
+                localctx = LuaParser.Tail_invoke_strContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 339
                 self.match(LuaParser.COL)
@@ -2927,6 +3110,7 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 6:
+                localctx = LuaParser.Tail_callContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 342
                 self.match(LuaParser.OPAR)
@@ -2943,12 +3127,14 @@ class LuaParser ( Parser ):
                 pass
 
             elif la_ == 7:
+                localctx = LuaParser.Tail_tableContext(self, localctx)
                 self.enterOuterAlt(localctx, 7)
                 self.state = 347
                 self.table_constructor()
                 pass
 
             elif la_ == 8:
+                localctx = LuaParser.Tail_stringContext(self, localctx)
                 self.enterOuterAlt(localctx, 8)
                 self.state = 348
                 self.match(LuaParser.STRING)
