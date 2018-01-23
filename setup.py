@@ -19,5 +19,5 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
   ],
-  install_requires = ['antlr4-python3-runtime<=4.7']
+  install_requires = ['antlr4-python3-runtime<=4.7', 'llist<=0.4']
 )
