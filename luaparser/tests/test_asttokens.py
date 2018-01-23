@@ -25,6 +25,71 @@ acc:withdraw(100)
 """
 
 class AstTokensTestCase(tests.TestCase):
+    def test_group_editor_line_count(self):
+        src = textwrap.dedent(r"""local 
+            a
+            = 
+            1""")
+
+        atokens = asttokens.parse(src)
+        self.assertEqual(4, atokens.lineCount())
+
+    def test_group_editor_lines(self):
+        src = textwrap.dedent(r"""local foo = "s"
+            local bar = "a"
+            local res = foo .. bar""")
+        atokens = asttokens.parse(src)
+
+        # test yield
+        count = 0
+        for line in atokens.lines():
+            count += 1
+        self.assertEqual(3, count)
+
+        # test content
+        lines = list(atokens.lines()) # lines yield
+
+        self.assertEqual('local foo = "s"', lines[0].toSource())
+        self.assertEqual('local bar = "a"', lines[1].toSource())
+        self.assertEqual('local res = foo .. bar', lines[2].toSource())
+
+    def test_group_editor_types(self):
+        src = textwrap.dedent(r"""
+            -- comment 1
+            local foo = "s"
+            -- comment 2
+            local bar = "a"
+            """)
+        atokens = asttokens.parse(src)
+
+        count = 0
+        for token in atokens.types(asttokens.Tokens.LOCAL):
+            count += 1
+        self.assertEqual(2, count)
+
+        count = 0
+        for token in atokens.types([asttokens.Tokens.LOCAL, asttokens.Tokens.LINE_COMMENT]):
+            count += 1
+        self.assertEqual(4, count)
+
+    def test_group_editor_first(self):
+        atokens = asttokens.parse(r"""local foo = 42""")
+        self.assertEqual(atokens[0], atokens.first())
+        self.assertEqual('local', atokens.first().text)
+
+        # empty
+        atokens = asttokens.parse(r"""""")
+        self.assertEqual(atokens[0], atokens.first())
+
+    def test_group_editor_last(self):
+        atokens = asttokens.parse(r"""local foo = 42""")
+        self.assertEqual(atokens[7], atokens.last())
+        self.assertEqual('<EOF>', atokens.last().text)
+
+        # empty
+        atokens = asttokens.parse(r"""""")
+        self.assertEqual(atokens[0], atokens.last())
+
     def test_line_editor_line(self):
         src = textwrap.dedent("""
             local 

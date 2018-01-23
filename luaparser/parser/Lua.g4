@@ -312,7 +312,7 @@ STRING
   | LongBracket
   ;
 
-//////////////////////////////// lexer rules to skip ////////////////////////////////
+//////////////////////////////// lexer rules to hide ////////////////////////////////
 COMMENT
     : '--[' NESTED_STR ']' -> channel(HIDDEN)
     ;
@@ -328,7 +328,11 @@ LINE_COMMENT
     ;
 
 SPACE
-  : (' ' | '\t' | '\r' | '\n' | '\u000C')+ -> skip
+  : (' ' | '\t')+ -> channel(HIDDEN)
+  ;
+
+NEWLINE
+  : ('\r\n' | '\r' | '\n' | '\u000C')+ -> channel(HIDDEN)
   ;
 
 SHEBANG

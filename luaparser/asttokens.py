@@ -2,7 +2,7 @@ from antlr4 import *
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astnodes import *
 from luaparser.parser.LuaParser import LuaParser
-from itertools import repeat
+import llist
 from enum import Enum
 
 
@@ -76,50 +76,177 @@ class Tokens(Enum):
     COMMENT = 59
     LINE_COMMENT = 60
     SPACE = 61
-    SHEBANG = 62
-    LongBracket = 63
+    NEWLINE = 62
+    SHEBANG = 63
+    LongBracket = 64
 
 class TokensEditor():
-    def __init__(self, allTokens, tokensToEdit):
-        # sort tokens by index:
-        self._all = sorted(allTokens, key=lambda token: token.tokenIndex)
-        self._tokens = tokensToEdit
-        if isinstance(tokensToEdit, list):
-            self._tokens = sorted(tokensToEdit, key=lambda token: token.tokenIndex)
+    """Initialize a token list editor.
+    :param dllTokens: a list or a double linked list of all tokens
+    :param dllTokensToEdit: a list or a double linked list of token to edit"""
+    def __init__(self, dllTokens, dllTokensToEdit):
+        # sort tokens by index and create a double linked list with them
+        if isinstance(dllTokens, list):
+            self._dllAll = llist.dllist()
+            for t in sorted(dllTokens, key=lambda token: token.tokenIndex):
+                self._dllAll.append(t)
+        elif isinstance(dllTokens, llist.dllist):
+            self._dllAll = dllTokens
+        else:
+            raise TypeError('dllTokens must be a list or a llist.dllist')
+
+        if isinstance(dllTokensToEdit, list):
+            self._dllTokens = llist.dllist()
+            for t in sorted(dllTokensToEdit, key=lambda token: token.tokenIndex):
+                self._dllTokens.append(t)
+        elif isinstance(dllTokensToEdit, llist.dllist):
+            self._dllTokens = dllTokensToEdit
+        else:
+            raise TypeError('dllTokensToEdit must be a list or a llist.dllist')
 
     def __iter__(self):
-        for token in self._tokens:
-            yield TokenEditor(self._all, token)
+        return iter(self._dllTokens)
 
     def __len__(self):
-        return len(self._tokens)
+        return len(self._dllTokens)
 
     def __getitem__(self, i):
-        return self._tokens[i]
+        return TokenEditor(self._dllAll, self._dllTokens.nodeat(i))
 
     def toSource(self):
-        return TokenPrinter().toStr(self._tokens)
+        return TokenPrinter().toStr(self._dllTokens)
+
+
+class TokenEditor():
+    """Utility class to edit a specific token.
+    """
+    def __init__(self, dllTokens, dllnodeTokenToEdit):
+        assert isinstance(dllTokens, llist.dllist)
+        assert isinstance(dllnodeTokenToEdit, llist.dllistnode)
+        self._dllAll = dllTokens
+        self._dllTokens = dllnodeTokenToEdit
+
+    def toSource(self):
+        return self._dllTokens.value.text
+
+    def next(self):
+        """Select next token.
+        """
+        node = self._dllTokens.next
+        if node:
+            return TokenEditor(self._dllAll, node)
+        return node
+
+    def prev(self):
+        """Select previous token.
+        """
+        node = self._dllTokens.prev
+        if node:
+            return TokenEditor(self._dllAll, node)
+        return node
+
+    def nextOfType(self, type):
+        node = self._dllTokens.next
+        while node:
+            if node.value.type == type.value:
+                return TokenEditor(self._dllAll, node)
+            node = node.next
+        return None
+
+    def prevOfType(self, type):
+        node = self._dllTokens.prev
+        while node:
+            if node.value.type == type.value:
+                return TokenEditor(self._dllAll, node)
+            node = node.prev
+        return None
+
+    def __str__(self):
+        return str(self._dllTokens.value)
+
+    def __eq__(self, other):
+        return isinstance(other, TokenEditor) and self._dllTokens.value == other._dllTokens.value
+
+    def line(self):
+        """Retrieve the line editor for this token."""
+        # tokens are ordered by line
+        line = self._dllTokens.value.lineNumber
+        tokens = llist.dllist()
+        # append on the left nodes before
+        node = self._dllTokens.prev
+        while node:
+            if line == node.value.lineNumber:
+                tokens.appendleft(node)
+            else: break
+            node = node.prev
+        # append self
+        tokens.append(self._dllTokens)
+        # append nodes after
+        node = self._dllTokens.next
+        while node:
+            if line == node.value.lineNumber:
+                tokens.append(node)
+            else:
+                break
+            node = node.next
+        return LineEditor(self._dllAll, tokens)
+
+    def isFirstOnLine(self):
+        if self._dllTokens.prev:
+            # check if token before is on the same line
+            return self._dllTokens.value.lineNumber != self._dllTokens.prev.value.lineNumber
+        return True
+
+    def grabUntil(self, type):
+        """Starting from self, return a list of tokens until the specified type if found"""
+        tokens = llist.dllist()
+        node = self._dllTokens.next
+        while node:
+            tokens.append(node)
+            if node.value.type == type.value:
+                break
+            node = node.next
+        return GroupEditor(self._dllAll, tokens)
+
+    @property
+    def text(self):
+        return self._dllTokens.value.text
+
+    @text.setter
+    def text(self, text):
+        self._dllTokens.value.text = text
+
+    @property
+    def lineNumber(self):
+        return self._dllTokens.value.line
+
+    @property
+    def column(self):
+        return self._dllTokens.value.column
+
+    @property
+    def type(self):
+        return self._dllTokens.value.type
+
 
 class GroupEditor(TokensEditor):
     def lineCount(self):
-        max = 0
-        for token in self._tokens:
-            if token.line > max:
-                max = token.line
-        return max
+        count = 0
+        if self._dllTokens: count += 1
+        for token in self._dllTokens:
+            if token.type == Tokens.NEWLINE.value:
+                count += 1
+        return count
 
     def lines(self):
-        lines = []
-        count = self.lineCount()
-        for i in range(1, count+1):
-            # grab all token on line i
-            ltokens = []
-            for token in self._tokens:
-                if token.line == i:
-                    ltokens.append(token)
-            if len(ltokens) > 0:
-                lines.append(LineEditor(self._all, ltokens))
-        return lines
+        linetok = llist.dllist()
+        for token in self._dllTokens:
+            linetok.append(token)
+            if token.type == Tokens.NEWLINE.value:
+                yield LineEditor(self._dllAll, linetok)
+                linetok = llist.dllist()
+        # yield last line
+        if linetok: yield LineEditor(self._dllAll, linetok)
 
     def types(self, types):
         _types = []
@@ -129,177 +256,53 @@ class GroupEditor(TokensEditor):
         else:
             for t in types:
                 _types.append(t.value)
-        tokens = []
-        for token in self._tokens:
+        tokens = llist.dllist()
+        for token in self._dllTokens:
             if token.type in _types:
                 tokens.append(token)
-        return GroupEditor(self._all, tokens)
+        return GroupEditor(self._dllAll, tokens)
 
     def first(self):
-        """Retrieve the first token based on index.
+        """Retrieve the first token of this group.
         """
-        if self._tokens:
-            first = self._tokens[0]
-            for token in self._tokens:
-                if token.tokenIndex < first.tokenIndex:
-                    first = token
-            return TokenEditor(self._all, first)
-        return None
+        first = self._dllTokens.first
+        if first:
+            return TokenEditor(self._dllAll, first)
 
     def last(self):
-        # tokens are ordered by tokenIndex
-        if self._tokens:
-            return TokenEditor(self._all, self._tokens[-1])
-        return None
+        """Retrieve the last token of this group.
+        """
+        last = self._dllTokens.last
+        if last:
+            return TokenEditor(self._dllAll, last)
 
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return GroupEditor(self._all, self._tokens[key])
-        return TokenEditor(self._all, self._tokens[key])
 
 class ProgramEditor(GroupEditor):
     def range(self, start, stop):
         tokens = []
-        for token in self._tokens:
+        for token in self._dllTokens:
             if token.tokenIndex >= start and token.tokenIndex <= stop:
                 tokens.append(token)
-        return GroupEditor(self._all, tokens)
+        return GroupEditor(self._dllAll, tokens)
 
     def fromAST(self, node):
         return self.range(node.start, node.stop)
 
-class TokenEditor(TokensEditor):
-    """Utility class to edit a specific token.
-    """
-    def next(self):
-        """Select next token.
-        """
-        # tokens are sorted by index
-        for i, t in enumerate(self._all):
-            if t.tokenIndex == self._tokens.tokenIndex:
-                # return next element:
-                if (i+1) < len(self._all):
-                    return TokenEditor(self._all, self._all[i+1])
-                else:
-                    return None
-        return None
-
-    def prev(self):
-        """Select previous token.
-        """
-        # tokens are sorted by index
-        for i, t in enumerate(self._all):
-            if t.tokenIndex == self._tokens.tokenIndex:
-                # return previous element if exist:
-                if (i-1) > 0:
-                    return TokenEditor(self._all, self._all[i-1])
-                else:
-                    return None
-        return None
-
-    def nextOfType(self, type):
-        next = self.next()
-        while next is not None:
-            if next.type == type.value:
-                return next
-            next = next.next()
-        return None
-
-    def prevOfType(self, type):
-        prev = self.prev()
-        while prev is not None:
-            if prev.type == type.value:
-                return prev
-            prev = prev.prev()
-        return None
-
-    def __str__(self):
-        return str(self._tokens)
-
-    def __eq__(self, other):
-        return isinstance(other, TokenEditor) and self._tokens == other._tokens
-
-    def line(self):
-        """Retrieve the line editor for this token."""
-        tokens = []
-        for t in self._all:
-            if t.line == self._tokens.line:
-                tokens.append(t)
-        return LineEditor(self._all, tokens)
-
-    def isFirstOnLine(self):
-        line = self.line()
-        return self == line.first()
-
-    def grabUntil(self, type):
-        """Starting from self, return a list of tokens until the specified type if found"""
-        tokens = [self._tokens] # include this token
-        for t in self._all:
-            if t.tokenIndex > self._tokens.tokenIndex:
-                if t.type != type.value:
-                    tokens.append(t)
-                else:
-                    tokens.append(t)
-                    break
-        return GroupEditor(self._all, tokens)
-
-
-    @property
-    def text(self):
-        return self._tokens.text
-
-    @text.setter
-    def text(self, text):
-        # compute text len diff
-        diff = len(text) - len(self._tokens.text)
-        self._tokens.text = text
-        # apply offset to next token
-        next = self.next()
-        if next is not Node:
-            next.column = next.column + diff
-
-    @property
-    def lineNumber(self):
-        return self._tokens.line
-
-    @lineNumber.setter
-    def lineNumber(self, value):
-        self._tokens.line = value
-
-    @property
-    def column(self):
-        return self._tokens.column
-
-    @column.setter
-    def column(self, column):
-        """Set column and modify all token on the same line.
-        """
-        diff = column - self._tokens.column
-        self._tokens.column = column
-        if diff != 0:
-            for t in self._all:
-                if t.tokenIndex > self._tokens.tokenIndex:
-                    if t.line == self._tokens.line:
-                        t.column += diff
-
-    @property
-    def type(self):
-        return self._tokens.type
 
 class LineEditor(GroupEditor):
     """Utility class to edit a list of token representing a program line.
     """
     def next(self):
         """Get next line editor on None if no new line."""
-        if not self._tokens:
+        if not self._dllTokens:
             return None
         tokens = []
-        for t in self._all:
-            if t.line == (self._tokens[0].line + 1):
+        for t in self._dllAll:
+            if t.line == (self._dllTokens[0].line + 1):
                 tokens.append(t)
         if not tokens:
             return None
-        return LineEditor(self._all, tokens)
+        return LineEditor(self._dllAll, tokens)
 
     def stripl(self):
         """Delete all left whitespace on a line.
@@ -316,13 +319,13 @@ class LineEditor(GroupEditor):
 
     def delete(self):
         """Delete all tokens on this line."""
-        if not self._tokens:
+        if not self._dllTokens:
             return None
-        currentLine = self._tokens[0].line
+        currentLine = self._dllTokens[0].line
         nextLine = self.next()
         # delete tokens on line by creating a new list
-        self._all[:] = [token for token in self._all if token.line == currentLine]
-        self._tokens = []
+        self._dllAll[:] = [token for token in self._dllAll if token.line == currentLine]
+        self._dllTokens = []
         # shift line under this one
         while nextLine is not None:
             first = nextLine.first()
@@ -332,38 +335,21 @@ class LineEditor(GroupEditor):
             nextLine = nextLine.next()
 
     def toSource(self):
-        line = TokenPrinter().toStr(self._tokens)
+        line = TokenPrinter().toStr(self._dllTokens)
         return line.strip()
 
     @property
     def lineNumber(self):
-        if self._tokens:
-            return self._tokens[0].line
+        if self._dllTokens:
+            return self._dllTokens[0].line
 
 
 class TokenPrinter():
     """Class to render a token list to a string.
     """
     def toStr(self, tokens):
-        lines = []
-        for token in tokens:
-            # extend current source:
-            if token.line > len(lines):
-                lines.extend(repeat('', (token.line - len(lines))))
+        source =  "".join((t.text) for t in tokens)
 
-            # Insert in source line:
-            line = token.line -1
-            text = token.text
-            position = token.column
-            s = lines[line]
-            # extend string
-            if position > len(s):
-                s += ' ' * (position - len(s))
-            # Use slicing to extract portion to replace:
-            s = s[:position] + text + s[position+len(text):]
-            lines[line] = s
-
-        source = '\n'.join(lines)
         if source.endswith('<EOF>'):
             source = source[:-5]
         return source
