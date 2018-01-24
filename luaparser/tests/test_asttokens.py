@@ -25,6 +25,18 @@ acc:withdraw(100)
 """
 
 class AstTokensTestCase(tests.TestCase):
+    def test_token_editor_next(self):
+        editor = asttokens.parse(r"""local a = 1""")
+        first = editor.first()
+
+        self.assertEqual('local', first.text)
+        self.assertEqual(' ', first.next().text)
+        self.assertEqual('a', first.next().next().text)
+        self.assertEqual(' ', first.next().next().next().text)
+        self.assertEqual('=', first.next().next().next().next().text)
+        self.assertEqual(' ', first.next().next().next().next().next().text)
+        self.assertEqual('1', first.next().next().next().next().next().next().text)
+
     def test_group_editor_line_count(self):
         src = textwrap.dedent(r"""local 
             a
@@ -35,7 +47,8 @@ class AstTokensTestCase(tests.TestCase):
         self.assertEqual(4, atokens.lineCount())
 
     def test_group_editor_lines(self):
-        src = textwrap.dedent(r"""local foo = "s"
+        src = textwrap.dedent(r"""
+            local foo = "s"
             local bar = "a"
             local res = foo .. bar""")
         atokens = asttokens.parse(src)
@@ -44,14 +57,14 @@ class AstTokensTestCase(tests.TestCase):
         count = 0
         for line in atokens.lines():
             count += 1
-        self.assertEqual(3, count)
+        self.assertEqual(4, count)
 
         # test content
         lines = list(atokens.lines()) # lines yield
 
-        self.assertEqual('local foo = "s"', lines[0].toSource())
-        self.assertEqual('local bar = "a"', lines[1].toSource())
-        self.assertEqual('local res = foo .. bar', lines[2].toSource())
+        self.assertEqual('local foo = "s"\n', lines[1].toSource())
+        self.assertEqual('local bar = "a"\n', lines[2].toSource())
+        self.assertEqual('local res = foo .. bar', lines[3].toSource())
 
     def test_group_editor_types(self):
         src = textwrap.dedent(r"""
@@ -90,76 +103,29 @@ class AstTokensTestCase(tests.TestCase):
         atokens = asttokens.parse(r"""""")
         self.assertEqual(atokens[0], atokens.last())
 
-    def test_line_editor_line(self):
-        src = textwrap.dedent("""
-            local 
-            a
-            = 
-            1""")
-
-        atokens = asttokens.parse(src)
-        tokens = atokens.lines()
-
-        self.assertEqual(4, len(tokens))
-        self.assertEqual(1, len(tokens[0]))
-        self.assertEqual(1, len(tokens[1]))
-        self.assertEqual(1, len(tokens[2]))
-        self.assertEqual(2, len(tokens[3]))
-
-    def test_to_source(self):
-        src = textwrap.dedent("""local a = 1""")
-        atokens = asttokens.parse(src)
-        self.assertEqual(src, atokens.toSource())
-
-    def test_line_editor_stripl(self):
-        src = """   local a = 1"""
-
-        atokens = asttokens.parse(src)
-        for tokens in atokens.lines():
-            tokens.stripl()
-
-        self.assertEqual(src.strip(), atokens.toSource())
-
-    def test_editor_set_text(self):
-        src = """local a = 1"""
-        exp = """local foo = 1"""
-
-        atokens = asttokens.parse(src)
-        for token in atokens.types(asttokens.Tokens.NAME):
-            token.text = 'foo'
-
-        self.assertEqual(exp, atokens.toSource())
-
-    def test_editor_indent(self):
-        src = """local a = 1"""
-        exp = """  local a = 1"""
-
-        atokens = asttokens.parse(src)
-        for tokens in atokens.lines():
-            tokens.indent(2)
-
-        self.assertEqual(exp, atokens.toSource())
-
-    def test_editor_from_ast(self):
-        src = textwrap.dedent("""
-            local a = 1
-            local b, c = '11'""")
-        exp= textwrap.dedent("""
-            local _a = 1
-            local _b, _c = '11'""")
-
-        tree = ast.parse(src)
+    def test_program_edior_range(self):
+        src = textwrap.dedent(r"""
+            local foo = "s"
+            local bar = "a"
+            local res = foo .. bar""")
         atokens = asttokens.parse(src)
 
-        for node in ast.walk(tree):
-            if isinstance(node, LocalAssign):
-                tokens = atokens.fromAST(node)
-                for name in tokens.types(asttokens.Tokens.NAME):
-                    name.text = '_' + name.text
+        rangetok = atokens.range(0, 2)
+        self.assertEqual(3, len(rangetok))
 
-        self.assertEqual(exp, atokens.toSource())
+        self.assertEqual('\n', rangetok[0].text)
+        self.assertEqual('local', rangetok[1].text)
+        self.assertEqual(' ', rangetok[2].text)
 
-    def test_editor_render_source(self):
-        atokens = asttokens.parse(src_1)
 
-        self.assertEqual(src_1, atokens.toSource())
+    def test_line_editor_lstrip(self):
+        atokens = asttokens.parse(r"""   local foo = "s"; """)
+        lines = list(atokens.lines())
+
+        self.assertEqual('   local foo = "s"; ', lines[0].toSource())
+        self.assertEqual('local foo = "s"; ', lines[0].lstrip().toSource())
+
+        self.assertEqual('foo = "s"; ', lines[0].lstrip([
+            asttokens.Tokens.SPACE,
+            asttokens.Tokens.LOCAL]).toSource())
+
