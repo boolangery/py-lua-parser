@@ -48,13 +48,20 @@ def _listify(obj):
         return obj
 
 def _setMetadata(ctx, node):
-    if ctx.start:
-        node.start = ctx.start.tokenIndex
-    if ctx.stop:
-        node.stop  = ctx.stop.tokenIndex
-    if ctx.start and ctx.stop:
-        for t in ctx.parser._input.getTokens(ctx.start.tokenIndex, ctx.stop.tokenIndex):
-            node.tokens.append(t)
+    if isinstance(ctx, TerminalNode):
+        node.tokens.append(ctx.symbol)
+    elif isinstance(ctx, list):
+        # merge tokens from all ctx in list
+        for context in ctx:
+            if isinstance(context, TerminalNode):
+                node.tokens.append(context.symbol)
+            else:
+                for t in context.parser._input.getTokens(context.start.tokenIndex, context.stop.tokenIndex + 1):
+                    node.tokens.append(t)
+    else:
+        if ctx.start and ctx.stop:
+            for t in ctx.parser._input.getTokens(ctx.start.tokenIndex, ctx.stop.tokenIndex + 1):
+                node.tokens.append(t)
     return node
 
 class ParseTreeVisitor(LuaVisitor):
@@ -143,6 +150,7 @@ class ParseTreeVisitor(LuaVisitor):
             return self.visit(ctx.children[0])
         else:
             root = self.visit(ctx.children[0])
+
             for i in range(1, len(ctx.children)):
                 tail = self.visit(ctx.children[i])
                 if isinstance(tail, Index):
@@ -155,6 +163,11 @@ class ParseTreeVisitor(LuaVisitor):
                     tail = Call(
                         func=root,
                         args=_listify(tail))
+
+                # extend with child tokens
+                tail.tokens.extend(root.tokens)
+                _setMetadata(ctx.children[i], tail)
+
                 root = tail
             return root
 
@@ -224,14 +237,14 @@ class ParseTreeVisitor(LuaVisitor):
         return self.visit(ctx.children[0])
 
     def visitTerminal(self, ctx):
-        def NilHandler(ctx): return Nil()
-        def NameHandler(ctx): return Name(ctx.getText())
-        def TrueHandler(ctx):return TrueExpr()
-        def FalseHandler(ctx):return FalseExpr()
+        def NilHandler(ctx): return _setMetadata(ctx, Nil())
+        def NameHandler(ctx): return _setMetadata(ctx, Name(ctx.getText()))
+        def TrueHandler(ctx):return _setMetadata(ctx, TrueExpr())
+        def FalseHandler(ctx):return _setMetadata(ctx, FalseExpr())
         def NumberHandler(ctx):
             # using python number eval to parse lua number
             number = ast.literal_eval(ctx.getText())
-            return Number(number)
+            return _setMetadata(ctx, Number(number))
         def StringHandler(ctx):
             luaStr = ctx.getText()
             p = re.compile('^\[=+\[(.*)\]=+\]')  # nested quote pattern
@@ -247,7 +260,7 @@ class ParseTreeVisitor(LuaVisitor):
             # nested quote
             elif p.match(luaStr):
                 luaStr = p.search(luaStr).group(1)
-            return String(luaStr)
+            return _setMetadata(ctx, String(luaStr))
         def BreakHandler(ctx): return Break()
 
         handlers = {
@@ -275,9 +288,9 @@ class ParseTreeVisitor(LuaVisitor):
             left = self.visit(ctx.children[0])
             for i in range(1, len(ctx.children), 2):
                 right = self.visit(ctx.children[i + 1])
-                root  = nodeOnToken[ctx.children[i].symbol.type](
+                root  = _setMetadata(ctx, nodeOnToken[ctx.children[i].symbol.type](
                     left=left,
-                    right=right)
+                    right=right))
                 left = root
             return left
         # expr
