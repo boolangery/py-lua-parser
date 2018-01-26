@@ -12,7 +12,7 @@ def parse(source):
     parser = LuaParser(stream)
     parser.chunk()
     tokens = stream.tokens
-    return ProgramEditor(tokens, None)
+    return ProgramEditor(tokens)
 
 class Tokens(Enum):
     AND = 1
@@ -82,31 +82,28 @@ class Tokens(Enum):
 
 class TokensEditor():
     """Initialize a token list editor.
-    :param dllTokens: a list or a double linked list of all tokens
     :param dllTokensToEdit: a list or a double linked list of token to edit"""
-    def __init__(self, dllTokens, lTokensToEdit):
+    def __init__(self, lTokensToEdit):
         # sort tokens by index and create a double linked list with them
-        if isinstance(dllTokens, list):
-            self._dllAll = llist.dllist()
-            for t in sorted(dllTokens, key=lambda token: token.tokenIndex):
-                self._dllAll.append(t)
-        elif isinstance(dllTokens, llist.dllist):
-            self._dllAll = dllTokens
+        self._dllTokens = []
+        if isinstance(lTokensToEdit, list):
+            if lTokensToEdit:
+                if isinstance(lTokensToEdit[0], llist.dllistnode):
+                    self._dllTokens = lTokensToEdit
+                else:
+                    # we create a double linked list of token,
+                    # to be able to navigate node with next, prev
+                    # keep a ref on this ddlist to keep next, prev working
+                    self._rawLlTokens = llist.dllist()
+                    for token in lTokensToEdit:
+                        self._rawLlTokens.append(token)
+                    # and we store need nodes in a normal list
+                    node = self._rawLlTokens.first
+                    while node:
+                        self._dllTokens.append(node)
+                        node = node.next
         else:
-            raise TypeError('dllTokens must be a list or a llist.dllist')
-
-        if lTokensToEdit is None:
-            self._dllTokens = []
-            node = self._dllAll.first
-            while node:
-                self._dllTokens.append(node)
-                node = node.next
-        elif isinstance(lTokensToEdit, list):
-            for node in lTokensToEdit:
-                assert isinstance(node, llist.dllistnode)
-            self._dllTokens = lTokensToEdit
-        else:
-            raise TypeError('lTokensToEdit must be none or a list of dllistnode')
+            raise TypeError('lTokensToEdit must be none or a list of token or dllistnode')
 
     def __iter__(self):
         return iter(self._dllTokens)
@@ -115,7 +112,7 @@ class TokensEditor():
         return len(self._dllTokens)
 
     def __getitem__(self, i):
-        return TokenEditor(self._dllAll, self._dllTokens[i])
+        return TokenEditor(self._dllTokens[i])
 
     def toSource(self):
         return TokenPrinter().toStr([t.value for t in self._dllTokens])
@@ -134,10 +131,8 @@ class TokensEditor():
 class TokenEditor():
     """Utility class to edit a specific token.
     """
-    def __init__(self, dllTokens, dllnodeTokenToEdit):
-        assert isinstance(dllTokens, llist.dllist)
+    def __init__(self, dllnodeTokenToEdit):
         assert isinstance(dllnodeTokenToEdit, llist.dllistnode)
-        self._dllAll = dllTokens
         self._dllTokens = dllnodeTokenToEdit
 
     def toSource(self):
@@ -148,7 +143,7 @@ class TokenEditor():
         """
         node = self._dllTokens.next
         if node:
-            return TokenEditor(self._dllAll, node)
+            return TokenEditor(node)
         return node
 
     def prev(self):
@@ -156,14 +151,14 @@ class TokenEditor():
         """
         node = self._dllTokens.prev
         if node:
-            return TokenEditor(self._dllAll, node)
+            return TokenEditor(node)
         return node
 
     def nextOfType(self, type):
         node = self._dllTokens.next
         while node:
             if node.value.type == type.value:
-                return TokenEditor(self._dllAll, node)
+                return TokenEditor(node)
             node = node.next
         return None
 
@@ -171,7 +166,7 @@ class TokenEditor():
         node = self._dllTokens.prev
         while node:
             if node.value.type == type.value:
-                return TokenEditor(self._dllAll, node)
+                return TokenEditor(node)
             node = node.prev
         return None
 
@@ -203,7 +198,7 @@ class TokenEditor():
             else:
                 break
             node = node.next
-        return LineEditor(self._dllAll, tokens)
+        return LineEditor(tokens)
 
     def isFirstOnLine(self):
         if self._dllTokens.prev:
@@ -220,7 +215,7 @@ class TokenEditor():
             if node.value.type == type.value:
                 break
             node = node.next
-        return GroupEditor(self._dllAll, tokens)
+        return GroupEditor(tokens)
 
     @property
     def text(self):
@@ -257,10 +252,10 @@ class GroupEditor(TokensEditor):
         for node in self._dllTokens:
             nodes.append(node)
             if node.value.type == Tokens.NEWLINE.value:
-                yield LineEditor(self._dllAll, nodes)
+                yield LineEditor(nodes)
                 nodes = []
         # yield last line
-        if nodes: yield LineEditor(self._dllAll, nodes)
+        if nodes: yield LineEditor(nodes)
 
     def types(self, ltypes):
         types = self.tokensEnumToValues(ltypes)
@@ -268,20 +263,20 @@ class GroupEditor(TokensEditor):
         for token in self._dllTokens:
             if token.value.type in types:
                 nodes.append(token)
-        return GroupEditor(self._dllAll, nodes)
+        return GroupEditor(nodes)
 
     def first(self):
         """Retrieve the first token of this group.
         """
         if self._dllTokens:
-            return TokenEditor(self._dllAll, self._dllTokens[0])
+            return TokenEditor(self._dllTokens[0])
         return None
 
     def last(self):
         """Retrieve the last token of this group.
         """
         if self._dllTokens:
-            return TokenEditor(self._dllAll, self._dllTokens[-1])
+            return TokenEditor(self._dllTokens[-1])
         return None
 
 
@@ -291,7 +286,7 @@ class ProgramEditor(GroupEditor):
         for node in self._dllTokens:
             if node.value.tokenIndex >= start and node.value.tokenIndex <= stop:
                 nodes.append(node)
-        return GroupEditor(self._dllAll, nodes)
+        return GroupEditor(nodes)
 
     def fromAST(self, node):
         return self.range(node.start, node.stop)
@@ -337,7 +332,6 @@ class LineEditor(GroupEditor):
         currentLine = self._dllTokens[0].line
         nextLine = self.next()
         # delete tokens on line by creating a new list
-        self._dllAll[:] = [token for token in self._dllAll if token.line == currentLine]
         self._dllTokens = []
         # shift line under this one
         while nextLine is not None:
