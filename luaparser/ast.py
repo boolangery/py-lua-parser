@@ -528,7 +528,7 @@ class ParseTreeVisitor(LuaVisitor):
                 lastStat.orelse = self.visit(node)
             else:
                 elseIfNodes = self.visit(node)
-                elseIf = ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None)
+                elseIf = _setMetadata(node, ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None))
                 lastStat.orelse = elseIf
                 lastStat = elseIf
         return _setMetadata(ctx, mainIf)
