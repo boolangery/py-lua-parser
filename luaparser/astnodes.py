@@ -5,6 +5,7 @@
     Contains all Ast Node definitions.
 """
 from enum import Enum
+from luaparser import asttokens
 
 ''' ----------------------------------------------------------------------- '''
 ''' AST base nodes                                                          '''
@@ -22,6 +23,10 @@ class Node(object):
     @property
     def tokens(self):
         return self._tokens
+
+    def edit(self):
+        """Get a token group editor."""
+        return asttokens.GroupEditor(self._tokens)
 
     def equalDicts(self, d1, d2, ignore_keys):
         ignored = set(ignore_keys)
