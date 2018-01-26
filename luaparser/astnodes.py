@@ -54,7 +54,7 @@ class Node(object):
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(self, other.__class__):
-            return self.equalDicts(self.__dict__, other.__dict__, ['_start', '_stop'])
+            return self.equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_tokens'])
         return False
 
 class Chunk(Node):
