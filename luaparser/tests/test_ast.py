@@ -44,3 +44,13 @@ class TokensTestCase(tests.TestCase):
 
         self.assertRaises(ast.SyntaxException, ast.parse, src)
 
+    def test_ast_tokens(self):
+        src = textwrap.dedent("""
+            local a = 42
+            local b = 48
+            """)
+        tree = ast.parse(src)
+        nodes = list(ast.walk(tree))
+        print(nodes)
+
+

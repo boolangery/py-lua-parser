@@ -15,6 +15,7 @@ class Node(object):
         self._name = name
         self._start = 0
         self._stop = 0
+        self._tokens = []
 
     @property
     def displayName(self):
@@ -31,6 +32,10 @@ class Node(object):
     @property
     def stop(self):
         return self._stop
+
+    @property
+    def tokens(self):
+        return self._tokens
 
     @stop.setter
     def stop(self, value):

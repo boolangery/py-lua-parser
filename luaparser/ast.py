@@ -52,6 +52,9 @@ def _setMetadata(ctx, node):
         node.start = ctx.start.tokenIndex
     if ctx.stop:
         node.stop  = ctx.stop.tokenIndex
+    if ctx.start and ctx.stop:
+        for t in ctx.parser._input.getTokens(ctx.start.tokenIndex, ctx.stop.tokenIndex):
+            node.tokens.append(t)
     return node
 
 class ParseTreeVisitor(LuaVisitor):
