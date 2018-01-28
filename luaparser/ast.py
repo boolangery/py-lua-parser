@@ -8,6 +8,7 @@ from luaparser.asttokens import Tokens
 from luaparser.parser.LuaParser import LuaParser
 from luaparser import printers
 from antlr4.error.ErrorListener import ErrorListener
+import llist
 
 def parse(source):
     lexer = LuaLexer(InputStream(source))
@@ -42,41 +43,54 @@ def toPrettyStr(tree, indent=2):
     return printers.PythonStyleVisitor(indent).visit(tree)
 
 def _listify(obj):
-    if not isinstance(obj, list):
-        return [obj]
+    if not isinstance(obj, NodeList):
+        l = NodeList()
+        l.append(obj)
+        return l
     else:
         return obj
 
-def _setMetadata(ctx, node):
-    if isinstance(ctx, TerminalNode):
-        node.tokens.append(ctx.symbol)
-    elif isinstance(ctx, list):
-        # merge tokens from all ctx in list
-        for context in ctx:
-            if isinstance(context, TerminalNode):
-                node.tokens.append(context.symbol)
-            else:
-                for t in context.parser._input.getTokens(context.start.tokenIndex, context.stop.tokenIndex + 1):
-                    node.tokens.append(t)
-    else:
-        if ctx.start and ctx.stop:
-            for t in ctx.parser._input.getTokens(ctx.start.tokenIndex, ctx.stop.tokenIndex + 1):
-                node.tokens.append(t)
-    return node
-
 class ParseTreeVisitor(LuaVisitor):
+    def _setTokens(self, ctx, node):
+        if isinstance(ctx, TerminalNode):
+            node.start = ctx.symbol.tokenIndex
+            node.stop = ctx.symbol.tokenIndex
+        elif isinstance(ctx, list):
+            raise Exception('not supported')
+        else:
+            if ctx.start and ctx.stop:
+                node.start = ctx.start.tokenIndex
+                node.stop = ctx.stop.tokenIndex
+        node.allTokens = self._dllAll
+        return node
+
+    def _setTokensFromIndex(self, start, stop, node):
+        node.start = start
+        node.stop = stop
+        node.allTokens = self._dllAll
+        return node
+
+    def getTokenNodes(self, start, stop):
+        subset = []
+        if stop >= len(self._dllAll):
+            stop = len(self._dllAll) - 1
+        for i in range(start, stop):
+            node = self._dllAll.nodeat(i)
+            subset.append(node)
+        return subset
+
     def visitChildren(self, ctx, mergeList=False):
         if ctx.children:
             return self.visitChildrenList(ctx.children, mergeList)
         else:
-            return []
+            return NodeList()
 
     def visitChildrenList(self, children, mergeList=False):
-        nodes = []
+        nodes = NodeList()
         for child in children:
             node = self.visit(child)
             if node != None:
-                if mergeList and isinstance(node, list):
+                if mergeList and isinstance(node, NodeList):
                     nodes.extend(node)
                 else:
                     nodes.append(node)
@@ -88,15 +102,29 @@ class ParseTreeVisitor(LuaVisitor):
         if ctx.children:
             return self.visitChildrenList(ctx.children[index:], mergeList)
         else:
-            return []
+            return NodeList()
 
     ''' Visiting root nodes.
     '''
     def visitChunk(self, ctx):
-        return _setMetadata(ctx, Chunk(self.visit(ctx.children[0])))
+        # create a double linked list of all token
+        # to be shared across all nodes:
+        self._dllAll = llist.dllist()
+        for token in ctx.parser._input.tokens:
+            self._dllAll.append(token)
+
+        node = self._setTokens(ctx, Chunk(self.visit(ctx.children[0])))
+
+        # add all tokens to chunk (include comments)
+        node.start = 0
+        node.stop = ctx.stop.tokenIndex
+
+        return node
 
     def visitBlock(self, ctx):
-        return _setMetadata(ctx, Block(_listify(self.visitChildren(ctx))))
+        """block
+        : stat* ret_stat?"""
+        return self._setTokens(ctx, Block(_listify(self.visitChildren(ctx))))
 
     def visitStat(self, ctx):
         return self.visit(ctx.children[0])
@@ -104,7 +132,7 @@ class ParseTreeVisitor(LuaVisitor):
     ''' Statements '''
     def visitAssignment(self, ctx):
         # var_list ASSIGN expr_list
-        return _setMetadata(ctx, Assign(
+        return self._setTokens(ctx, Assign(
             targets=_listify(self.visit(ctx.children[0])),
             values=_listify(self.visit(ctx.children[2]))))
 
@@ -117,26 +145,31 @@ class ParseTreeVisitor(LuaVisitor):
         if isinstance(ctx.children[1], LuaParser.Name_listContext):
             # LOCAL name_list (ASSIGN expr_list)?
             if len(ctx.children)>2:
-                return _setMetadata(ctx, LocalAssign(
+                return self._setTokens(ctx, LocalAssign(
                     targets=_listify(self.visit(ctx.children[1])),
                     values=_listify(self.visit(ctx.children[3]))))
             # LOCAL name_list
             else:
-                return _setMetadata(ctx, LocalAssign(
+                return self._setTokens(ctx, LocalAssign(
                     targets=_listify(self.visit(ctx.children[1])),
-                    values=[]))
+                    values=NodeList()))
 
         # LOCAL FUNCTION NAME func_body
         else:
             name     = self.visit(ctx.children[2])
             funcBody = self.visit(ctx.children[3])
-            return _setMetadata(ctx, LocalFunction(name=name, args=funcBody[0], body=funcBody[1]))
+            return self._setTokens(ctx, LocalFunction(name=name, args=funcBody[0], body=funcBody[1]))
 
     def visitFunc_body(self, ctx):
         """func_body
         : OPAR param_list CPAR block END"""
-        params = self.visit(ctx.children[1])
-        body   = self.visit(ctx.children[3]).body
+        params = self._setTokens(ctx.children[1], self.visit(ctx.children[1]))
+
+        body = self._setTokensFromIndex(
+            ctx.children[2].symbol.tokenIndex + 1,
+            ctx.children[4].symbol.tokenIndex - 1,
+            self.visit(ctx.children[3]).body)
+
         return (params, body)
 
     def visitVar_list(self, ctx):
@@ -153,6 +186,7 @@ class ParseTreeVisitor(LuaVisitor):
 
             for i in range(1, len(ctx.children)):
                 tail = self.visit(ctx.children[i])
+                self._setTokens(ctx.children[i], tail)
                 if isinstance(tail, Index):
                     tail.value = root
                 elif isinstance(tail, Invoke):
@@ -162,11 +196,11 @@ class ParseTreeVisitor(LuaVisitor):
                 else:
                     tail = Call(
                         func=root,
-                        args=_listify(tail))
+                        args=self._setTokens(ctx.children[i], _listify(tail)))
 
                 # extend with child tokens
-                tail.tokens.extend(root.tokens)
-                _setMetadata(ctx.children[i], tail)
+                self._setTokens(ctx.children[i], tail)
+                tail.start = root.start
 
                 root = tail
             return root
@@ -191,42 +225,47 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitTail_dot_index(self, ctx):
         """DOT NAME"""
-        return Index(
+        return self._setTokens(ctx, Index(
             value=None, # to set in parent
-            idx=self.visit(ctx.children[1]))
+            idx=self.visit(ctx.children[1])))
 
     def visitTail_brack_index(self, ctx):
         """OBRACK expr CBRACK"""
-        return Index(
+        return self._setTokens(ctx, Index(
             value=None,  # to set in parent
-            idx=self.visit(ctx.children[1]))
+            idx=self.visit(ctx.children[1])))
 
     def visitTail_invoke(self, ctx):
         """COL NAME OPAR expr_list? CPAR"""
-        return Invoke(
+        return self._setTokens(ctx, Invoke(
             source=None,  # to set in parent
             func=self.visit(ctx.children[1]),
-            args=_listify(self.visit(ctx.children[3]) or []))
+            args=_listify(self.visit(ctx.children[3]) or NodeList())))
 
     def visitTail_invoke_table(self, ctx):
         """COL NAME table_constructor"""
-        return Invoke(
+        return self._setTokens(ctx, Invoke(
             source=None,  # to set in parent
             func=self.visit(ctx.children[1]),
-            args=_listify(self.visit(ctx.children[2]) or []))
+            args=_listify(self.visit(ctx.children[2]) or NodeList())))
 
     def visitTail_invoke_str(self, ctx):
         """COL NAME STRING"""
-        return Invoke(
+        return self._setTokens(ctx, Invoke(
             source=None,  # to set in parent
             func=self.visit(ctx.children[1]),
-            args=_listify(self.visit(ctx.children[2]) or []))
+            args=_listify(self.visit(ctx.children[2]) or NodeList())))
 
     def visitTail_call(self, ctx):
         """OPAR expr_list? CPAR"""
-        return Call(
+        args = self._setTokensFromIndex(
+            ctx.children[0].symbol.tokenIndex + 1,
+            ctx.children[2].symbol.tokenIndex - 1,
+            _listify(self.visit(ctx.children[1]) or NodeList()))
+
+        return self._setTokens(ctx, Call(
             func=None,  # to set in parent
-            args=_listify(self.visit(ctx.children[1]) or []))
+            args=args))
 
     def visitTail_table(self, ctx):
         """table_constructor"""
@@ -237,14 +276,14 @@ class ParseTreeVisitor(LuaVisitor):
         return self.visit(ctx.children[0])
 
     def visitTerminal(self, ctx):
-        def NilHandler(ctx): return _setMetadata(ctx, Nil())
-        def NameHandler(ctx): return _setMetadata(ctx, Name(ctx.getText()))
-        def TrueHandler(ctx):return _setMetadata(ctx, TrueExpr())
-        def FalseHandler(ctx):return _setMetadata(ctx, FalseExpr())
+        def NilHandler(ctx): return self._setTokens(ctx, Nil())
+        def NameHandler(ctx): return self._setTokens(ctx, Name(ctx.getText()))
+        def TrueHandler(ctx):return self._setTokens(ctx, TrueExpr())
+        def FalseHandler(ctx):return self._setTokens(ctx, FalseExpr())
         def NumberHandler(ctx):
             # using python number eval to parse lua number
             number = ast.literal_eval(ctx.getText())
-            return _setMetadata(ctx, Number(number))
+            return self._setTokens(ctx, Number(number))
         def StringHandler(ctx):
             luaStr = ctx.getText()
             p = re.compile('^\[=+\[(.*)\]=+\]')  # nested quote pattern
@@ -260,7 +299,7 @@ class ParseTreeVisitor(LuaVisitor):
             # nested quote
             elif p.match(luaStr):
                 luaStr = p.search(luaStr).group(1)
-            return _setMetadata(ctx, String(luaStr))
+            return self._setTokens(ctx, String(luaStr))
         def BreakHandler(ctx): return Break()
 
         handlers = {
@@ -288,7 +327,7 @@ class ParseTreeVisitor(LuaVisitor):
             left = self.visit(ctx.children[0])
             for i in range(1, len(ctx.children), 2):
                 right = self.visit(ctx.children[i + 1])
-                root  = _setMetadata(ctx, nodeOnToken[ctx.children[i].symbol.type](
+                root  = self._setTokens(ctx, nodeOnToken[ctx.children[i].symbol.type](
                     left=left,
                     right=right))
                 left = root
@@ -320,13 +359,13 @@ class ParseTreeVisitor(LuaVisitor):
         | pow_expr"""
         if len(ctx.children)>1:
             if ctx.children[0].symbol.type == Tokens.MINUS.value:
-                return _setMetadata(ctx, USubOp(self.visit(ctx.children[1])))
+                return self._setTokens(ctx, USubOp(self.visit(ctx.children[1])))
             elif ctx.children[0].symbol.type == Tokens.LENGTH.value:
-                return _setMetadata(ctx, ULengthOP(self.visit(ctx.children[1])))
+                return self._setTokens(ctx, ULengthOP(self.visit(ctx.children[1])))
             elif ctx.children[0].symbol.type == Tokens.NOT.value:
-                return _setMetadata(ctx, ULNotOp(self.visit(ctx.children[1])))
+                return self._setTokens(ctx, ULNotOp(self.visit(ctx.children[1])))
             else:
-                return _setMetadata(ctx, UBNotOp(self.visit(ctx.children[1])))
+                return self._setTokens(ctx, UBNotOp(self.visit(ctx.children[1])))
         else:
             return self.visit(ctx.children[0])
 
@@ -380,8 +419,8 @@ class ParseTreeVisitor(LuaVisitor):
         """table_constructor
         : OBRACE field_list? CBRACE"""
         if len(ctx.children) > 2:
-            keys   = []
-            values = []
+            keys   = NodeList()
+            values = NodeList()
             fields = self.visit(ctx.children[1])
             tableIndex = 1
             for field in fields:
@@ -392,14 +431,14 @@ class ParseTreeVisitor(LuaVisitor):
                 else:
                     keys.append(field[0])
                 values.append(field[1])
-            return _setMetadata(ctx, Table(keys, values))
+            return self._setTokens(ctx, Table(keys, values))
         else:
-            return _setMetadata(ctx, Table([], []))
+            return self._setTokens(ctx, Table(NodeList(), NodeList()))
 
     def visitField_list(self, ctx):
         """field_list
         : field (field_sep field)* field_sep?"""
-        fields = []
+        fields = NodeList()
         for child in ctx.children:
             if isinstance(child, LuaParser.FieldContext):
                 fields.append(self.visit(child))
@@ -429,7 +468,7 @@ class ParseTreeVisitor(LuaVisitor):
         # FUNCTION names COL NAME func_body
         if len(ctx.children) > 3:
             funcBody = self.visit(ctx.children[4])
-            return _setMetadata(ctx, Method(
+            return self._setTokens(ctx, Method(
                 source=names,
                 name=self.visit(ctx.children[3]),
                 args=funcBody[0],
@@ -437,7 +476,7 @@ class ParseTreeVisitor(LuaVisitor):
         # FUNCTION names func_body
         else:
             funcBody = self.visit(ctx.children[2])
-            return _setMetadata(ctx, Function(
+            return self._setTokens(ctx, Function(
                 name=names,
                 args=funcBody[0],
                 body=funcBody[1]))
@@ -454,7 +493,7 @@ class ParseTreeVisitor(LuaVisitor):
                     value=child,
                     idx=self.visit(ctx.children[i+1]))
                 child = root
-            return _setMetadata(ctx, child)
+            return self._setTokens(ctx, child)
         else:
             return self.visitChildren(ctx)
 
@@ -463,14 +502,18 @@ class ParseTreeVisitor(LuaVisitor):
         """function_literal
         : FUNCTION func_body"""
         funcBody = self.visit(ctx.children[1])
-        return _setMetadata(ctx, AnonymousFunction(
+        return self._setTokens(ctx, AnonymousFunction(
             args=funcBody[0],
             body=funcBody[1]))
 
     def visitDo_block(self, ctx):
         """do_block
         : DO block END"""
-        return _setMetadata(ctx, Do(self.visit(ctx.children[1]).body))
+        body = self._setTokensFromIndex(
+            ctx.children[0].symbol.tokenIndex + 1,
+            ctx.children[2].symbol.tokenIndex - 1,
+            self.visit(ctx.children[1]).body)
+        return self._setTokens(ctx, Do(body))
 
     def visitFor_stat(self, ctx):
         """for_stat
@@ -487,7 +530,7 @@ class ParseTreeVisitor(LuaVisitor):
             if len(ctx.children) > 6:
                 step = self.visit(ctx.children[7])
 
-            return _setMetadata(ctx, Fornum(
+            return self._setTokens(ctx, Fornum(
                 target=self.visit(ctx.children[1]),
                 start=start,
                 stop=stop,
@@ -495,7 +538,7 @@ class ParseTreeVisitor(LuaVisitor):
                 body=self.visit(ctx.children[-1]).body)) # visitDo_block
         # FOR name_list IN expr_list do_block
         else:
-            return _setMetadata(ctx, Forin(
+            return self._setTokens(ctx, Forin(
                 body=self.visit(ctx.children[4]).body,
                 iter=self.visit(ctx.children[3]),
                 targets=_listify(self.visit(ctx.children[1]))))
@@ -503,14 +546,14 @@ class ParseTreeVisitor(LuaVisitor):
     def visitWhile_stat(self, ctx):
         """while_stat
         : WHILE expr do_block"""
-        return _setMetadata(ctx, While(
+        return self._setTokens(ctx, While(
             test=self.visit(ctx.children[1]),
             body=self.visit(ctx.children[2]).body))
 
     def visitRepeat_stat(self, ctx):
         """repeat_stat
         : REPEAT block UNTIL expr"""
-        return _setMetadata(ctx, Repeat(
+        return self._setTokens(ctx, Repeat(
             body=self.visit(ctx.children[1]).body,
             test=self.visit(ctx.children[3])))
 
@@ -528,10 +571,10 @@ class ParseTreeVisitor(LuaVisitor):
                 lastStat.orelse = self.visit(node)
             else:
                 elseIfNodes = self.visit(node)
-                elseIf = _setMetadata(node, ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None))
+                elseIf = self._setTokens(node, ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None))
                 lastStat.orelse = elseIf
                 lastStat = elseIf
-        return _setMetadata(ctx, mainIf)
+        return self._setTokens(ctx, mainIf)
 
     def visitElseif_stat(self, ctx):
         """elseif_stat
@@ -548,468 +591,16 @@ class ParseTreeVisitor(LuaVisitor):
     def visitLabel(self, ctx):
         """label
         : COLCOL NAME COLCOL"""
-        return _setMetadata(ctx, Label(id=self.visit(ctx.children[1])))
+        return self._setTokens(ctx, Label(id=self.visit(ctx.children[1])))
 
     def visitGoto_stat(self, ctx):
-        return _setMetadata(ctx, Goto(label=self.visit(ctx.children[1])))
+        return self._setTokens(ctx, Goto(label=self.visit(ctx.children[1])))
 
     def visitRet_stat(self, ctx):
         """ret_stat
         : RETURN expr_list? SEMCOL?"""
-        return _setMetadata(ctx, Return(_listify(self.visitChildren(ctx))))
+        return self._setTokens(ctx, Return(_listify(self.visitChildren(ctx))))
 
-
-
-
-
-
-
-
-
-
-    """
-
-    ''' ----------------------------------------------------------------------- '''
-    ''' 3.3 – Statements                                                        '''
-    ''' ----------------------------------------------------------------------- '''
-
-    def visitLocalset(self, ctx):
-        # 'local' namelist ('=' explist)?
-        if len(ctx.children) > 2:
-            return _setMetadata(ctx, LocalAssign(
-                targets=_listify(self.visit(ctx.children[1])), \
-                values=_listify(self.visit(ctx.children[3]))))
-        else:
-            return _setMetadata(ctx, LocalAssign(
-                targets=_listify(self.visit(ctx.children[1])), \
-                values=[]))
-
-    def visitWhileStat(self, ctx):
-        # 'while' exp 'do' block 'end' ;
-        return _setMetadata(ctx, While(
-            test=self.visit(ctx.children[1]),
-            body=self.visit(ctx.children[3]).body))
-
-    def visitDo(self, ctx):
-        return _setMetadata(ctx, Do(self.visit(ctx.children[1]).body))
-
-    def visitRepeat(self, ctx):
-        # 'repeat' block 'until' exp ;
-        return _setMetadata(ctx, Repeat(
-            body=self.visit(ctx.children[1]).body,
-            test=self.visit(ctx.children[3])))
-
-    def visitCall(self, ctx):
-        # varOrExp args+
-
-        return _setMetadata(ctx, Call(
-            func=self.visit(ctx.children[0]), \
-            args=_listify(self.visitStartingFrom(ctx, 1))))
-
-    def visitInvoke(self, ctx):
-        # varOrExp (':' name args)+
-        child = Invoke(
-            source=self.visit(ctx.children[0]), \
-            func=self.visit(ctx.children[2]), \
-            args=_listify(self.visit(ctx.children[3])))
-        # if nested invoke:
-        if len(ctx.children)>4:
-            # iterate (':' name args)
-            for i in range(4, len(ctx.children), 3):
-                root = Invoke(
-                    source=child, \
-                    func=self.visit(ctx.children[i+1]), \
-                    args=_listify(self.visit(ctx.children[i+2])))
-                child = root
-            return _setMetadata(ctx, child)
-        else:
-            return _setMetadata(ctx, child)
-
-    def visitFornum(self, ctx):
-        # 'for' name '=' exp ',' exp (',' exp)? 'do' block 'end' ;
-        # if has step expr
-        if len(ctx.children) > 8:
-            return _setMetadata(ctx, Fornum(
-                target=self.visit(ctx.children[1]),
-                start=self.visit(ctx.children[3]),
-                stop=self.visit(ctx.children[5]),
-                step=self.visit(ctx.children[7]),
-                body=self.visit(ctx.children[-2]).body))
-        else:
-            return _setMetadata(ctx, Fornum(
-                target=self.visit(ctx.children[1]),
-                start=self.visit(ctx.children[3]),
-                stop=self.visit(ctx.children[5]),
-                step=Number(1),
-                body=self.visit(ctx.children[-2]).body))
-
-    def visitForin(self, ctx):
-        # 'for' namelist 'in' explist 'do' block 'end' ;
-        return _setMetadata(ctx, Forin(
-            body=self.visit(ctx.children[5]).body,
-            iter=self.visit(ctx.children[3]),
-            targets=_listify(self.visit(ctx.children[1]))))
-
-    def visitPrefixexp(self, ctx):
-        # varOrExp nameAndArgs*
-
-        nodes = self.visitChildren(ctx, True)
-        print('\nvisitPrefixexp')
-        print(vars(ctx))
-        print(nodes)
-
-        if isinstance(nodes, list):
-            if len(nodes) > 1:
-                if isinstance(nodes[0], Name) or isinstance(nodes[0], Index):
-                    if isinstance(nodes[-1], Invoke):
-                        nodes[-1].source = nodes[0]
-                        for i in range(len(nodes)-1, 0, -1):
-                            if isinstance(nodes[i], Invoke):
-                                nodes[i].source = nodes[i-1]
-                        return _setMetadata(ctx, nodes[-1])
-                    else:
-                        return _setMetadata(ctx, Call(
-                            func=nodes[0],
-                            args=nodes[1:]
-                        ))
-
-
-        return self.visitChildren(ctx)
-
-    def visitNameAndArgs(self, ctx):
-        # (COLON name)? args
-        if len(ctx.children)>1:
-            return _setMetadata(ctx, Invoke(
-                source=None, # will be filled in parent visitor
-                func=self.visit(ctx.children[1]),
-                args=_listify(self.visit(ctx.children[2]))))
-        else:
-            return self.visit(ctx.children[0])
-
-    def visitIfStat(self, ctx):
-        # 'if' exp 'then' block elseIfStat* elseStat? 'end' ;
-        mainIf = If(
-            test=self.visit(ctx.children[1]),
-            body=self.visit(ctx.children[3]).body,
-            orelse=None)
-        lastStat = mainIf
-
-        for node in ctx.children[4:-1]:
-            if isinstance(node, LuaParser.ElseStatContext):
-                lastStat.orelse = self.visit(node)
-            else:
-                elseIfNodes = self.visit(node)
-                elseIf = ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None)
-                lastStat.orelse = elseIf
-                lastStat = elseIf
-        return _setMetadata(ctx, mainIf)
-
-    def visitElseIfStat(self, ctx):
-        # 'elseif' exp 'then' block
-        return [
-            self.visit(ctx.children[1]),
-            self.visit(ctx.children[3]).body]
-
-    def visitElseStat(self, ctx):
-        # 'else' block
-        return self.visit(ctx.children[1]).body
-
-    def visitLabel(self, ctx):
-        return _setMetadata(ctx, Label(id=self.visit(ctx.children[1]).id))
-
-    def visitGoto(self, ctx):
-        return _setMetadata(ctx, Goto(label=self.visit(ctx.children[1]).id))
-
-    def visitBreakStat(self, ctx):
-        return _setMetadata(ctx, Break())
-
-    '''
-    Visiting expressions.
-    '''
-    '''
-    Types and values
-    '''
-    def visitNil(self, ctx):
-        return _setMetadata(ctx, Nil())
-
-    def visitTrue(self, ctx):
-        return _setMetadata(ctx, TrueExpr())
-
-    def visitFalse(self, ctx):
-        return _setMetadata(ctx, FalseExpr())
-
-    def visitNumber(self, ctx):
-        # using python number eval to parse lua number:
-        number = ast.literal_eval(ctx.children[0].getText())
-        return _setMetadata(ctx, Number(number))
-
-    def visitString(self, ctx):
-        luaStr = ctx.children[0].getText()
-        p = re.compile('^\[=+\[(.*)\]=+\]') # nested quote pattern
-        # try remove double quote:
-        if luaStr.startswith('"') and luaStr.endswith('"'):
-            luaStr = luaStr[1:-1]
-        # try remove single quote:
-        elif luaStr.startswith("'") and luaStr.endswith("'"):
-            luaStr = luaStr[1:-1]
-        # try remove double square bracket:
-        elif luaStr.startswith("[[") and luaStr.endswith("]]"):
-            luaStr = luaStr[2:-2]
-        # nested quote
-        elif p.match(luaStr):
-            luaStr = p.search(luaStr).group(1)
-        return _setMetadata(ctx, String(luaStr))
-
-    def _visitName(self, ctx):
-        return _setMetadata(ctx, Name(ctx.children[0].getText()))
-
-    def visitArgs(self, ctx):
-        return self.visitChildren(ctx, mergeList=True)
-
-    def _visitVar(self, ctx):
-        # : (name | '(' exp ')' varSuffix) varSuffix*
-        # if name varSuffix*
-        if len(ctx.children)>1 and isinstance(ctx.children[1], LuaParser.VarSuffixContext):
-            child = Index(value=self.visit(ctx.children[0]), idx=self.visit(ctx.children[1]))
-            for i in range(2, len(ctx.children)):
-                root = Index(value=child, idx=self.visit(ctx.children[i]))
-                child = root
-            print(toPrettyStr(child))
-            return _setMetadata(ctx, child)
-        else:
-            return self.visitChildren(ctx)
-
-    '''
-    Visiting arithmetic operator expressions
-    '''
-    def visitOpAdd(self, ctx):
-        return _setMetadata(ctx, AddOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpSub(self, ctx):
-        return _setMetadata(ctx, SubOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpMult(self, ctx):
-        return _setMetadata(ctx, MultOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpFloatDiv(self, ctx):
-        return _setMetadata(ctx, FloatDivOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpFloorDiv(self, ctx):
-        return _setMetadata(ctx, FloorDivOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpMod(self, ctx):
-        return _setMetadata(ctx, ModOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpExpo(self, ctx):
-        return _setMetadata(ctx, ExpoOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitOpMin(self, ctx):
-        return _setMetadata(ctx, NegOp(self.visitChildren(ctx)))
-
-    '''
-    Relational Operators
-    '''
-    def visitRelOpLess(self, ctx):
-        return _setMetadata(ctx, LessThanOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitRelOpGreater(self, ctx):
-        return _setMetadata(ctx, GreaterThanOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitRelOpLessEq(self, ctx):
-        return _setMetadata(ctx, LessOrEqThanOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitRelOpGreaterEq(self, ctx):
-        return _setMetadata(ctx, GreaterOrEqThanOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitRelOpNotEq(self, ctx):
-        return _setMetadata(ctx, NotEqToOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitRelOpEq(self, ctx):
-        return _setMetadata(ctx, EqToOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-
-    '''
-    3.4.2 – Bitwise Operators
-    '''
-    def visitBitOpAnd(self, ctx):
-        return _setMetadata(ctx, BAndOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitBitOpOr(self, ctx):
-        return _setMetadata(ctx, BOrOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitBitOpXor(self, ctx):
-        return _setMetadata(ctx, BXorOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitBitOpShiftR(self, ctx):
-        return _setMetadata(ctx, BShiftROp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitBitOpShiftL(self, ctx):
-        return _setMetadata(ctx, BShiftLOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    '''
-    Unary Operators
-    '''
-    def visitUnOpMin(self, ctx):
-        return _setMetadata(ctx, USubOp(operand=self.visit(ctx.children[1])))
-
-    def visitUnOpBitNot(self, ctx):
-        return _setMetadata(ctx, UBNotOp(operand=self.visit(ctx.children[1])))
-
-    def visitUnOpNot(self, ctx):
-        return _setMetadata(ctx, ULNotOp(self.visitChildren(ctx)))
-
-    '''
-    3.4.5 – Logical Operators
-    '''
-    def visitLoOpAnd(self, ctx):
-        return _setMetadata(ctx, AndLoOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    def visitLoOpOr(self, ctx):
-        return _setMetadata(ctx, OrLoOp(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    ''' ----------------------------------------------------------------------- '''
-    ''' 3.4.6 – Concatenation                                                   '''
-    ''' ----------------------------------------------------------------------- '''
-    def visitConcat(self, ctx):
-        return _setMetadata(ctx, Concat(
-            left=self.visit(ctx.children[0]), \
-            right=self.visit(ctx.children[2])))
-
-    ''' ----------------------------------------------------------------------- '''
-    ''' 3.4.7 – The Length Operator                                             '''
-    ''' ----------------------------------------------------------------------- '''
-    def visitUnOpLength(self, ctx):
-        return _setMetadata(ctx, ULengthOP(operand=self.visit(ctx.children[1])))
-
-    ''' ----------------------------------------------------------------------- '''
-    ''' 3.4.9 – Table Constructors                                              '''
-    ''' ----------------------------------------------------------------------- '''
-    def visitdTableconstructor(self, ctx):
-        # table      : '{' (field (fieldsep field)* fieldsep?)? '}'
-        # field      : '[' tableKey ']' '=' tableValue | tableKey '=' tableValue | tableValue
-        # tableKey   : exp | name
-        # tableValue : exp
-        keys    = []
-        values  = []
-        index   = 1 # lua array start index
-        for field in ctx.children:
-            if isinstance(field, LuaParser.FieldContext):
-                hasKey = False
-                for tblElem in field.children:
-                    if isinstance(tblElem, LuaParser.TableKeyContext):
-                        keys.append(self.visitChildren(tblElem))
-                        hasKey = True
-                    elif isinstance(tblElem, LuaParser.TableValueContext):
-                        values.append(self.visitChildren(tblElem))
-                # if no index found, create an integer key:
-                if not hasKey:
-                    keys.append(Number(index))
-                    index += 1
-        return _setMetadata(ctx, Table(keys, values))
-
-    ''' ----------------------------------------------------------------------- '''
-    ''' 3.4.11 – Function Definitions                                           '''
-    ''' ----------------------------------------------------------------------- '''
-    def visitFunctiondef(self, ctx):
-        # 'function' funcbody
-        argsBlock = self.visit(ctx.children[1])
-        return _setMetadata(ctx, Function(name='', args=argsBlock[0], body=argsBlock[1].body))
-
-    def visitFuncbody(self, ctx):
-        # '(' parlist? ')' block 'end'
-        if isinstance(ctx.children[1], LuaParser.ParlistContext):
-            nodes = [_listify(self.visit(ctx.children[1])),
-                     self.visit(ctx.children[3])]
-        else:
-            nodes = [[],self.visit(ctx.children[2])]
-        return nodes
-
-    def visitParlist(self, ctx):
-        return self.visitChildren(ctx, True)
-
-    def visitFunc(self, ctx):
-        # 'function' funcname funcbody
-        name      = self.visit(ctx.children[1])
-        argsBlock = self.visit(ctx.children[2])
-
-        if isinstance(name, Name):
-            return _setMetadata(ctx, Function(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
-        else:
-            return _setMetadata(ctx, Function(name=name, args=argsBlock[0], body=argsBlock[1].body))
-
-    def visitLocalfunc(self, ctx):
-        # 'local' 'function' name funcbody
-        name      = self.visit(ctx.children[2])
-        argsBlock = self.visit(ctx.children[3])
-        return _setMetadata(ctx, LocalFunction(name=name.id, args=argsBlock[0], body=argsBlock[1].body))
-
-    def visitRetstat(self, ctx):
-        # RETURN explist? SEMI_COLON?
-        return _setMetadata(ctx, Return(_listify(self.visitChildren(ctx))))
-
-    def visitFuncname(self, ctx):
-        # name ('.' name)* (':' name)?
-        if len(ctx.children)>2:
-            child = Index(value=self.visit(ctx.children[0]), idx=self.visit(ctx.children[2]).id)
-
-            for i in range(3, len(ctx.children)):
-                if isinstance(ctx.children[i], LuaParser.NameContext):
-                    root = Index(value=child, idx=self.visit(ctx.children[i]).id)
-                    child = root
-            return _setMetadata(ctx, child)
-        else:
-            return self.visitChildren(ctx)
-
-
-    ''' ----------------------------------------------------------------------- '''
-    ''' Comments                                                                '''
-    ''' ----------------------------------------------------------------------- '''
-    def visitComment_rule(self, ctx):
-        comment = self.visitString(ctx).s
-        if comment.startswith('--'):
-            comment = comment[2:]
-        return _setMetadata(ctx, Comment(comment.strip(' \t\n\r')))
-"""
 
 class ASTVisitor():
     def visit(self, root):
@@ -1046,7 +637,7 @@ class ASTRecursiveVisitor():
             # search in parent arg type:
             parentType = node.__class__
             while parentType != object:
-                name = 'enter_' + node.__class__.__name__
+                name = 'enter_' + parentType.__name__
                 visitor = getattr(self, name, None)
                 if visitor:
                     visitor(node)
@@ -1064,7 +655,7 @@ class ASTRecursiveVisitor():
             # search in parent arg type:
             parentType = node.__class__
             while parentType != object:
-                name = 'exit_' + node.__class__.__name__
+                name = 'exit_' + parentType.__name__
                 visitor = getattr(self, name, None)
                 if visitor:
                     visitor(node)

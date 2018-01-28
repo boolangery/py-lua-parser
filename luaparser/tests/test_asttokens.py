@@ -129,3 +129,28 @@ class AstTokensTestCase(tests.TestCase):
             asttokens.Tokens.SPACE,
             asttokens.Tokens.LOCAL]).toSource())
 
+    def test_line_editor_rstrip(self):
+        atokens = asttokens.parse(r"""local foo = "s";   
+        """)
+        lines = list(atokens.lines())
+
+        self.assertEqual('local foo = "s";\n', lines[0].rstrip().toSource())
+
+
+    def test_line_editor_indent(self):
+        atokens = asttokens.parse(r"""local foo = "s"; """)
+        lines = list(atokens.lines())
+
+        lines[0].indent(2)
+
+        self.assertEqual(r"""  local foo = "s"; """, atokens.allToSource())
+        self.assertEqual(r"""  local foo = "s"; """, lines[0].toSource())
+
+    def test_line_editor_indent_2(self):
+        atokens = asttokens.parse(r"""  local foo = "s"; """)
+        lines = list(atokens.lines())
+
+        lines[0].indent(2)
+
+        self.assertEqual(r"""  local foo = "s"; """, atokens.allToSource())
+        self.assertEqual(r"""  local foo = "s"; """, lines[0].toSource())
