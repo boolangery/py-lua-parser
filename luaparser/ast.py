@@ -53,13 +53,19 @@ def _listify(obj):
 class ParseTreeVisitor(LuaVisitor):
     def _initNode(self, ctx, node):
         if isinstance(ctx, TerminalNode):
-            return node.initTokens(self._dllAll, ctx.symbol.tokenIndex, ctx.symbol.tokenIndex)
-        elif isinstance(ctx, list):
-            raise Exception('not supported')
+            return self._initNodeFromIndex(ctx.symbol.tokenIndex, ctx.symbol.tokenIndex, node)
         else:
-            return node.initTokens(self._dllAll, ctx.start.tokenIndex, ctx.stop.tokenIndex)
+            return self._initNodeFromIndex(ctx.start.tokenIndex, ctx.stop.tokenIndex, node)
 
     def _initNodeFromIndex(self, start, stop, node):
+        # include hidden tokens:
+        hiddenTokens = self._tokenStream.getHiddenTokensToLeft(start)
+        if hiddenTokens:
+            start -= len(hiddenTokens)
+        hiddenTokens = self._tokenStream.getHiddenTokensToRight(stop)
+        if hiddenTokens:
+            stop += len(hiddenTokens)
+
         return node.initTokens(self._dllAll, start, stop)
 
     def getTokenNodes(self, start, stop):
@@ -101,6 +107,7 @@ class ParseTreeVisitor(LuaVisitor):
     def visitChunk(self, ctx):
         # create a double linked list of all token
         # to be shared across all nodes:
+        self._tokenStream = ctx.parser._input
         self._dllAll = llist.dllist()
         for token in ctx.parser._input.tokens:
             self._dllAll.append(token)
@@ -158,9 +165,7 @@ class ParseTreeVisitor(LuaVisitor):
         : OPAR param_list CPAR block END"""
         params = self._initNode(ctx.children[1], self.visit(ctx.children[1]))
 
-        body = self._initNodeFromIndex(
-            ctx.children[2].symbol.tokenIndex + 1,
-            ctx.children[4].symbol.tokenIndex - 1,
+        body = self._initNode(ctx.children[3],
             self.visit(ctx.children[3]).body)
 
         return (params, body)
@@ -255,10 +260,12 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitTail_call(self, ctx):
         """OPAR expr_list? CPAR"""
-        args = self._initNodeFromIndex(
-            ctx.children[0].symbol.tokenIndex + 1,
-            ctx.children[-1].symbol.tokenIndex - 1,
-            _listify(self.visit(ctx.children[1]) or NodeList()))
+        if len(ctx.children) > 2:
+            args = self._initNode(
+                ctx.children[1],
+                _listify(self.visit(ctx.children[1])))
+        else:
+            args = NodeList()
 
         return self._initNode(ctx, Call(
             func=None,  # to set in parent
@@ -506,9 +513,8 @@ class ParseTreeVisitor(LuaVisitor):
     def visitDo_block(self, ctx):
         """do_block
         : DO block END"""
-        body = self._initNodeFromIndex(
-            ctx.children[0].symbol.tokenIndex + 1,
-            ctx.children[2].symbol.tokenIndex - 1,
+        body = self._initNode(
+            ctx.children[1],
             self.visit(ctx.children[1]).body)
         return self._initNode(ctx, Do(body))
 
@@ -524,7 +530,7 @@ class ParseTreeVisitor(LuaVisitor):
             stop  = self.visit(ctx.children[5])
             step  = 1
             # if has step
-            if len(ctx.children) > 6:
+            if len(ctx.children) > 7:
                 step = self.visit(ctx.children[7])
 
             return self._initNode(ctx, Fornum(
