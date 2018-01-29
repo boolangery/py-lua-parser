@@ -40,8 +40,10 @@ will display:
         Block: {} 1 key
           body: [] 2 items
             0: {} 1 key
-              LocalFunctionDef: {} 3 keys
-                id: "sayHello"
+              LocalFunction: {} 3 keys
+                name: {} 1 key
+                  Name: {} 1 key
+                    id: "sayHello"
                 args: [] 0 item
                 body: [] 1 item
                   0: {} 1 key
@@ -104,7 +106,7 @@ Working directly on tokens is a convenient way to modify source code:
 
     atokens = asttokens.parse(src)
     for token in atokens.types(asttokens.Tokens.NAME):
-        token.text = 'foo'
+        token.value.text = 'foo'
 
     print(atokens.toSource())
 
@@ -114,31 +116,44 @@ Will render:
 
     local foo = 1
 
-You can also work on both ast and tokens:
+You can also work on both ast and tokens. In fact, you can retrieve and edit all tokens associated to a specific AST node.
+
+The following example show how to automatically modify last argument in function call:
 
 .. code-block:: python
 
-    import textwrap
     from luaparser import ast
-    from luaparser import asttokens
-    from luaparser import astnodes
 
-    src = textwrap.dedent("""
-        local a = 1
-        local b, c = '11'""")
+    src = """\
+    print('foo')
+    process(1, 2, 3)
+    """
+
+    class CallVisitor(ast.ASTVisitor):
+        def visit_Call(self, node):
+            print('Call:', node.func.id)
+            print('Args:', node.args.edit().toSource())
+            print('Full line: ', node.edit().toSource())
+            node.args.edit().last().text = 'replaced'
 
     tree = ast.parse(src)
-    atokens = asttokens.parse(src)
+    CallVisitor().visit(tree)
 
-    for node in ast.walk(tree):
-        if isinstance(node, LocalAssign):
-            tokens = atokens.fromAST(node)
-            for name in tokens.types(asttokens.Tokens.NAME):
-                name.text = '_' + name.text
+    print(tree.edit().toSource())
 
-Will render:
+
+Output is:
 
 .. code-block::
 
-    local _a = 1
-    local _b, _c = '11'
+    Call: print
+    Args: 'foo'
+    Full line:  print('foo')
+
+    Call: process
+    Args: 1, 2, 3
+    Full line:
+    process(1, 2, 3)
+
+    print(replaced)
+    process(1, 2, replaced)
