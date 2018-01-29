@@ -85,6 +85,8 @@ class Tokens(Enum):
     SHEBANG = 63
     LongBracket = 64
 
+DEFAULT_IGNORE = [Tokens.COMMENT, Tokens.LINE_COMMENT, Tokens.SPACE, Tokens.NEWLINE, Tokens.SHEBANG]
+
 class AbstractTokensEditor():
     def tokensEnumToValues(self, ltypes):
         types = []
@@ -281,19 +283,41 @@ class GroupEditor(TokensEditor):
                 nodes.append(token)
         return GroupEditor(nodes, self._dllAll)
 
-    def first(self):
-        """Retrieve the first token of this group.
-        """
-        if self._dllTokens:
-            return TokenEditor(self._dllTokens[0], self._dllAll)
+    def lastOfType(self, type):
+        for node in reversed(self._dllTokens):
+            if node.value.type == type.value:
+                return TokenEditor(node, self._dllAll)
         return None
 
-    def last(self):
+    def lastOfNotType(self, ltypes):
+        types = self.tokensEnumToValues(ltypes)
+        for node in reversed(self._dllTokens):
+            if node.value.type not in types:
+                return TokenEditor(node, self._dllAll)
+        return None
+
+    def firstOfType(self, type):
+        for node in self._dllTokens:
+            if node.value.type == type.value:
+                return TokenEditor(node, self._dllAll)
+        return None
+
+    def firstOfNotType(self, ltypes):
+        types = self.tokensEnumToValues(ltypes)
+        for node in self._dllTokens:
+            if node.value.type not in types:
+                return TokenEditor(node, self._dllAll)
+        return None
+
+    def first(self, lignore=DEFAULT_IGNORE):
+        """Retrieve the first token of this group.
+        """
+        return self.firstOfNotType(lignore)
+
+    def last(self, lignore=DEFAULT_IGNORE):
         """Retrieve the last token of this group.
         """
-        if self._dllTokens:
-            return TokenEditor(self._dllTokens[-1], self._dllAll)
-        return None
+        return self.lastOfNotType(lignore)
 
     def indent(self, count):
         for line in self.lines():
@@ -402,6 +426,20 @@ class LineEditor(GroupEditor):
                 if first.value.line == prev.value.line:
                     return False
         return True
+
+    def next(self):
+        last = self.last()
+        if last:
+            firstOnNextLine = last.next()
+            if firstOnNextLine:
+                return firstOnNextLine.line()
+        return None
+
+    def nextLines(self):
+        next = self.next()
+        while next:
+            yield next
+            next = next.next()
 
     @property
     def lineNumber(self):
