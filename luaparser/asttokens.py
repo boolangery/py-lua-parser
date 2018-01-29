@@ -85,7 +85,18 @@ class Tokens(Enum):
     SHEBANG = 63
     LongBracket = 64
 
-class TokensEditor():
+class AbstractTokensEditor():
+    def tokensEnumToValues(self, ltypes):
+        types = []
+        # convert enum to int value
+        if not isinstance(ltypes, list):
+            types = [ltypes.value]
+        else:
+            for t in ltypes:
+                types.append(t.value)
+        return types
+
+class TokensEditor(AbstractTokensEditor):
     """Initialize a token list editor.
     :param dllTokensToEdit: a list or a double linked list of token to edit"""
     def __init__(self, lTokensToEdit, dllAll):
@@ -126,18 +137,7 @@ class TokensEditor():
     def allToSource(self):
         return TokenPrinter().toStr([t for t in self._dllAll])
 
-    def tokensEnumToValues(self, ltypes):
-        types = []
-        # convert enum to int value
-        if not isinstance(ltypes, list):
-            types = [ltypes.value]
-        else:
-            for t in ltypes:
-                types.append(t.value)
-        return types
-
-
-class TokenEditor():
+class TokenEditor(AbstractTokensEditor):
     """Utility class to edit a specific token.
     """
     def __init__(self, dllnodeTokenToEdit, dllAll):
@@ -211,10 +211,14 @@ class TokenEditor():
             node = node.next
         return LineEditor(tokens, self._dllAll)
 
-    def isFirstOnLine(self):
-        if self._dllTokens.prev:
-            # check if token before is on the same line
-            return self._dllTokens.value.lineNumber != self._dllTokens.prev.value.lineNumber
+    def isFirstOnLine(self, lignore = [Tokens.SPACE]):
+        ignore = self.tokensEnumToValues(lignore)
+        node = self._dllTokens.prev
+        while node:
+            if node.value.line == self._dllTokens.value.line:
+                if node.value.type not in ignore:
+                    return False
+            node = node.prev
         return True
 
     def grabUntil(self, type):

@@ -6,21 +6,22 @@
 """
 from enum import Enum
 from luaparser import asttokens
+import llist
 
 ''' ----------------------------------------------------------------------- '''
 ''' AST base nodes                                                          '''
 ''' ----------------------------------------------------------------------- '''
-class Node(object):
-    """Base class for lua AST Node"""
-    def __init__(self, name):
-        self._name = name
+class TokenisedSource(object):
+    def __init__(self):
+        self._allTokens = llist.dllist()
         self._start = 0
         self._stop = 0
-        self._allTokens = None
 
-    @property
-    def displayName(self):
-        return self._name
+    def initTokens(self, allTokens, start, stop):
+        self._allTokens = allTokens
+        self._start = start
+        self._stop = stop
+        return self
 
     @property
     def tokens(self):
@@ -34,14 +35,6 @@ class Node(object):
                     break
             node = node.next
         return tokens
-
-    @property
-    def allTokens(self):
-        return self._allTokens
-
-    @allTokens.setter
-    def allTokens(self, value):
-        self._allTokens = value
 
     @property
     def start(self):
@@ -62,6 +55,19 @@ class Node(object):
     def edit(self):
         """Get a token group editor."""
         return asttokens.GroupEditor(self.tokens, self._allTokens)
+
+
+class Node(TokenisedSource):
+    """Base class for lua AST Node"""
+    def __init__(self, name):
+        TokenisedSource.__init__(self)
+        self._name = name
+        self._start = 0
+        self._stop = 0
+
+    @property
+    def displayName(self):
+        return self._name
 
     def equalDicts(self, d1, d2, ignore_keys):
         ignored = set(ignore_keys)
@@ -79,51 +85,10 @@ class Node(object):
             return self.equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_allTokens'])
         return False
 
-class NodeList(list):
+class NodeList(list, TokenisedSource):
     def __init__(self, *args):
         list.__init__(self, *args)
-        self._allTokens = None
-
-    @property
-    def tokens(self):
-        tokens = []
-        node = self._allTokens.first
-        while node:
-            if node.value.tokenIndex >= self._start:
-                if node.value.tokenIndex <= self._stop:
-                    tokens.append(node)
-                else:
-                    break
-            node = node.next
-        return tokens
-
-    @property
-    def start(self):
-        return self._start
-
-    @start.setter
-    def start(self, value):
-        self._start = value
-
-    @property
-    def stop(self):
-        return self._stop
-
-    @stop.setter
-    def stop(self, value):
-        self._stop = value
-
-    @property
-    def allTokens(self):
-        return self._allTokens
-
-    @allTokens.setter
-    def allTokens(self, value):
-        self._allTokens = value
-
-    def edit(self):
-        """Get a token group editor."""
-        return asttokens.GroupEditor(self.tokens, self._allTokens)
+        TokenisedSource.__init__(self)
 
 class Chunk(Node):
     """Define a Lua chunk"""

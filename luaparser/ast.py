@@ -51,24 +51,16 @@ def _listify(obj):
         return obj
 
 class ParseTreeVisitor(LuaVisitor):
-    def _setTokens(self, ctx, node):
+    def _initNode(self, ctx, node):
         if isinstance(ctx, TerminalNode):
-            node.start = ctx.symbol.tokenIndex
-            node.stop = ctx.symbol.tokenIndex
+            return node.initTokens(self._dllAll, ctx.symbol.tokenIndex, ctx.symbol.tokenIndex)
         elif isinstance(ctx, list):
             raise Exception('not supported')
         else:
-            if ctx.start and ctx.stop:
-                node.start = ctx.start.tokenIndex
-                node.stop = ctx.stop.tokenIndex
-        node.allTokens = self._dllAll
-        return node
+            return node.initTokens(self._dllAll, ctx.start.tokenIndex, ctx.stop.tokenIndex)
 
-    def _setTokensFromIndex(self, start, stop, node):
-        node.start = start
-        node.stop = stop
-        node.allTokens = self._dllAll
-        return node
+    def _initNodeFromIndex(self, start, stop, node):
+        return node.initTokens(self._dllAll, start, stop)
 
     def getTokenNodes(self, start, stop):
         subset = []
@@ -113,7 +105,7 @@ class ParseTreeVisitor(LuaVisitor):
         for token in ctx.parser._input.tokens:
             self._dllAll.append(token)
 
-        node = self._setTokens(ctx, Chunk(self.visit(ctx.children[0])))
+        node = self._initNode(ctx, Chunk(self.visit(ctx.children[0])))
 
         # add all tokens to chunk (include comments)
         node.start = 0
@@ -124,7 +116,8 @@ class ParseTreeVisitor(LuaVisitor):
     def visitBlock(self, ctx):
         """block
         : stat* ret_stat?"""
-        return self._setTokens(ctx, Block(_listify(self.visitChildren(ctx))))
+        body = self._initNode(ctx, _listify(self.visitChildren(ctx)))
+        return self._initNode(ctx, Block(body))
 
     def visitStat(self, ctx):
         return self.visit(ctx.children[0])
@@ -132,7 +125,7 @@ class ParseTreeVisitor(LuaVisitor):
     ''' Statements '''
     def visitAssignment(self, ctx):
         # var_list ASSIGN expr_list
-        return self._setTokens(ctx, Assign(
+        return self._initNode(ctx, Assign(
             targets=_listify(self.visit(ctx.children[0])),
             values=_listify(self.visit(ctx.children[2]))))
 
@@ -145,12 +138,12 @@ class ParseTreeVisitor(LuaVisitor):
         if isinstance(ctx.children[1], LuaParser.Name_listContext):
             # LOCAL name_list (ASSIGN expr_list)?
             if len(ctx.children)>2:
-                return self._setTokens(ctx, LocalAssign(
+                return self._initNode(ctx, LocalAssign(
                     targets=_listify(self.visit(ctx.children[1])),
                     values=_listify(self.visit(ctx.children[3]))))
             # LOCAL name_list
             else:
-                return self._setTokens(ctx, LocalAssign(
+                return self._initNode(ctx, LocalAssign(
                     targets=_listify(self.visit(ctx.children[1])),
                     values=NodeList()))
 
@@ -158,14 +151,14 @@ class ParseTreeVisitor(LuaVisitor):
         else:
             name     = self.visit(ctx.children[2])
             funcBody = self.visit(ctx.children[3])
-            return self._setTokens(ctx, LocalFunction(name=name, args=funcBody[0], body=funcBody[1]))
+            return self._initNode(ctx, LocalFunction(name=name, args=funcBody[0], body=funcBody[1]))
 
     def visitFunc_body(self, ctx):
         """func_body
         : OPAR param_list CPAR block END"""
-        params = self._setTokens(ctx.children[1], self.visit(ctx.children[1]))
+        params = self._initNode(ctx.children[1], self.visit(ctx.children[1]))
 
-        body = self._setTokensFromIndex(
+        body = self._initNodeFromIndex(
             ctx.children[2].symbol.tokenIndex + 1,
             ctx.children[4].symbol.tokenIndex - 1,
             self.visit(ctx.children[3]).body)
@@ -186,7 +179,7 @@ class ParseTreeVisitor(LuaVisitor):
 
             for i in range(1, len(ctx.children)):
                 tail = self.visit(ctx.children[i])
-                self._setTokens(ctx.children[i], tail)
+                self._initNode(ctx.children[i], tail)
                 if isinstance(tail, Index):
                     tail.value = root
                 elif isinstance(tail, Invoke):
@@ -196,10 +189,10 @@ class ParseTreeVisitor(LuaVisitor):
                 else:
                     tail = Call(
                         func=root,
-                        args=self._setTokens(ctx.children[i], _listify(tail)))
+                        args=self._initNode(ctx.children[i], _listify(tail)))
 
                 # extend with child tokens
-                self._setTokens(ctx.children[i], tail)
+                self._initNode(ctx.children[i], tail)
                 tail.start = root.start
 
                 root = tail
@@ -225,45 +218,49 @@ class ParseTreeVisitor(LuaVisitor):
 
     def visitTail_dot_index(self, ctx):
         """DOT NAME"""
-        return self._setTokens(ctx, Index(
+        return self._initNode(ctx, Index(
             value=None, # to set in parent
             idx=self.visit(ctx.children[1])))
 
     def visitTail_brack_index(self, ctx):
         """OBRACK expr CBRACK"""
-        return self._setTokens(ctx, Index(
+        return self._initNode(ctx, Index(
             value=None,  # to set in parent
             idx=self.visit(ctx.children[1])))
 
     def visitTail_invoke(self, ctx):
         """COL NAME OPAR expr_list? CPAR"""
-        return self._setTokens(ctx, Invoke(
+        args = _listify(self.visit(ctx.children[3]) or NodeList())
+        if len(ctx.children) > 4: self._initNode(ctx.children[3], args)
+        return self._initNode(ctx, Invoke(
             source=None,  # to set in parent
             func=self.visit(ctx.children[1]),
-            args=_listify(self.visit(ctx.children[3]) or NodeList())))
+            args=args))
 
     def visitTail_invoke_table(self, ctx):
         """COL NAME table_constructor"""
-        return self._setTokens(ctx, Invoke(
+        args = self._initNode(ctx.children[2], _listify(self.visit(ctx.children[2])))
+        return self._initNode(ctx, Invoke(
             source=None,  # to set in parent
             func=self.visit(ctx.children[1]),
-            args=_listify(self.visit(ctx.children[2]) or NodeList())))
+            args=args))
 
     def visitTail_invoke_str(self, ctx):
         """COL NAME STRING"""
-        return self._setTokens(ctx, Invoke(
+        args = self._initNode(ctx.children[2], _listify(self.visit(ctx.children[2])))
+        return self._initNode(ctx, Invoke(
             source=None,  # to set in parent
             func=self.visit(ctx.children[1]),
-            args=_listify(self.visit(ctx.children[2]) or NodeList())))
+            args=args))
 
     def visitTail_call(self, ctx):
         """OPAR expr_list? CPAR"""
-        args = self._setTokensFromIndex(
+        args = self._initNodeFromIndex(
             ctx.children[0].symbol.tokenIndex + 1,
-            ctx.children[2].symbol.tokenIndex - 1,
+            ctx.children[-1].symbol.tokenIndex - 1,
             _listify(self.visit(ctx.children[1]) or NodeList()))
 
-        return self._setTokens(ctx, Call(
+        return self._initNode(ctx, Call(
             func=None,  # to set in parent
             args=args))
 
@@ -276,14 +273,14 @@ class ParseTreeVisitor(LuaVisitor):
         return self.visit(ctx.children[0])
 
     def visitTerminal(self, ctx):
-        def NilHandler(ctx): return self._setTokens(ctx, Nil())
-        def NameHandler(ctx): return self._setTokens(ctx, Name(ctx.getText()))
-        def TrueHandler(ctx):return self._setTokens(ctx, TrueExpr())
-        def FalseHandler(ctx):return self._setTokens(ctx, FalseExpr())
+        def NilHandler(ctx): return self._initNode(ctx, Nil())
+        def NameHandler(ctx): return self._initNode(ctx, Name(ctx.getText()))
+        def TrueHandler(ctx):return self._initNode(ctx, TrueExpr())
+        def FalseHandler(ctx):return self._initNode(ctx, FalseExpr())
         def NumberHandler(ctx):
             # using python number eval to parse lua number
             number = ast.literal_eval(ctx.getText())
-            return self._setTokens(ctx, Number(number))
+            return self._initNode(ctx, Number(number))
         def StringHandler(ctx):
             luaStr = ctx.getText()
             p = re.compile('^\[=+\[(.*)\]=+\]')  # nested quote pattern
@@ -299,7 +296,7 @@ class ParseTreeVisitor(LuaVisitor):
             # nested quote
             elif p.match(luaStr):
                 luaStr = p.search(luaStr).group(1)
-            return self._setTokens(ctx, String(luaStr))
+            return self._initNode(ctx, String(luaStr))
         def BreakHandler(ctx): return Break()
 
         handlers = {
@@ -327,7 +324,7 @@ class ParseTreeVisitor(LuaVisitor):
             left = self.visit(ctx.children[0])
             for i in range(1, len(ctx.children), 2):
                 right = self.visit(ctx.children[i + 1])
-                root  = self._setTokens(ctx, nodeOnToken[ctx.children[i].symbol.type](
+                root  = self._initNode(ctx, nodeOnToken[ctx.children[i].symbol.type](
                     left=left,
                     right=right))
                 left = root
@@ -359,13 +356,13 @@ class ParseTreeVisitor(LuaVisitor):
         | pow_expr"""
         if len(ctx.children)>1:
             if ctx.children[0].symbol.type == Tokens.MINUS.value:
-                return self._setTokens(ctx, USubOp(self.visit(ctx.children[1])))
+                return self._initNode(ctx, USubOp(self.visit(ctx.children[1])))
             elif ctx.children[0].symbol.type == Tokens.LENGTH.value:
-                return self._setTokens(ctx, ULengthOP(self.visit(ctx.children[1])))
+                return self._initNode(ctx, ULengthOP(self.visit(ctx.children[1])))
             elif ctx.children[0].symbol.type == Tokens.NOT.value:
-                return self._setTokens(ctx, ULNotOp(self.visit(ctx.children[1])))
+                return self._initNode(ctx, ULNotOp(self.visit(ctx.children[1])))
             else:
-                return self._setTokens(ctx, UBNotOp(self.visit(ctx.children[1])))
+                return self._initNode(ctx, UBNotOp(self.visit(ctx.children[1])))
         else:
             return self.visit(ctx.children[0])
 
@@ -431,9 +428,9 @@ class ParseTreeVisitor(LuaVisitor):
                 else:
                     keys.append(field[0])
                 values.append(field[1])
-            return self._setTokens(ctx, Table(keys, values))
+            return self._initNode(ctx, Table(keys, values))
         else:
-            return self._setTokens(ctx, Table(NodeList(), NodeList()))
+            return self._initNode(ctx, Table(NodeList(), NodeList()))
 
     def visitField_list(self, ctx):
         """field_list
@@ -468,7 +465,7 @@ class ParseTreeVisitor(LuaVisitor):
         # FUNCTION names COL NAME func_body
         if len(ctx.children) > 3:
             funcBody = self.visit(ctx.children[4])
-            return self._setTokens(ctx, Method(
+            return self._initNode(ctx, Method(
                 source=names,
                 name=self.visit(ctx.children[3]),
                 args=funcBody[0],
@@ -476,7 +473,7 @@ class ParseTreeVisitor(LuaVisitor):
         # FUNCTION names func_body
         else:
             funcBody = self.visit(ctx.children[2])
-            return self._setTokens(ctx, Function(
+            return self._initNode(ctx, Function(
                 name=names,
                 args=funcBody[0],
                 body=funcBody[1]))
@@ -493,7 +490,7 @@ class ParseTreeVisitor(LuaVisitor):
                     value=child,
                     idx=self.visit(ctx.children[i+1]))
                 child = root
-            return self._setTokens(ctx, child)
+            return self._initNode(ctx, child)
         else:
             return self.visitChildren(ctx)
 
@@ -502,18 +499,18 @@ class ParseTreeVisitor(LuaVisitor):
         """function_literal
         : FUNCTION func_body"""
         funcBody = self.visit(ctx.children[1])
-        return self._setTokens(ctx, AnonymousFunction(
+        return self._initNode(ctx, AnonymousFunction(
             args=funcBody[0],
             body=funcBody[1]))
 
     def visitDo_block(self, ctx):
         """do_block
         : DO block END"""
-        body = self._setTokensFromIndex(
+        body = self._initNodeFromIndex(
             ctx.children[0].symbol.tokenIndex + 1,
             ctx.children[2].symbol.tokenIndex - 1,
             self.visit(ctx.children[1]).body)
-        return self._setTokens(ctx, Do(body))
+        return self._initNode(ctx, Do(body))
 
     def visitFor_stat(self, ctx):
         """for_stat
@@ -530,7 +527,7 @@ class ParseTreeVisitor(LuaVisitor):
             if len(ctx.children) > 6:
                 step = self.visit(ctx.children[7])
 
-            return self._setTokens(ctx, Fornum(
+            return self._initNode(ctx, Fornum(
                 target=self.visit(ctx.children[1]),
                 start=start,
                 stop=stop,
@@ -538,7 +535,7 @@ class ParseTreeVisitor(LuaVisitor):
                 body=self.visit(ctx.children[-1]).body)) # visitDo_block
         # FOR name_list IN expr_list do_block
         else:
-            return self._setTokens(ctx, Forin(
+            return self._initNode(ctx, Forin(
                 body=self.visit(ctx.children[4]).body,
                 iter=self.visit(ctx.children[3]),
                 targets=_listify(self.visit(ctx.children[1]))))
@@ -546,14 +543,14 @@ class ParseTreeVisitor(LuaVisitor):
     def visitWhile_stat(self, ctx):
         """while_stat
         : WHILE expr do_block"""
-        return self._setTokens(ctx, While(
+        return self._initNode(ctx, While(
             test=self.visit(ctx.children[1]),
             body=self.visit(ctx.children[2]).body))
 
     def visitRepeat_stat(self, ctx):
         """repeat_stat
         : REPEAT block UNTIL expr"""
-        return self._setTokens(ctx, Repeat(
+        return self._initNode(ctx, Repeat(
             body=self.visit(ctx.children[1]).body,
             test=self.visit(ctx.children[3])))
 
@@ -571,10 +568,10 @@ class ParseTreeVisitor(LuaVisitor):
                 lastStat.orelse = self.visit(node)
             else:
                 elseIfNodes = self.visit(node)
-                elseIf = self._setTokens(node, ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None))
+                elseIf = self._initNode(node, ElseIf(test=elseIfNodes[0], body=elseIfNodes[1], orelse=None))
                 lastStat.orelse = elseIf
                 lastStat = elseIf
-        return self._setTokens(ctx, mainIf)
+        return self._initNode(ctx, mainIf)
 
     def visitElseif_stat(self, ctx):
         """elseif_stat
@@ -591,15 +588,15 @@ class ParseTreeVisitor(LuaVisitor):
     def visitLabel(self, ctx):
         """label
         : COLCOL NAME COLCOL"""
-        return self._setTokens(ctx, Label(id=self.visit(ctx.children[1])))
+        return self._initNode(ctx, Label(id=self.visit(ctx.children[1])))
 
     def visitGoto_stat(self, ctx):
-        return self._setTokens(ctx, Goto(label=self.visit(ctx.children[1])))
+        return self._initNode(ctx, Goto(label=self.visit(ctx.children[1])))
 
     def visitRet_stat(self, ctx):
         """ret_stat
         : RETURN expr_list? SEMCOL?"""
-        return self._setTokens(ctx, Return(_listify(self.visitChildren(ctx))))
+        return self._initNode(ctx, Return(_listify(self.visitChildren(ctx))))
 
 
 class ASTVisitor():
