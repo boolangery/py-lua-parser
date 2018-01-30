@@ -8,16 +8,27 @@ from enum import Enum
 from luaparser import asttokens
 import llist
 
-''' ----------------------------------------------------------------------- '''
-''' AST base nodes                                                          '''
-''' ----------------------------------------------------------------------- '''
-class TokenisedSource(object):
+class TokenisedSourcePart(object):
+    """Represent a tokenized source code part.
+    """
     def __init__(self):
         self._allTokens = llist.dllist()
         self._start = 0
         self._stop = 0
 
     def initTokens(self, allTokens, start, stop):
+        """
+        Initialized object.
+
+        :param allTokens: Full list of tokens
+        :type allTokens: llist.dllist of CommonToken
+        :param start: First token index in full token list
+        :type start: int
+        :param stop: Last token index in full token list
+        :type stop: int
+
+        :return: This instance
+        """
         self._allTokens = allTokens
         self._start = start
         self._stop = stop
@@ -25,6 +36,11 @@ class TokenisedSource(object):
 
     @property
     def tokens(self):
+        """
+        Get a token list that is a sub range of full token list.
+
+        :return: A list of llist.dllistnode
+        """
         tokens = []
         node = self._allTokens.first
         while node:
@@ -38,29 +54,62 @@ class TokenisedSource(object):
 
     @property
     def start(self):
+        """
+        Get start token index
+        .
+        :return: Start index
+        :rtype: int
+        """
         return self._start
 
     @start.setter
     def start(self, value):
+        """
+        Set start token index.
+
+        :param value: Start index
+        :type value: int
+        """
         self._start = value
 
     @property
     def stop(self):
+        """
+        Get stop token index.
+
+        :return: Stop index
+        :rtype: int
+        """
         return self._stop
 
     @stop.setter
     def stop(self, value):
+        """
+        Set stop token index.
+
+        :param value: Stop index
+        :type value: int
+        """
         self._stop = value
 
     def edit(self):
-        """Get a token group editor."""
+        """
+        Get a token group editor.
+
+        :return: A token editor
+        :rtype: asttokens.GroupEditor
+        """
         return asttokens.GroupEditor(self.tokens, self._allTokens)
 
 
-class Node(TokenisedSource):
-    """Base class for lua AST Node"""
+class Node(TokenisedSourcePart):
+    """Base class for AST node.
+
+    Attributes:
+        **displayName** (`str`): Node display name (to pretty print).
+    """
     def __init__(self, name):
-        TokenisedSource.__init__(self)
+        TokenisedSourcePart.__init__(self)
         self._name = name
         self._start = 0
         self._stop = 0
@@ -69,7 +118,7 @@ class Node(TokenisedSource):
     def displayName(self):
         return self._name
 
-    def equalDicts(self, d1, d2, ignore_keys):
+    def _equalDicts(self, d1, d2, ignore_keys):
         ignored = set(ignore_keys)
         for k1, v1 in d1.items():
             if k1 not in ignored and (k1 not in d2 or d2[k1] != v1):
@@ -80,24 +129,36 @@ class Node(TokenisedSource):
         return True
 
     def __eq__(self, other):
-        """Overrides the default implementation"""
         if isinstance(self, other.__class__):
-            return self.equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_allTokens'])
+            return self._equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_allTokens'])
         return False
 
-class NodeList(list, TokenisedSource):
+class NodeList(list, TokenisedSourcePart):
+    """
+    Represent a tokenized node list.
+
+    A list of AST nodes can represent the same source code part.
+    """
     def __init__(self, *args):
         list.__init__(self, *args)
-        TokenisedSource.__init__(self)
+        TokenisedSourcePart.__init__(self)
 
 class Chunk(Node):
-    """Define a Lua chunk"""
+    """Define a Lua chunk.
+
+    Attributes:
+        **body** (`list<Node>`): List of nodes composing chunk body.
+    """
     def __init__(self, body):
         super(Chunk, self).__init__('Chunk')
         self.body = body
 
 class Block(Node):
-    """Define a Lua Block"""
+    """Define a Lua Block.
+
+    Attributes:
+        **body** (`list<Node>`): List of nodes composing block body.
+    """
     def __init__(self, body):
         super(Block, self).__init__('Block')
         self.body = body
@@ -107,45 +168,82 @@ class Block(Node):
 ''' Statements                                                              '''
 ''' ----------------------------------------------------------------------- '''
 class Statement(Node):
-    """Base class for Lua statement"""
+    """Base class for Lua statement.
+    """
     pass
 
 class Assign(Statement):
-    """Define the 'set' lua statement"""
+    """Lua global assignment statement.
+
+    Attributes:
+        **targets** (`list<Node>`): List of targets.
+        **values** (`list<Node>`): List of values.
+    """
     def __init__(self, targets, values):
         super(Assign, self).__init__('Assign')
         self.targets = targets
         self.values  = values
 
-class LocalAssign(Statement):
-    """Define the 'Local assign' lua statement"""
+class LocalAssign(Assign):
+    """Lua local assignment statement.
+
+    Attributes:
+        **targets** (`list<Node>`): List of targets.
+        **values** (`list<Node>`): List of values.
+    """
     def __init__(self, targets, values):
-        super(LocalAssign, self).__init__('LocalAssign')
-        self.targets = targets
-        self.values  = values
+        super(LocalAssign, self).__init__(targets, values)
+        self._name = 'LocalAssign'
 
 class While(Statement):
-    """Define the 'while' lua statement"""
+    """Lua while statement.
+
+    Attributes:
+        **test** (`Node`): Expression to test.
+        **body** (`list<Node>`): List of statements to execute.
+    """
     def __init__(self, test, body):
         super(While, self).__init__('While')
         self.test = test
         self.body = body
 
 class Do(Statement):
-    """Define the 'do end' lua statement"""
+    """Lua do end statement."""
+
+    body = None
+    """List of statement to execute."""
+
     def __init__(self, body):
         super(Do, self).__init__('Do')
         self.body = body
 
 class Repeat(Statement):
-    """Define the 'Repeat' lua statement"""
+    """Lua repeat until statement."""
+
+    body = None
+    """List of statement to execute."""
+
+    test = None
+    """Expression to test."""
+
     def __init__(self, body, test):
         super(Repeat, self).__init__('Repeat')
         self.body = body
         self.test = test
 
 class If(Statement):
-    """Define the 'if' lua statement"""
+    """Lua if statement."""
+
+    test = None
+    """Expression to test."""
+
+    body = None
+    """List of statement to execute."""
+
+    orelse = None
+    """Else close. Either an ElseIf statement or a list
+    of statement to execute (simple Else)"""
+
     def __init__(self, test, body, orelse):
         super(If, self).__init__('If')
         self.test = test
@@ -290,7 +388,7 @@ class Table(Expression):
         self.keys = keys
         self.values = values
 
-class AnonymousFunction(Statement):
+class AnonymousFunction(Expression):
     """Define the Lua anonymous function expression"""
     def __init__(self, args, body):
         super(AnonymousFunction, self).__init__('AnonymousFunction')
