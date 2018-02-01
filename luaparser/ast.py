@@ -51,20 +51,22 @@ def _listify(obj):
         return obj
 
 class ParseTreeVisitor(LuaVisitor):
-    def _initNode(self, ctx, node):
+    def _initNode(self, ctx, node, isBlock=False):
         if isinstance(ctx, TerminalNode):
-            return self._initNodeFromIndex(ctx.symbol.tokenIndex, ctx.symbol.tokenIndex, node)
+            return self._initNodeFromIndex(ctx.symbol.tokenIndex, ctx.symbol.tokenIndex, node, isBlock)
         else:
-            return self._initNodeFromIndex(ctx.start.tokenIndex, ctx.stop.tokenIndex, node)
+            return self._initNodeFromIndex(ctx.start.tokenIndex, ctx.stop.tokenIndex, node, isBlock)
 
-    def _initNodeFromIndex(self, start, stop, node):
+    def _initNodeFromIndex(self, start, stop, node, isBlock):
         # include hidden tokens:
         hiddenTokens = self._tokenStream.getHiddenTokensToLeft(start)
         if hiddenTokens:
             start -= len(hiddenTokens)
-        hiddenTokens = self._tokenStream.getHiddenTokensToRight(stop)
-        if hiddenTokens:
-            stop += len(hiddenTokens)
+
+        if isBlock:
+            hiddenTokens = self._tokenStream.getHiddenTokensToRight(stop)
+            if hiddenTokens:
+                stop += len(hiddenTokens)
 
         return node.initTokens(self._dllAll, start, stop)
 
@@ -123,8 +125,8 @@ class ParseTreeVisitor(LuaVisitor):
     def visitBlock(self, ctx):
         """block
         : stat* ret_stat?"""
-        body = self._initNode(ctx, _listify(self.visitChildren(ctx)))
-        return self._initNode(ctx, Block(body))
+        body = self._initNode(ctx, _listify(self.visitChildren(ctx)), True)
+        return self._initNode(ctx, Block(body), True)
 
     def visitStat(self, ctx):
         return self.visit(ctx.children[0])
@@ -165,8 +167,7 @@ class ParseTreeVisitor(LuaVisitor):
         : OPAR param_list CPAR block END"""
         params = self._initNode(ctx.children[1], self.visit(ctx.children[1]))
 
-        body = self._initNode(ctx.children[3],
-            self.visit(ctx.children[3]).body)
+        body = self.visit(ctx.children[3]).body
 
         return (params, body)
 
@@ -513,9 +514,7 @@ class ParseTreeVisitor(LuaVisitor):
     def visitDo_block(self, ctx):
         """do_block
         : DO block END"""
-        body = self._initNode(
-            ctx.children[1],
-            self.visit(ctx.children[1]).body)
+        body = self.visit(ctx.children[1]).body
         return self._initNode(ctx, Do(body))
 
     def visitFor_stat(self, ctx):
