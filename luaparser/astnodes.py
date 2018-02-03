@@ -200,7 +200,7 @@ class While(Statement):
 
     Attributes:
         **test** (`Node`): Expression to test.
-        **body** (`list<Node>`): List of statements to execute.
+        **body** (`list<Statement>`): List of statements to execute.
     """
     def __init__(self, test, body):
         super(While, self).__init__('While')
@@ -208,42 +208,35 @@ class While(Statement):
         self.body = body
 
 class Do(Statement):
-    """Lua do end statement."""
+    """Lua do end statement.
 
-    body = None
-    """List of statement to execute."""
-
+    Attributes:
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, body):
         super(Do, self).__init__('Do')
         self.body = body
 
 class Repeat(Statement):
-    """Lua repeat until statement."""
+    """Lua repeat until statement.
 
-    body = None
-    """List of statement to execute."""
-
-    test = None
-    """Expression to test."""
-
+    Attributes:
+        **test** (`Node`): Expression to test.
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, body, test):
         super(Repeat, self).__init__('Repeat')
         self.body = body
         self.test = test
 
 class If(Statement):
-    """Lua if statement."""
+    """Lua if statement.
 
-    test = None
-    """Expression to test."""
-
-    body = None
-    """List of statement to execute."""
-
-    orelse = None
-    """Else close. Either an ElseIf statement or a list
-    of statement to execute (simple Else)"""
-
+    Attributes:
+        **test** (`Node`): Expression to test.
+        **body** (`list<Statement>`): List of statements to execute if test is true.
+        **orelse** (`list<Node> or ElseIf`): List of statements or ElseIf if test if false.
+    """
     def __init__(self, test, body, orelse):
         super(If, self).__init__('If')
         self.test = test
@@ -251,7 +244,13 @@ class If(Statement):
         self.orelse = orelse
 
 class ElseIf(Statement):
-    """Define the 'elseif' lua statement"""
+    """Define the elseif lua statement.
+
+    Attributes:
+        **test** (`Node`): Expression to test.
+        **body** (`list<Statement>`): List of statements to execute if test is true.
+        **orelse** (`list<Node> or ElseIf`): List of statements or ElseIf if test if false.
+    """
     def __init__(self, test, body, orelse):
         super(ElseIf, self).__init__('ElseIf')
         self.test = test
@@ -259,24 +258,42 @@ class ElseIf(Statement):
         self.orelse = orelse
 
 class Label(Statement):
-    """Define the '::label::' lua statement"""
+    """Define the label lua statement.
+
+    Attributes:
+        **id** (`Node`): Label name.
+    """
     def __init__(self, id):
         super(Label, self).__init__('Label')
         self.id = id
 
 class Goto(Statement):
-    """Define the 'goto' lua statement"""
+    """Define the goto lua statement.
+
+    Attributes:
+        **label** (`Node`): Label node.
+    """
     def __init__(self, label):
         super(Goto, self).__init__('Goto')
         self.label = label
 
 class Break(Statement):
-    """Define the 'break' lua statement"""
+    """Define the break lua statement.
+
+    """
     def __init__(self):
         super(Break, self).__init__('Break')
 
 class Fornum(Statement):
-    """Define the 'Fornum' lua statement"""
+    """Define the numeric for lua statement.
+
+    Attributes:
+        **target** (`Name`): Target name.
+        **start** (`Expression`): Start index value.
+        **stop** (`Expression`): Stop index value.
+        **step** (`Expression`): Step value.
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, target, start, stop, step, body):
         super(Fornum, self).__init__('Fornum')
         self.target = target
@@ -286,7 +303,13 @@ class Fornum(Statement):
         self.body   = body
 
 class Forin(Statement):
-    """Define the 'Forin' lua statement"""
+    """Define the for in lua statement.
+
+    Attributes:
+        **body** (`list<Statement>`): List of statements to execute.
+        **iter** (`list<Expression>`): Iterable expressions.
+        **targets** (`list<Name>`): Start index value.
+    """
     def __init__(self, body, iter, targets):
         super(Forin, self).__init__('Forin')
         self.body = body
@@ -294,14 +317,25 @@ class Forin(Statement):
         self.targets = targets
 
 class Call(Statement):
-    """Define the 'Call' lua statement"""
+    """Define the function call lua statement.
+
+    Attributes:
+        **func** (`Expression`): Function to call.
+        **args** (`list<Expression>`): Function call arguments.
+    """
     def __init__(self, func, args):
         super(Call, self).__init__('Call')
         self.func = func
         self.args = args
 
 class Invoke(Statement):
-    """Define the 'Invoke' lua statement"""
+    """Define the invoke function call lua statement (magic syntax with ':').
+
+    Attributes:
+        **source** (`Expression`): Source expression where function is invoked.
+        **func** (`Expression`): Function to call.
+        **args** (`list<Expression>`): Function call arguments.
+    """
     def __init__(self, source, func, args):
         super(Invoke, self).__init__('Invoke')
         self.source = source
@@ -309,7 +343,13 @@ class Invoke(Statement):
         self.args = args
 
 class Function(Statement):
-    """Define the Lua function statement"""
+    """Define the Lua function declaration statement.
+
+    Attributes:
+        **name** (`Expression`): Function name.
+        **args** (`list<Expression>`): Function arguments.
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, name, args, body):
         super(Function, self).__init__('Function')
         self.name = name
@@ -317,7 +357,13 @@ class Function(Statement):
         self.body = body
 
 class LocalFunction(Statement):
-    """Define the Lua local function statement"""
+    """Define the Lua local function declaration statement.
+
+    Attributes:
+        **name** (`Expression`): Function name.
+        **args** (`list<Expression>`): Function arguments.
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, name, args, body):
         super(LocalFunction, self).__init__('LocalFunction')
         self.name = name
@@ -325,7 +371,14 @@ class LocalFunction(Statement):
         self.body = body
 
 class Method(Statement):
-    """Define the Lua Object Oriented function statement"""
+    """Define the Lua Object Oriented function statement.
+
+    Attributes:
+        **source** (`Expression`): Source expression where method is defined.
+        **name** (`Expression`): Function name.
+        **args** (`list<Expression>`): Function arguments.
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, source, name, args, body):
         super(Method, self).__init__('Method')
         self.source = source
@@ -334,7 +387,11 @@ class Method(Statement):
         self.body = body
 
 class Return(Statement):
-    """Define the Lua return statement"""
+    """Define the Lua return statement.
+
+    Attributes:
+        **values** (`list<Expression>`): Values to return.
+    """
     def __init__(self, values):
         super(Return, self).__init__('Return')
         self.values = values
@@ -343,53 +400,76 @@ class Return(Statement):
 ''' Lua Expression                                                          '''
 ''' ----------------------------------------------------------------------- '''
 class Expression(Node):
-    """Define a Lua generic expression"""
+    """Define a Lua expression.
+    """
     pass
 
 ''' ----------------------------------------------------------------------- '''
 ''' Types and values                                                        '''
 ''' ----------------------------------------------------------------------- '''
 class Nil(Expression):
-    """Define the Lua 'nil' expression"""
+    """Define the Lua nil expression.
+    """
     def __init__(self):
         super(Nil, self).__init__('Nil')
 
 class TrueExpr(Expression):
-    """Define the Lua 'true' expression"""
+    """Define the Lua true expression.
+    """
     def __init__(self):
         super(TrueExpr, self).__init__('True')
 
 class FalseExpr(Expression):
-    """Define the Lua 'false' expression"""
+    """Define the Lua false expression.
+    """
     def __init__(self):
         super(FalseExpr, self).__init__('False')
 
 class Number(Expression):
-    """Define the Lua number expression"""
+    """Define the Lua number expression.
+
+    Attributes:
+        **n** (`int|float`): Numeric value.
+    """
     def __init__(self, n):
         super(Number, self).__init__('Number')
         self.n = n
 
 class String(Expression):
-    """Define the Lua string expression"""
+    """Define the Lua string expression.
+
+    Attributes:
+        **s** (`string`): String value.
+    """
     def __init__(self, s):
         super(String, self).__init__('String')
         self.s = s
 
 class Dots(Expression):
-    """Define the Lua dots (...) expression"""
+    """Define the Lua dots (...) expression.
+    """
     def __init__(self):
         super(Dots, self).__init__('Dots')
 
 class Table(Expression):
-    """Define the Lua table expression"""
+    """Define the Lua table expression.
+
+    Attributes:
+        **keys** (`list<Expression>`): Table keys.
+        **values** (`list<Expression>`): Table values.
+    """
     def __init__(self, keys, values):
         super(Table, self).__init__('Table')
         self.keys = keys
         self.values = values
 
 class AnonymousFunction(Expression):
-    """Define the Lua anonymous function expression"""
+    """Define the Lua anonymous function expression.
+
+    Attributes:
+        **args** (`list<Expression>`): Function arguments.
+        **body** (`list<Statement>`): List of statements to execute.
+    """
     def __init__(self, args, body):
         super(AnonymousFunction, self).__init__('AnonymousFunction')
         self.args = args
@@ -399,11 +479,17 @@ class AnonymousFunction(Expression):
 ''' Operators                                                               '''
 ''' ----------------------------------------------------------------------- '''
 class Op(Expression):
-    """Base class for operators"""
+    """Base class for Lua operators.
+    """
     pass
 
 class LeftRightOp(Op):
-    """Base class for 'Left Op Right' Arithmetic Operators"""
+    """Base class for Lua 'Left Op Right' Operators.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, name, left, right):
         super(LeftRightOp, self).__init__(name)
         self.left = left
@@ -417,37 +503,72 @@ class AriOp(LeftRightOp):
     pass
 
 class AddOp(AriOp):
-    """+ operator"""
+    """Add expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(AddOp, self).__init__('AddOp', left, right)
 
 class SubOp(AriOp):
-    """- operator"""
+    """Substract expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(SubOp, self).__init__('SubOp', left, right)
 
 class MultOp(AriOp):
-    """* operator"""
+    """Multiplication expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(MultOp, self).__init__('MultOp', left, right)
 
 class FloatDivOp(AriOp):
-    """/ operator"""
+    """Float division expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(FloatDivOp, self).__init__('FloatDivOp', left, right)
 
 class FloorDivOp(AriOp):
-    """// operator"""
+    """Floor division expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(FloorDivOp, self).__init__('FloorDivOp', left, right)
 
 class ModOp(AriOp):
-    """# operator"""
+    """Modulo expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(ModOp, self).__init__('ModOp', left, right)
 
 class ExpoOp(AriOp):
-    """^ operator"""
+    """Exponent expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(ExpoOp, self).__init__('ExpoOp', left, right)
 
@@ -456,31 +577,57 @@ class ExpoOp(AriOp):
 ''' 3.4.2 – Bitwise Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
 class BitOp(LeftRightOp):
-    """Base class for Bitwise Operators"""
+    """Base class for bitwise Operators.
+    """
     pass
 
 class BAndOp(BitOp):
-    """Bitwise And operator"""
+    """Bitwise and expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(BAndOp, self).__init__('BAndOp', left, right)
 
 class BOrOp(BitOp):
-    """Bitwise Or operator"""
+    """Bitwise or expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(BOrOp, self).__init__('BOrOp', left, right)
 
 class BXorOp(BitOp):
-    """Bitwise Xor operator"""
+    """Bitwise xor expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(BXorOp, self).__init__('BXorOp', left, right)
 
 class BShiftROp(BitOp):
-    """Bitwise Shift Right operator"""
+    """Bitwise right shift expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(BShiftROp, self).__init__('BShiftROp', left, right)
 
 class BShiftLOp(BitOp):
-    """Bitwise Shift Left operator"""
+    """Bitwise left shift expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(BShiftLOp, self).__init__('BShiftLOp', left, right)
 
@@ -489,30 +636,67 @@ class BShiftLOp(BitOp):
 ''' 3.4.4 – Relational Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
 class RelOp(LeftRightOp):
-    """Base class for Relational Operators """
+    """Base class for Lua relational operators.
+    """
     pass
 
 class LessThanOp(RelOp):
+    """Less than expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(LessThanOp, self).__init__('RLtOp', left, right)
 
 class GreaterThanOp(RelOp):
+    """Greater than expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(GreaterThanOp, self).__init__('RGtOp', left, right)
 
 class LessOrEqThanOp(RelOp):
+    """Less or equal expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right)
 
 class GreaterOrEqThanOp(RelOp):
+    """Greater or equal expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right)
 
 class EqToOp(RelOp):
+    """Equal to expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(EqToOp, self).__init__('REqOp', left, right)
 
 class NotEqToOp(RelOp):
+    """Not equal to expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(NotEqToOp, self).__init__('RNotEqOp', left, right)
 
@@ -520,16 +704,27 @@ class NotEqToOp(RelOp):
 ''' 3.4.5 – Logical Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
 class LoOp(LeftRightOp):
-    """Base class for Logical Operators """
+    """Base class for logical operators.
+    """
     pass
 
 class AndLoOp(LoOp):
-    """Logical And operator"""
+    """Logical and expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(AndLoOp, self).__init__('LAndOp', left, right)
 
 class OrLoOp(LoOp):
-    """Logical Or operator"""
+    """Logical or expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(OrLoOp, self).__init__('LOrOp', left, right)
 
@@ -539,6 +734,12 @@ class OrLoOp(LoOp):
 ''' 3.4.6 – Concatenation operator                                          '''
 ''' ----------------------------------------------------------------------- '''
 class Concat(LeftRightOp):
+    """Concat expression.
+
+    Attributes:
+        **left** (`Expression`): Left expression.
+        **right** (`Expression`): Right expression.
+    """
     def __init__(self, left, right):
         super(Concat, self).__init__('Concat', left, right)
 
@@ -546,23 +747,39 @@ class Concat(LeftRightOp):
 Unitary Operators.
 '''
 class UnOp(Expression):
-    """Base class for Lua unitary operator"""
+    """Base class for Lua unitary expression.
+
+    Attributes:
+        **operand** (`Expression`): Operand.
+    """
     def __init__(self, name, operand):
         super(UnOp, self).__init__(name)
         self.operand = operand
 
 class UBNotOp(UnOp):
-    """Lua binary not unitary operator expression"""
+    """Lua binary not unitary expression.
+
+    Attributes:
+        **operand** (`Expression`): Operand.
+    """
     def __init__(self, operand):
         super(UBNotOp, self).__init__('UBNotOp', operand)
 
 class USubOp(UnOp):
-    """Lua negation unitary operator expression"""
+    """Lua negation unitary expression.
+
+    Attributes:
+        **operand** (`Expression`): Operand.
+    """
     def __init__(self, operand):
         super(USubOp, self).__init__('USubOp', operand)
 
 class ULNotOp(UnOp):
-    """Logical Not operator"""
+    """Logical not expression.
+
+    Attributes:
+        **operand** (`Expression`): Operand.
+    """
     def __init__(self, operand):
         super(ULNotOp, self).__init__('ULNotOp', operand)
 
@@ -570,6 +787,8 @@ class ULNotOp(UnOp):
 ''' 3.4.7 – The Length Operator                                             '''
 ''' ----------------------------------------------------------------------- '''
 class ULengthOP(UnOp):
+    """Length expression.
+    """
     def __init__(self, operand):
         super(ULengthOP, self).__init__('ULengthOp', operand)
 
@@ -577,21 +796,31 @@ class ULengthOP(UnOp):
 Left Hand Side expression.
 '''
 class Lhs(Expression):
-    """Define a Lua Left Hand Side expression"""
+    """Define a Lua Left Hand Side expression.
+    """
     pass
 
 class Name(Lhs):
-    """Define a Lua Id expression"""
+    """Define a Lua name expression.
+
+    Attributes:
+        **id** (`string`): Id.
+    """
     def __init__(self, id):
         super(Name, self).__init__('Name')
         self.id = id
 
 class Index(Lhs):
-    """Define a Lua Index expression"""
+    """Define a Lua index expression.
+
+    Attributes:
+        **idx** (`Expression`): Index expression.
+        **value** (`string`): Id.
+    """
     def __init__(self, idx, value):
         super(Index, self).__init__('Index')
-        self.idx    = idx
-        self.value  = value
+        self.idx   = idx
+        self.value = value
 
 ''' ----------------------------------------------------------------------- '''
 ''' Comments                                                                '''
