@@ -2,10 +2,10 @@ from setuptools import setup
 
 setup(
   name = 'luaparser',
-  version = '0.1',
+  version = '1.0',
   description = 'A lua parser in Python',
   url = 'https://github.com/boolangery/py-lua-parser',
-  download_url = 'https://github.com/boolangery/py-lua-parser/archive/0.1.tar.gz',
+  download_url = 'https://github.com/boolangery/py-lua-parser/archive/1.0.tar.gz',
   author = 'Eliott Dumeix',
   author_email = 'eliott.dumeix@gmail.com',
   license = 'MIT',
