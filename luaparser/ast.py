@@ -364,7 +364,7 @@ class ParseTreeVisitor(LuaVisitor):
         | pow_expr"""
         if len(ctx.children)>1:
             if ctx.children[0].symbol.type == Tokens.MINUS.value:
-                return self._initNode(ctx, USubOp(self.visit(ctx.children[1])))
+                return self._initNode(ctx, UMinusOp(self.visit(ctx.children[1])))
             elif ctx.children[0].symbol.type == Tokens.LENGTH.value:
                 return self._initNode(ctx, ULengthOP(self.visit(ctx.children[1])))
             elif ctx.children[0].symbol.type == Tokens.NOT.value:

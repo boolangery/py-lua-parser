@@ -146,7 +146,7 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[Assign(
             targets=[Name(id='a')],
             values=[
-                USubOp(operand=Number(1))
+                UMinusOp(operand=Number(1))
             ]
         )]))
         self.assertEqual(exp, tree)
