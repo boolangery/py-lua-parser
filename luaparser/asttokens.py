@@ -151,21 +151,27 @@ class TokenEditor(AbstractTokensEditor):
     def toSource(self):
         return self._dllTokens.value.text
 
-    def next(self):
+    def next(self, lignore=DEFAULT_IGNORE):
         """Select next token.
         """
+        types = self.tokensEnumToValues(lignore)
         node = self._dllTokens.next
-        if node:
-            return TokenEditor(node, self._dllAll)
-        return node
+        while node:
+            if node.value.type not in types:
+                return TokenEditor(node, self._dllAll)
+            node = node.next
+        return None
 
-    def prev(self):
+    def prev(self, lignore=DEFAULT_IGNORE):
         """Select previous token.
         """
+        types = self.tokensEnumToValues(lignore)
         node = self._dllTokens.prev
-        if node:
-            return TokenEditor(node, self._dllAll)
-        return node
+        while node:
+            if node.value.type not in types:
+                return TokenEditor(node, self._dllAll)
+            node = node.prev
+        return None
 
     def nextOfType(self, type):
         node = self._dllTokens.next

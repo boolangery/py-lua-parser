@@ -25,17 +25,53 @@ acc:withdraw(100)
 """
 
 class AstTokensTestCase(tests.TestCase):
-    def test_token_editor_next(self):
+    def test_token_editor_next_no_ignore(self):
         editor = asttokens.parse(r"""local a = 1""")
         first = editor.first()
 
         self.assertEqual('local', first.text)
-        self.assertEqual(' ', first.next().text)
-        self.assertEqual('a', first.next().next().text)
-        self.assertEqual(' ', first.next().next().next().text)
-        self.assertEqual('=', first.next().next().next().next().text)
-        self.assertEqual(' ', first.next().next().next().next().next().text)
-        self.assertEqual('1', first.next().next().next().next().next().next().text)
+        self.assertEqual(' ', first.next([]).text)
+        self.assertEqual('a', first.next([]).next([]).text)
+        self.assertEqual(' ', first.next([]).next([]).next([]).text)
+        self.assertEqual('=', first.next([]).next([]).next([]).next([]).text)
+        self.assertEqual(' ', first.next([]).next([]).next([]).next([]).next([]).text)
+        self.assertEqual('1', first.next([]).next([]).next([]).next([]).next([]).next([]).text)
+
+    def test_token_editor_next_ignore(self):
+        editor = asttokens.parse(r"""local a = 1""")
+        first = editor.first()
+
+        self.assertEqual('local', first.text)
+        self.assertEqual('a', first.next().text)
+        self.assertEqual('=', first.next().next().text)
+        self.assertEqual('1', first.next().next().next().text)
+
+        self.assertEqual('local', first.text)
+        self.assertEqual('=', first.next([asttokens.Tokens.SPACE, asttokens.Tokens.NAME]).text)
+
+    def test_token_editor_prev_no_ignore(self):
+        editor = asttokens.parse(r"""local a = 1""")
+        last = editor.last()
+
+        self.assertEqual('<EOF>', last.text)
+        self.assertEqual('1',     last.prev([]).text)
+        self.assertEqual(' ',     last.prev([]).prev([]).text)
+        self.assertEqual('=',     last.prev([]).prev([]).prev([]).text)
+        self.assertEqual(' ',     last.prev([]).prev([]).prev([]).prev([]).text)
+        self.assertEqual('a',     last.prev([]).prev([]).prev([]).prev([]).prev([]).text)
+        self.assertEqual(' ',     last.prev([]).prev([]).prev([]).prev([]).prev([]).prev([]).text)
+        self.assertEqual('local', last.prev([]).prev([]).prev([]).prev([]).prev([]).prev([]).prev([]).text)
+
+    def test_token_editor_prev_ignore(self):
+        editor = asttokens.parse(r"""local a = 1""")
+        last = editor.last()
+
+        self.assertEqual('<EOF>', last.text)
+        self.assertEqual('1',     last.prev().text)
+        self.assertEqual('=',     last.prev().prev().text)
+        self.assertEqual('a',     last.prev().prev().prev().text)
+        self.assertEqual('local', last.prev().prev().prev().prev().text)
+        self.assertEqual(None,    last.prev().prev().prev().prev().prev())
 
     def test_group_editor_line_count(self):
         src = textwrap.dedent(r"""local 
