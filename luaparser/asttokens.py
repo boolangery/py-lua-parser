@@ -219,7 +219,7 @@ class TokenEditor(AbstractTokensEditor):
             node = node.next
         return LineEditor(tokens, self._dllAll)
 
-    def isFirstOnLine(self, lignore = [Tokens.SPACE]):
+    def isFirstOnLine(self, lignore = DEFAULT_IGNORE):
         ignore = self.tokensEnumToValues(lignore)
         node = self._dllTokens.prev
         while node:
@@ -326,9 +326,17 @@ class GroupEditor(TokensEditor):
         return self.lastOfNotType(lignore)
 
     def indent(self, count):
+        """Indent lines in this group editor with n whitespace.
+
+        Args:
+            count (int): The number of whitespace.
+
+        """
         for line in self.lines():
-            if line.isConsistent():
-                line.indent(count)
+            first = line.first([])  # no ignore
+            if first:
+                if first.isFirstOnLine([]):  # no ignore
+                    line.indent(count)
 
 
 class ProgramEditor(GroupEditor):
@@ -423,15 +431,6 @@ class LineEditor(GroupEditor):
                 for t in nextLine:
                     t.lineNumber = first.lineNumber - 1
             nextLine = nextLine.next()
-
-    def isConsistent(self):
-        if self._dllTokens:
-            first = self._dllTokens[0]
-            prev = first.prev
-            if first and prev:
-                if first.value.line == prev.value.line:
-                    return False
-        return True
 
     def next(self):
         last = self.last()
