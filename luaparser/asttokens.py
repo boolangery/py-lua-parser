@@ -125,7 +125,8 @@ class TokensEditor(AbstractTokensEditor):
             self._dllAll = dllAll
 
     def __iter__(self):
-        return iter(self._dllTokens)
+        for node in self._dllTokens:
+            yield TokenEditor(node, self._dllAll)
 
     def __len__(self):
         return len(self._dllTokens)
@@ -239,6 +240,29 @@ class TokenEditor(AbstractTokensEditor):
                 break
             node = node.next
         return GroupEditor(tokens, self._dllAll)
+
+    def insertLeft(self, type, text):
+        token = CommonToken()
+        token.type = type.value
+        token.text = text
+        token.line = self._dllTokens.value.line
+        token.tokenIndex = self._dllTokens.value.tokenIndex
+        inserted = self._dllAll.insert(token, self._dllTokens)
+        return TokenEditor(inserted, self._dllAll)
+
+    def insertRight(self, type, text):
+        token = CommonToken()
+        token.type = type.value
+        token.text = text
+        token.line = self._dllTokens.value.line
+        token.tokenIndex = self._dllTokens.value.tokenIndex
+
+        next = self._dllTokens.next
+        if next:
+            inserted = self._dllAll.insert(token, next)
+        else:
+            inserted = self._dllAll.append(token)
+        return TokenEditor(inserted, self._dllAll)
 
     @property
     def text(self):
@@ -389,17 +413,6 @@ class LineEditor(GroupEditor):
         return self
 
     def indent(self, count, lignore = [Tokens.NEWLINE]):
-        #ignore = self.tokensEnumToValues(lignore)
-        #ignore.append(Tokens.SPACE.value)
-
-        ## check if line is consistent
-        #consistent = False
-        #for node in self._dllTokens:
-        #    if node.value.type not in ignore:
-        #        consistent = True
-        #        break
-        #if not consistent: return
-
         node = self._dllTokens[0]
 
         if node:
@@ -407,14 +420,18 @@ class LineEditor(GroupEditor):
             if node.value.type == Tokens.SPACE.value:
                 node.value.text = ' ' * count
             elif count != 0:
+                editor = TokenEditor(node, self._dllAll)
+                newEditor = editor.insertLeft(Tokens.SPACE, ' ' * count)
+                self._dllTokens.insert(0, newEditor._dllTokens)
+
                 # need to create a new token
-                token = CommonToken()
-                token.type = Tokens.SPACE.value
-                token.text = ' ' * count
-                token.line = node.value.line
-                token.tokenIndex = node.value.tokenIndex
-                inserted = self._dllAll.insert(token, node)
-                self._dllTokens.insert(0, inserted)
+                # token = CommonToken()
+                # token.type = Tokens.SPACE.value
+                # token.text = ' ' * count
+                # token.line = node.value.line
+                # token.tokenIndex = node.value.tokenIndex
+                # inserted = self._dllAll.insert(token, node)
+                # self._dllTokens.insert(0, inserted)
 
     def delete(self):
         """Delete all tokens on this line."""
