@@ -287,7 +287,11 @@ class ParseTreeVisitor(LuaVisitor):
         def FalseHandler(ctx):return self._initNode(ctx, FalseExpr())
         def NumberHandler(ctx):
             # using python number eval to parse lua number
-            number = ast.literal_eval(ctx.getText())
+            try:
+                number = ast.literal_eval(ctx.getText())
+            except:
+                # exception occurs with leading zero number: 002
+                number = float(ctx.getText())
             return self._initNode(ctx, Number(number))
         def StringHandler(ctx):
             luaStr = ctx.getText()

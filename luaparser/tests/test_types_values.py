@@ -42,7 +42,7 @@ class TypesValuesTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_numbers(self):
-        tree = ast.parse(r'foo = 4')
+        tree = ast.parse(r'foo = 04')
         exp = Chunk(body=Block(body=[Assign(
             targets=[Name(id='foo')],
             values=[Number(n=4)]
@@ -74,6 +74,20 @@ class TypesValuesTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[Assign(
             targets=[Name(id='foo')],
             values=[Number(n=5e+20)]
+        )]))
+        self.assertEqual(exp, tree)
+
+        tree = ast.parse(r'foo = 0.31416E1')
+        exp = Chunk(body=Block(body=[Assign(
+            targets=[Name(id='foo')],
+            values=[Number(n=0.31416E1)]
+        )]))
+        self.assertEqual(exp, tree)
+
+        tree = ast.parse(r'foo = 0xff')
+        exp = Chunk(body=Block(body=[Assign(
+            targets=[Name(id='foo')],
+            values=[Number(n=0xff)]
         )]))
         self.assertEqual(exp, tree)
 
