@@ -70,7 +70,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Forin(
-                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Call(func=Name('pairs'), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -122,7 +122,7 @@ class StatementsTestCase(tests.TestCase):
         self.assertEqual(nodes[6].tokens[0].value.text, '{')
         self.assertEqual(nodes[6].tokens[1].value.text, '}')
 
-        self.assertIsInstance(nodes[8], Call)
+        self.assertIsInstance(nodes[8], Block)
         self.assertEqual(nodes[8].tokens[0].value.text, '\n')
         self.assertEqual(nodes[8].tokens[1].value.text, '  ')
         self.assertEqual(nodes[8].tokens[2].value.text, 'print')
@@ -141,7 +141,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Forin(
-                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Call(func=Index(Name('pairs'), Name('foo')), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -156,7 +156,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Forin(
-                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Invoke(source=Name('foo'), func=Name('pairs'), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -171,7 +171,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Forin(
-                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -186,7 +186,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Forin(
-                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Invoke(
                     source=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)]),
                     func=Name('pairs'),
@@ -204,7 +204,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Forin(
-                body=[Call(func=Name('print'), args=[Name('k'), Name('v')])],
+                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Call(
                     func=Index(idx=Name('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
                     args=[Table(keys=[], values=[])]),
@@ -223,7 +223,7 @@ class StatementsTestCase(tests.TestCase):
                 start=Number(1),
                 stop=Number(10),
                 step=Number(2),
-                body=[Call(func=Name('print'), args=[Name('i')])]
+                body=Block([Call(func=Name('print'), args=[Name('i')])])
             )
         ]))
         self.assertEqual(exp, tree)
@@ -236,7 +236,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(body=Block(body=[
             Do(
-                body=[LocalAssign(targets=[Name('foo')],values=[String('bar')])]
+                body=Block([LocalAssign(targets=[Name('foo')],values=[String('bar')])])
             )
         ]))
         self.assertEqual(exp, tree)
@@ -247,9 +247,9 @@ class StatementsTestCase(tests.TestCase):
               print('hello world')
             end"""))
         exp = Chunk(body=Block(body=[
-            While(test=TrueExpr(), body=[
+            While(test=TrueExpr(), body=Block([
                 Call(func=Name('print'), args=[String('hello world')])
-            ])
+            ]))
         ]))
         self.assertEqual(exp, tree)
 
@@ -259,7 +259,7 @@ class StatementsTestCase(tests.TestCase):
             until true
             """))
         exp = Chunk(body=Block(body=[
-            Repeat(body=[], test=TrueExpr())
+            Repeat(body=Block([]), test=TrueExpr())
         ]))
         self.assertEqual(exp, tree)
 
@@ -271,7 +271,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[
             If(
                 test=TrueExpr(),
-                body=[],
+                body=Block([]),
                 orelse=None
             )
         ]))
@@ -288,7 +288,7 @@ class StatementsTestCase(tests.TestCase):
                     left=Name('a'),
                     right=Number(2)
                 ),
-                body=[],
+                body=Block([]),
                 orelse=None
             )
         ]))
@@ -303,8 +303,8 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[
             If(
                 test=TrueExpr(),
-                body=[],
-                orelse=ElseIf(test=FalseExpr(), body=[], orelse=None)
+                body=Block([]),
+                orelse=ElseIf(test=FalseExpr(), body=Block([]), orelse=None)
             )
         ]))
         self.assertEqual(exp, tree)
@@ -319,11 +319,11 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[
             If(
                 test=TrueExpr(),
-                body=[],
+                body=Block([]),
                 orelse=ElseIf(
                     test=FalseExpr(),
-                    body=[],
-                    orelse=[]
+                    body=Block([]),
+                    orelse=Block([])
                 )
             )
         ]))
@@ -341,14 +341,14 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[
             If(
                 test=TrueExpr(),
-                body=[],
+                body=Block([]),
                 orelse=ElseIf(
                     test=FalseExpr(),
-                    body=[],
+                    body=Block([]),
                     orelse=ElseIf(
                         test=Number(42),
-                        body=[],
-                        orelse=[Return([TrueExpr()])]
+                        body=Block([]),
+                        orelse=Block([Return([TrueExpr()])])
                     )
                 )
             )

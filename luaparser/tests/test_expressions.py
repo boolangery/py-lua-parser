@@ -596,10 +596,10 @@ class ExpressionsTestCase(tests.TestCase):
             targets=[Name(id='f')],
             values=[AnonymousFunction(
                 args=[],
-                body=[LocalAssign(
+                body=Block([LocalAssign(
                     targets=[Name(id='a')],
                     values=[]
-                )]
+                )])
             )]
         )]))
         self.assertEqual(exp, tree)
@@ -624,7 +624,7 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[Function(
             name=Name('f'),
             args=[],
-            body=[]
+            body=Block([])
         )]))
         self.assertEqual(exp, tree)
 
@@ -633,7 +633,7 @@ class ExpressionsTestCase(tests.TestCase):
         exp = Chunk(body=Block(body=[LocalFunction(
             name=Name('_process'),
             args=[],
-            body=[]
+            body=Block([])
         )]))
         self.assertEqual(exp, tree)
 
@@ -653,7 +653,7 @@ class ExpressionsTestCase(tests.TestCase):
                     )
                 )),
             args=[],
-            body=[]
+            body=Block([])
         )]))
         self.assertEqual(exp, tree)
 
@@ -674,7 +674,7 @@ class ExpressionsTestCase(tests.TestCase):
                 ))],
             values=[AnonymousFunction(
                 args=[],
-                body=[]
+                body=Block([])
             )]
         )]))
         self.assertEqual(exp, tree)

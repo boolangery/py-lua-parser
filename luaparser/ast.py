@@ -167,7 +167,7 @@ class ParseTreeVisitor(LuaVisitor):
         : OPAR param_list CPAR block END"""
         params = self._initNode(ctx.children[1], self.visit(ctx.children[1]))
 
-        body = self.visit(ctx.children[3]).body
+        body = self.visit(ctx.children[3])
 
         return (params, body)
 
@@ -518,7 +518,7 @@ class ParseTreeVisitor(LuaVisitor):
     def visitDo_block(self, ctx):
         """do_block
         : DO block END"""
-        body = self.visit(ctx.children[1]).body
+        body = self.visit(ctx.children[1])
         return self._initNode(ctx, Do(body))
 
     def visitFor_stat(self, ctx):
@@ -560,7 +560,7 @@ class ParseTreeVisitor(LuaVisitor):
         """repeat_stat
         : REPEAT block UNTIL expr"""
         return self._initNode(ctx, Repeat(
-            body=self.visit(ctx.children[1]).body,
+            body=self.visit(ctx.children[1]),
             test=self.visit(ctx.children[3])))
 
     def visitIf_stat(self, ctx):
@@ -568,7 +568,7 @@ class ParseTreeVisitor(LuaVisitor):
         : IF expr THEN block elseif_stat* else_stat? END"""
         mainIf = If(
             test=self.visit(ctx.children[1]),
-            body=self.visit(ctx.children[3]).body,
+            body=self.visit(ctx.children[3]),
             orelse=None)
         lastStat = mainIf
 
@@ -587,12 +587,12 @@ class ParseTreeVisitor(LuaVisitor):
         : ELSEIF expr THEN block"""
         return [
             self.visit(ctx.children[1]),
-            self.visit(ctx.children[3]).body]
+            self.visit(ctx.children[3])]
 
     def visitElse_stat(self, ctx):
         """else_stat
         : ELSE block"""
-        return self.visit(ctx.children[1]).body
+        return self.visit(ctx.children[1])
 
     def visitLabel(self, ctx):
         """label
