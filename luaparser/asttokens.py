@@ -85,7 +85,7 @@ class Tokens(Enum):
     SHEBANG = 63
     LongBracket = 64
 
-DEFAULT_IGNORE = [Tokens.COMMENT, Tokens.LINE_COMMENT, Tokens.SPACE, Tokens.NEWLINE, Tokens.SHEBANG]
+DEFAULT_IGNORE = [Tokens.SPACE, Tokens.NEWLINE, Tokens.SHEBANG]
 
 class AbstractTokensEditor():
     def tokensEnumToValues(self, ltypes):
@@ -348,19 +348,6 @@ class GroupEditor(TokensEditor):
         """Retrieve the last token of this group.
         """
         return self.lastOfNotType(lignore)
-
-    def indent(self, count):
-        """Indent lines in this group editor with n whitespace.
-
-        Args:
-            count (int): The number of whitespace.
-
-        """
-        for line in self.lines():
-            first = line.first([])  # no ignore
-            if first:
-                if first.isFirstOnLine([]):  # no ignore
-                    line.indent(count)
 
 
 class ProgramEditor(GroupEditor):
