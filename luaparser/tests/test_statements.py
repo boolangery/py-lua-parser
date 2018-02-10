@@ -10,12 +10,12 @@ class StatementsTestCase(tests.TestCase):
     """
     def test_empty_block(self):
         tree = ast.parse(";;;;")
-        exp = Chunk(body=Block(body=[]))
+        exp = Chunk(Block([]))
         self.assertEqual(exp, tree)
 
     def test_2_block(self):
         tree = ast.parse("local a;local b;")
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             LocalAssign(targets=[Name('a')],values=[]),
             LocalAssign(targets=[Name('b')],values=[])
         ]))
@@ -26,35 +26,35 @@ class StatementsTestCase(tests.TestCase):
     """
     def test_set_number(self):
         tree = ast.parse("i=3")
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Assign(targets=[Name('i')],values=[Number(3)])
         ]))
         self.assertEqual(exp, tree)
 
     def test_set_string(self):
         tree = ast.parse('i="foo bar"')
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Assign(targets=[Name('i')],values=[String('foo bar')])
         ]))
         self.assertEqual(exp, tree)
 
     def test_set_array_index(self):
         tree = ast.parse('a[i] = 42')
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Assign(targets=[Index(idx=Name('i'), value=Name('a'))], values=[Number(42)])
         ]))
         self.assertEqual(exp, tree)
 
     def test_set_table_index(self):
         tree = ast.parse('_ENV.x = val')
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Assign(targets=[Index(idx=Name('x'), value=Name('_ENV'))], values=[Name('val')])
         ]))
         self.assertEqual(exp, tree)
 
     def test_set_multi(self):
         tree = ast.parse('x, y = y, x')
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Assign(targets=[Name('x'), Name('y')],values=[Name('y'), Name('x')])
         ]))
         self.assertEqual(exp, tree)
@@ -68,9 +68,9 @@ class StatementsTestCase(tests.TestCase):
               print(k, v)
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Forin(
-                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
+                Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Call(func=Name('pairs'), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -139,9 +139,9 @@ class StatementsTestCase(tests.TestCase):
               print(k, v)
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Forin(
-                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
+                Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Call(func=Index(Name('pairs'), Name('foo')), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -154,9 +154,9 @@ class StatementsTestCase(tests.TestCase):
               print(k, v)
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Forin(
-                body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
+                Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Invoke(source=Name('foo'), func=Name('pairs'), args=[Table(keys=[], values=[])]),
                 targets=[Name('k'), Name('v')]
             )
@@ -169,7 +169,7 @@ class StatementsTestCase(tests.TestCase):
               print(k, v)
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table(keys=[], values=[])]),
@@ -184,7 +184,7 @@ class StatementsTestCase(tests.TestCase):
               print(k, v)
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Invoke(
@@ -202,7 +202,7 @@ class StatementsTestCase(tests.TestCase):
               print(k, v)
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=Call(
@@ -217,7 +217,7 @@ class StatementsTestCase(tests.TestCase):
         tree = ast.parse(textwrap.dedent("""
             for i=1,10,2 do print(i) end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Fornum(
                 target=Name('i'),
                 start=Number(1),
@@ -234,7 +234,7 @@ class StatementsTestCase(tests.TestCase):
               local foo = 'bar'
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Do(
                 body=Block([LocalAssign(targets=[Name('foo')],values=[String('bar')])])
             )
@@ -246,7 +246,7 @@ class StatementsTestCase(tests.TestCase):
             while true do
               print('hello world')
             end"""))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             While(test=TrueExpr(), body=Block([
                 Call(func=Name('print'), args=[String('hello world')])
             ]))
@@ -258,7 +258,7 @@ class StatementsTestCase(tests.TestCase):
             repeat        
             until true
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Repeat(body=Block([]), test=TrueExpr())
         ]))
         self.assertEqual(exp, tree)
@@ -268,7 +268,7 @@ class StatementsTestCase(tests.TestCase):
             if true then    
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             If(
                 test=TrueExpr(),
                 body=Block([]),
@@ -282,7 +282,7 @@ class StatementsTestCase(tests.TestCase):
             if (a<2) then    
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             If(
                 test=LessThanOp(
                     left=Name('a'),
@@ -300,7 +300,7 @@ class StatementsTestCase(tests.TestCase):
             elseif false then     
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             If(
                 test=TrueExpr(),
                 body=Block([]),
@@ -316,7 +316,7 @@ class StatementsTestCase(tests.TestCase):
             else   
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             If(
                 test=TrueExpr(),
                 body=Block([]),
@@ -338,7 +338,7 @@ class StatementsTestCase(tests.TestCase):
               return true
             end
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             If(
                 test=TrueExpr(),
                 body=Block([]),
@@ -407,8 +407,8 @@ class StatementsTestCase(tests.TestCase):
         tree = ast.parse(textwrap.dedent("""
             ::foo::
             """))
-        exp = Chunk(body=Block(body=[
-            Label(id=Name('foo'))
+        exp = Chunk(Block([
+            Label(Name('foo'))
         ]))
         self.assertEqual(exp, tree)
 
@@ -426,9 +426,9 @@ class StatementsTestCase(tests.TestCase):
             goto foo
             ::foo::
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Goto(label=Name('foo')),
-            Label(id=Name('foo'))
+            Label(Name('foo'))
         ]))
         self.assertEqual(exp, tree)
 
@@ -445,21 +445,21 @@ class StatementsTestCase(tests.TestCase):
         tree = ast.parse(textwrap.dedent("""
             break
             """))
-        exp = Chunk(body=Block(body=[
+        exp = Chunk(Block([
             Break()
         ]))
         self.assertEqual(exp, tree)
 
     def test_return(self):
         tree = ast.parse(r'return nil')
-        exp = Chunk(body=Block(body=[Return([
+        exp = Chunk(Block([Return([
             Nil()
         ])]))
         self.assertEqual(exp, tree)
 
     def test_return_multiple(self):
         tree = ast.parse(r'return nil, "error", 42; ')
-        exp = Chunk(body=Block(body=[Return([
+        exp = Chunk(Block([Return([
             Nil(), String('error'), Number(42)
         ])]))
         self.assertEqual(exp, tree)

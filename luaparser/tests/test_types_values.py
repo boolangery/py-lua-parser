@@ -7,9 +7,9 @@ import textwrap
 class TypesValuesTestCase(tests.TestCase):
     def test_nil(self):
         tree = ast.parse(r'foo = nil')
-        exp = Chunk(body=Block(body=[Assign(
+        exp = Chunk(Block([Assign(
             targets=[
-                Name(id='foo')
+                Name('foo')
             ],
             values=[
                 Nil()
@@ -19,9 +19,9 @@ class TypesValuesTestCase(tests.TestCase):
 
     def test_true(self):
         tree = ast.parse(r'foo = true')
-        exp = Chunk(body=Block(body=[Assign(
+        exp = Chunk(Block([Assign(
             targets=[
-                Name(id='foo')
+                Name('foo')
             ],
             values=[
                 TrueExpr()
@@ -31,9 +31,9 @@ class TypesValuesTestCase(tests.TestCase):
 
     def test_false(self):
         tree = ast.parse(r'foo = false')
-        exp = Chunk(body=Block(body=[Assign(
+        exp = Chunk(Block([Assign(
             targets=[
-                Name(id='foo')
+                Name('foo')
             ],
             values=[
                 FalseExpr()
@@ -43,83 +43,83 @@ class TypesValuesTestCase(tests.TestCase):
 
     def test_numbers(self):
         tree = ast.parse(r'foo = 04')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=4)]
         )]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(r'foo = 0.4')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=0.4)]
         )]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(r'foo = 4.57e-3')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=4.57e-3)]
         )]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(r'foo = 0.3e12')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=0.3e12)]
         )]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(r'foo = 5e+20')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=5e+20)]
         )]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(r'foo = 0.31416E1')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=0.31416E1)]
         )]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(r'foo = 0xff')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='foo')],
+        exp = Chunk(Block([Assign(
+            targets=[Name('foo')],
             values=[Number(n=0xff)]
         )]))
         self.assertEqual(exp, tree)
 
     def test_string_dbl_quote(self):
         tree = ast.parse(r'a = "a line"')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='a')],
-            values=[String(s='a line')]
+        exp = Chunk(Block([Assign(
+            targets=[Name('a')],
+            values=[String('a line')]
         )]))
         self.assertEqual(exp, tree)
 
     def test_string_quote(self):
         tree = ast.parse(r"b = 'another line'")
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='b')],
-            values=[String(s='another line')]
+        exp = Chunk(Block([Assign(
+            targets=[Name('b')],
+            values=[String('another line')]
         )]))
         self.assertEqual(exp, tree)
 
     def test_string_escape(self):
         tree = ast.parse(r'''b = "one line\nnext line\n\"in quotes\", 'in quotes'"''')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='b')],
-            values=[String(s=r"one line\nnext line\n\"in quotes\", 'in quotes'")]
+        exp = Chunk(Block([Assign(
+            targets=[Name('b')],
+            values=[String(r"one line\nnext line\n\"in quotes\", 'in quotes'")]
         )]))
         self.assertEqual(exp, tree)
 
     def test_string_dbl_square(self):
         tree = ast.parse(r'b = [[hello]]')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='b')],
-            values=[String(s='hello')]
+        exp = Chunk(Block([Assign(
+            targets=[Name('b')],
+            values=[String('hello')]
         )]))
         self.assertEqual(exp, tree)
 
@@ -128,16 +128,16 @@ class TypesValuesTestCase(tests.TestCase):
             can be enclosed in double square
             brackets.]]
             '''))
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='b')],
-            values=[String(s='Multiple lines of text\ncan be enclosed in double square\nbrackets.')]
+        exp = Chunk(Block([Assign(
+            targets=[Name('b')],
+            values=[String('Multiple lines of text\ncan be enclosed in double square\nbrackets.')]
         )]))
         self.assertEqual(exp, tree)
 
     def test_string_dbl_square_equal(self):
         tree = ast.parse(r'b = [=[one [[two]] one]=]')
-        exp = Chunk(body=Block(body=[Assign(
-            targets=[Name(id='b')],
-            values=[String(s='one [[two]] one')]
+        exp = Chunk(Block([Assign(
+            targets=[Name('b')],
+            values=[String('one [[two]] one')]
         )]))
         self.assertEqual(exp, tree)
