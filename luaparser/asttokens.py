@@ -399,26 +399,17 @@ class LineEditor(GroupEditor):
                 self._dllAll.remove(node)
         return self
 
-    def indent(self, count, lignore = [Tokens.NEWLINE]):
+    def indent(self, count, indent_char=' ', lignore = [Tokens.NEWLINE]):
         node = self._dllTokens[0]
 
         if node:
             # already a SPACE token, use it
             if node.value.type == Tokens.SPACE.value:
-                node.value.text = ' ' * count
+                node.value.text = indent_char * count
             elif count != 0:
                 editor = TokenEditor(node, self._dllAll)
-                newEditor = editor.insertLeft(Tokens.SPACE, ' ' * count)
+                newEditor = editor.insertLeft(Tokens.SPACE, indent_char * count)
                 self._dllTokens.insert(0, newEditor._dllTokens)
-
-                # need to create a new token
-                # token = CommonToken()
-                # token.type = Tokens.SPACE.value
-                # token.text = ' ' * count
-                # token.line = node.value.line
-                # token.tokenIndex = node.value.tokenIndex
-                # inserted = self._dllAll.insert(token, node)
-                # self._dllTokens.insert(0, inserted)
 
     def delete(self):
         """Delete all tokens on this line."""
