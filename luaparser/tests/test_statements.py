@@ -464,3 +464,17 @@ class StatementsTestCase(tests.TestCase):
         ])]))
         self.assertEqual(exp, tree)
 
+        # test tokens
+        nodes = list(ast.walk(tree))
+
+        self.assertIsInstance(nodes[2], Return)
+        self.assertEqual(nodes[2].tokens[0].value.text, 'return')
+        self.assertEqual(nodes[2].tokens[1].value.text, ' ')
+        self.assertEqual(nodes[2].tokens[2].value.text, 'nil')
+        self.assertEqual(nodes[2].tokens[3].value.text, ',')
+        self.assertEqual(nodes[2].tokens[4].value.text, ' ')
+        self.assertEqual(nodes[2].tokens[5].value.text, '"error"')
+        self.assertEqual(nodes[2].tokens[6].value.text, ',')
+        self.assertEqual(nodes[2].tokens[7].value.text, ' ')
+        self.assertEqual(nodes[2].tokens[8].value.text, '42')
+        self.assertEqual(nodes[2].tokens[9].value.text, ';')

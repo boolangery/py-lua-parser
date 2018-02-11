@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 
 setup(
     name = 'luaparser',

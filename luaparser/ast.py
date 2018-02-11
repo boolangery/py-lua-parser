@@ -605,7 +605,10 @@ class ParseTreeVisitor(LuaVisitor):
     def visitRet_stat(self, ctx):
         """ret_stat
         : RETURN expr_list? SEMCOL?"""
-        return self._initNode(ctx, Return(_listify(self.visitChildren(ctx))))
+        exp_list = _listify(self.visitChildren(ctx))
+        if len(exp_list) > 0:
+            self._initNode(ctx.children[1], exp_list)
+        return self._initNode(ctx, Return(exp_list))
 
 
 class ASTVisitor():
