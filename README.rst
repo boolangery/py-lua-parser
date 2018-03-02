@@ -3,6 +3,10 @@ py-lua-parser
 
 .. image:: https://travis-ci.org/boolangery/py-lua-parser.svg?branch=master
     :target: https://travis-ci.org/boolangery/py-lua-parser
+.. image:: https://img.shields.io/pypi/v/luaparser.svg
+    :target: https://pypi.python.org/pypi/luaparser/
+.. image:: https://img.shields.io/pypi/pyversions/luaparser.svg
+    :target: https://pypi.python.org/pypi/luaparser/
 
 A Lua parser and AST builder written in Python.
 
