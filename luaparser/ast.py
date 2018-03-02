@@ -42,6 +42,10 @@ def walk(root):
 def toPrettyStr(tree, indent=2):
     return printers.PythonStyleVisitor(indent).visit(tree)
 
+def toXmlStr(tree):
+    visitor = printers.HTMLStyleVisitor()
+    return visitor.get_xml_string(tree)
+
 def _listify(obj):
     if not isinstance(obj, NodeList):
         l = NodeList()

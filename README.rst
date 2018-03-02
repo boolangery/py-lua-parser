@@ -3,11 +3,35 @@ py-lua-parser
 
 A Lua parser and AST builder written in Python.
 
+
 Installation:
 ------------------------------------------------------------------------------
+
 The package can be installed through `pip`:
 
-    python3.6 -m pip install .
+.. code-block::
+
+    $ python3.6 -m pip install luaparser
+
+It will install the shell command 'luaparser'.
+
+
+Options
+------------------------------------------------------------------------------
+
+These are the command-line flags:
+
+Usage: luastyle [options] filename
+
+.. code-block::
+
+    CLI Options:
+      --version                     Show program's version number and exit
+      -h, --help                    Show this help message and exit
+      -s, --source                  Source passed in a string
+      -x, --xml                     Set output format to xml
+      -o, --output                  Write output to file
+
 
 Quickstart
 ==============================================================================

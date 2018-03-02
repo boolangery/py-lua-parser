@@ -1,13 +1,13 @@
 from setuptools import setup
+import luaparser
 
-__version__ = '1.1.6'
 
 setup(
     name = 'luaparser',
-    version = __version__,
+    version = luaparser.__version__,
     description = 'A lua parser in Python',
     url = 'https://github.com/boolangery/py-lua-parser',
-    download_url = 'https://github.com/boolangery/py-lua-parser/archive/' + __version__ + '.tar.gz',
+    download_url = 'https://github.com/boolangery/py-lua-parser/archive/' + luaparser.__version__ + '.tar.gz',
     author = 'Eliott Dumeix',
     author_email = 'eliott.dumeix@gmail.com',
     license = 'MIT',
@@ -21,5 +21,13 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
     ],
-    install_requires = ['antlr4-python3-runtime<=4.7.1', 'llist<=0.5']
+    install_requires = [
+        'antlr4-python3-runtime<=4.7.1',
+        'llist<=0.5',
+    ],
+    entry_points={
+        'console_scripts': [
+            'luaparser = luaparser.__main__:main'
+        ]
+    }
 )
