@@ -57,7 +57,7 @@ class ParseTreeVisitor(LuaVisitor):
         else:
             return self._initNodeFromIndex(ctx.start.tokenIndex, ctx.stop.tokenIndex, node, isBlock)
 
-    def _initNodeFromIndex(self, start, stop, node, isBlock):
+    def _initNodeFromIndex(self, start, stop, node, isBlock=False):
         # include hidden tokens:
         hiddenTokens = self._tokenStream.getHiddenTokensToLeft(start)
         if hiddenTokens:
@@ -458,16 +458,22 @@ class ParseTreeVisitor(LuaVisitor):
         : OBRACK expr CBRACK ASSIGN expr
         | NAME ASSIGN expr
         | expr"""
-        lenght = len(ctx.children)
+        length = len(ctx.children)
         # OBRACK expr CBRACK ASSIGN expr
-        if lenght > 3:
-            return (self.visit(ctx.children[1]), self.visit(ctx.children[4]))
+        if length > 3:
+            key = self.visit(ctx.children[1])
+            # include OBRACK and CBRACK in token list
+            self._initNodeFromIndex(ctx.children[0].symbol.tokenIndex, ctx.children[2].symbol.tokenIndex, key)
+            value = self.visit(ctx.children[4])
         # NAME ASSIGN expr
-        elif lenght > 2:
-            return (self.visit(ctx.children[0]), self.visit(ctx.children[2]))
+        elif length > 2:
+            key = self.visit(ctx.children[0])
+            value = self.visit(ctx.children[2])
         # expr
         else:
-            return (None, self.visit(ctx.children[0]))
+            key = None
+            value = self.visit(ctx.children[0])
+        return (key, value)
 
 
     def visitFunction(self, ctx):

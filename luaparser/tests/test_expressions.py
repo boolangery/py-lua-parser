@@ -462,22 +462,35 @@ class ExpressionsTestCase(tests.TestCase):
         foo = {
           options = { radio = true },
           "enabled",
-          157
+          157,
+          [true] = false,
+          ['true'] = true,
         };
         '''))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
             values=[Table(
                 keys=[
-                    Name('options'),  Number(1),  Number(2)
+                    Name('options'),  Number(1),  Number(2),
+                    TrueExpr(), String('true')
                 ],
                 values=[
                     Table(keys=[Name('radio')], values=[TrueExpr()]),
-                    String('enabled'), Number(157)
+                    String('enabled'), Number(157),
+                    FalseExpr(), TrueExpr()
                 ]
             )]
         )]))
         self.assertEqual(exp, tree)
+
+        # test if all tokens included in '[true]' key
+        nodes = list(ast.walk(tree))
+        self.assertIsInstance(nodes[14], TrueExpr)
+        self.assertEqual(nodes[14].tokens[0].value.text, '\n')
+        self.assertEqual(nodes[14].tokens[1].value.text, '  ')
+        self.assertEqual(nodes[14].tokens[2].value.text, '[')
+        self.assertEqual(nodes[14].tokens[3].value.text, 'true')
+        self.assertEqual(nodes[14].tokens[4].value.text, ']')
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.10 – Function Calls                                                 '''
