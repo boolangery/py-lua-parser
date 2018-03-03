@@ -118,9 +118,9 @@ class StatementsTestCase(tests.TestCase):
         self.assertEqual(nodes[5].tokens[4].value.text, '}')
         self.assertEqual(nodes[5].tokens[5].value.text, ')')
 
-        self.assertIsInstance(nodes[6], Table)
-        self.assertEqual(nodes[6].tokens[0].value.text, '{')
-        self.assertEqual(nodes[6].tokens[1].value.text, '}')
+        self.assertIsInstance(nodes[7], Table)
+        self.assertEqual(nodes[7].tokens[0].value.text, '{')
+        self.assertEqual(nodes[7].tokens[1].value.text, '}')
 
         self.assertIsInstance(nodes[8], Block)
         self.assertEqual(nodes[8].tokens[0].value.text, '\n')
@@ -387,21 +387,21 @@ class StatementsTestCase(tests.TestCase):
         self.assertEqual(nodes[2].tokens[25].value.text, '\n')
         self.assertEqual(nodes[2].tokens[26].value.text, 'end')
 
-        self.assertIsInstance(nodes[3], ElseIf)
-        self.assertEqual(nodes[3].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[3].tokens[1].value.text, 'elseif')
-        self.assertEqual(nodes[3].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[3].tokens[3].value.text, 'false')
-        self.assertEqual(nodes[3].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[3].tokens[5].value.text, 'then')
+        self.assertIsInstance(nodes[5], ElseIf)
+        self.assertEqual(nodes[5].tokens[0].value.text, '\n')
+        self.assertEqual(nodes[5].tokens[1].value.text, 'elseif')
+        self.assertEqual(nodes[5].tokens[2].value.text, ' ')
+        self.assertEqual(nodes[5].tokens[3].value.text, 'false')
+        self.assertEqual(nodes[5].tokens[4].value.text, ' ')
+        self.assertEqual(nodes[5].tokens[5].value.text, 'then')
 
-        self.assertIsInstance(nodes[4], ElseIf)
-        self.assertEqual(nodes[4].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[4].tokens[1].value.text, 'elseif')
-        self.assertEqual(nodes[4].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[3].value.text, '42')
-        self.assertEqual(nodes[4].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[5].value.text, 'then')
+        self.assertIsInstance(nodes[8], ElseIf)
+        self.assertEqual(nodes[8].tokens[0].value.text, '\n')
+        self.assertEqual(nodes[8].tokens[1].value.text, 'elseif')
+        self.assertEqual(nodes[8].tokens[2].value.text, ' ')
+        self.assertEqual(nodes[8].tokens[3].value.text, '42')
+        self.assertEqual(nodes[8].tokens[4].value.text, ' ')
+        self.assertEqual(nodes[8].tokens[5].value.text, 'then')
 
     def test_label(self):
         tree = ast.parse(textwrap.dedent("""

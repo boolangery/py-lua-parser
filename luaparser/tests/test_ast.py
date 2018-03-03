@@ -45,13 +45,13 @@ class TokensTestCase(tests.TestCase):
         self.assertEqual(nodes[2].tokens[7].value.text, ' ')
         self.assertEqual(nodes[2].tokens[8].value.text, '42')
 
-        self.assertIsInstance(nodes[3], Number)
-        self.assertEqual(nodes[3].tokens[0].value.text, ' ')
-        self.assertEqual(nodes[3].tokens[1].value.text, '42')
-
-        self.assertIsInstance(nodes[4], Name)
+        self.assertIsInstance(nodes[4], Number)
         self.assertEqual(nodes[4].tokens[0].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[1].value.text, 'a')
+        self.assertEqual(nodes[4].tokens[1].value.text, '42')
+
+        self.assertIsInstance(nodes[3], Name)
+        self.assertEqual(nodes[3].tokens[0].value.text, ' ')
+        self.assertEqual(nodes[3].tokens[1].value.text, 'a')
 
     def test_walk_1(self):
         src = textwrap.dedent("""
