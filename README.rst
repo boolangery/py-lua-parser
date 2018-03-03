@@ -28,7 +28,7 @@ Options
 
 These are the command-line flags:
 
-Usage: luastyle [options] filename
+Usage: luaparser [options] filename
 
 .. code-block::
 
