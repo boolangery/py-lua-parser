@@ -61,16 +61,7 @@ class ParseTreeVisitor(LuaVisitor):
             if hiddenTokens:
                 stop += len(hiddenTokens)
 
-        return node.initTokens(self._dllAll, start, stop)
-
-    def getTokenNodes(self, start, stop):
-        subset = []
-        if stop >= len(self._dllAll):
-            stop = len(self._dllAll) - 1
-        for i in range(start, stop):
-            node = self._dllAll.nodeat(i)
-            subset.append(node)
-        return subset
+        return node.initTokens(self._dllAll, self._token_nodes, start, stop)
 
     def visitChildren(self, ctx, mergeList=False):
         if ctx.children:
@@ -104,8 +95,9 @@ class ParseTreeVisitor(LuaVisitor):
         # to be shared across all nodes:
         self._tokenStream = ctx.parser._input
         self._dllAll = llist.dllist()
+        self._token_nodes = []
         for token in ctx.parser._input.tokens:
-            self._dllAll.append(token)
+            self._token_nodes.append(self._dllAll.append(token))
 
         node = self._initNode(ctx, Chunk(self.visit(ctx.children[0])))
 

@@ -13,10 +13,11 @@ class TokenisedSourcePart(object):
     """
     def __init__(self):
         self._allTokens = llist.dllist()
+        self._ldllnodeTokens = []
         self._start = 0
         self._stop = 0
 
-    def initTokens(self, allTokens, start, stop):
+    def initTokens(self, dllTokens, ldllnodeTokens, start, stop):
         """
         Initialized object.
 
@@ -29,7 +30,8 @@ class TokenisedSourcePart(object):
 
         :return: This instance
         """
-        self._allTokens = allTokens
+        self._allTokens = dllTokens
+        self._ldllnodeTokens = ldllnodeTokens
         self._start = start
         self._stop = stop
         return self
@@ -41,16 +43,7 @@ class TokenisedSourcePart(object):
 
         :return: A list of llist.dllistnode
         """
-        tokens = []
-        node = self._allTokens.first
-        while node:
-            if node.value.tokenIndex >= self._start:
-                if node.value.tokenIndex <= self._stop:
-                    tokens.append(node)
-                else:
-                    break
-            node = node.next
-        return tokens
+        return self._ldllnodeTokens[self.start:self.stop+1]
 
     @property
     def start(self):
@@ -130,7 +123,7 @@ class Node(TokenisedSourcePart):
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
-            return self._equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_allTokens'])
+            return self._equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_allTokens', '_ldllnodeTokens'])
         return False
 
 class NodeList(list, TokenisedSourcePart):
