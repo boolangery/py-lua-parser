@@ -19,6 +19,11 @@ def parse(source):
         dlltokens.append(t)
     return ProgramEditor(None, dlltokens)
 
+def get_token_stream(source):
+    lexer = LuaLexer(InputStream(source))
+    stream = CommonTokenStream(lexer)
+    return stream
+
 class Tokens(Enum):
     AND = 1
     BREAK = 2
