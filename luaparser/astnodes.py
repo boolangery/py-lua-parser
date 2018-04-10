@@ -271,6 +271,12 @@ class Goto(Statement):
         super(Goto, self).__init__('Goto')
         self.label = label
 
+class SemiColon(Statement):
+    """Define the semi-colon lua statement.
+    """
+    def __init__(self):
+        super(SemiColon, self).__init__('SemiColon')
+
 class Break(Statement):
     """Define the break lua statement.
 

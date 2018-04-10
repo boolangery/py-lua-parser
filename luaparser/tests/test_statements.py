@@ -14,7 +14,8 @@ class StatementsTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_2_block(self):
-        tree = ast.parse("local a;local b;")
+        tree = ast.parse_v2("local a;local b;")
+        print(ast.toPrettyStr(tree))
         exp = Chunk(Block([
             LocalAssign(targets=[Name('a')],values=[]),
             LocalAssign(targets=[Name('b')],values=[])

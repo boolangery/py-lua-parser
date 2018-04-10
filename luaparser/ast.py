@@ -18,6 +18,10 @@ def parse(source):
     astVisitor = ParseTreeVisitor()
     return astVisitor.visit(parser.chunk())
 
+def parse_v2(source):
+    from luaparser.builder import Builder
+    return Builder(source).process()
+
 def walk(root):
     # base case:
     if root is None:
