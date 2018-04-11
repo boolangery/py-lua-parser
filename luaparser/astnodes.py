@@ -437,6 +437,13 @@ class Number(Expression):
         super(Number, self).__init__('Number')
         self.n = n
 
+class Varargs(Expression):
+    """Define the Lua Varargs expression (...).
+
+    """
+    def __init__(self):
+        super(Varargs, self).__init__('Varargs')
+
 class String(Expression):
     """Define the Lua string expression.
 

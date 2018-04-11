@@ -4,6 +4,8 @@ from luaparser.astnodes import *
 from luaparser.asttokens import Tokens
 from enum import Enum
 from antlr4.Token import CommonToken
+import ast
+import re
 
 
 
@@ -87,6 +89,15 @@ class CTokens:
     LongBracket = 64
 
 
+def _listify(obj):
+    if not isinstance(obj, NodeList):
+        l = NodeList()
+        l.append(obj)
+        return l
+    else:
+        return obj
+
+
 
 class Builder:
     CLOSING_TOKEN = [
@@ -122,6 +133,7 @@ class Builder:
         self._index_stack = []
         self._right_index_stack = []
         self.text = ''  # last token text
+        self.type = -1  # last token type
 
     def process(self):
         node = self.parse_chunk()
@@ -157,6 +169,7 @@ class Builder:
 
         if toktype == type:
             self.text = token.text
+            self.type = toktype
             self._stream.consume()
             if hidden_right:
                 self.handle_hidden_right()
@@ -302,47 +315,78 @@ class Builder:
 
     def parse_assignment(self):
         self.save()
-        if self.parse_var_list():
+        targets = self.parse_var_list()
+        if targets:
             if self.next_is_rc(CTokens.ASSIGN):
-                if self.parse_expr_list():
-                    return self.success()
+                values = self.parse_expr_list()
+                if values:
+                    self.success()
+                    return Assign(targets, values)
         return self.failure()
 
     def parse_var_list(self):
+        vars = []
         self.save()
-        if self.parse_var():
+        var = self.parse_var()
+        if var:
+            vars.append(var)
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.COMMA) and self.parse_var():
-                    self.success()
+                if self.next_is_rc(CTokens.COMMA):
+                    var = self.parse_var()
+                    if var:
+                        vars.append(var)
+                        self.success()
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return vars
         return self.failure()
 
     def parse_var(self, is_stat=False):
         self.save()
         number_of_tail = 0
-        if self.parse_callee():
+        root = self.parse_callee()
+
+        # count number of tail and return callee if no tails
+        if root:
             if self.parse_tail():
+                number_of_tail += 1
                 self.handle_hidden_right()
                 while self.parse_tail():
                     self.handle_hidden_right()
                     number_of_tail += 1
-            if number_of_tail < 2:
-                return self.success()
+            else:
+                # only a callee
+                self.success()
+                return root
 
-
+        # we have one callee or more
         self.failure_save()
-        if self.parse_callee():
+
+        root = self.parse_callee()
+        if root:
             for n in range(0, number_of_tail):
-                self.parse_tail()
-                self.handle_hidden_right()
-            self.parse_tail()
+                tail = self.parse_tail()
+                if isinstance(tail, Index):
+                    tail.value = root
+                elif isinstance(tail, Invoke):
+                    tail.source = root
+                elif isinstance(tail, Call):
+                    tail.func = root
+                else:
+                    tail = Call(root, _listify(tail))
+                root = tail
+                if n < number_of_tail:
+                    self.handle_hidden_right()
 
             self.handle_hidden_right()
-            return self.success()
+            self.success()
+            return root
 
         return self.failure()
 
@@ -350,54 +394,85 @@ class Builder:
         # do not render last hidden
         self.save()
         if self.next_is_rc(CTokens.DOT) and self.next_is_rc(CTokens.NAME, False):
-            return self.success()
+            self.success()
+            return Index(self.text, None)  # value must be set in parent
 
         self.failure_save()
-        if self.next_is_rc(CTokens.OBRACK) and self.parse_expr() and self.next_is_rc(CTokens.CBRACK, False):
-            return self.success()
+        if self.next_is_rc(CTokens.OBRACK):
+            expr = self.parse_expr()
+            if expr and self.next_is_rc(CTokens.CBRACK, False):
+                self.success()
+                return Index(expr, None)  # value must be set in parent
 
         self.failure_save()
-        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME) and self.next_is_rc(CTokens.OPAR):
-            self.parse_expr_list(True)
-            if self.next_is_rc(CTokens.CPAR, False):
-                return self.success()
+        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+            name = self.text
+            if self.next_is_rc(CTokens.OPAR):
+                expr_list = self.parse_expr_list() or []
+                if self.next_is_rc(CTokens.CPAR, False):
+                    self.success()
+                    return Invoke(None, name, expr_list)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME) and self.parse_table_constructor(False):
-            return self.success()
+        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+            name = self.text
+            table = self.parse_table_constructor(False)
+            if table:
+                self.success()
+                return Invoke(None, name, [table])
 
         self.failure_save()
-        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME) and self.next_is_rc(CTokens.STRING, False):
-            return self.success()
+        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+            name = self.text
+            if self.next_is_rc(CTokens.STRING, False):
+                string = String(self.text)
+                self.success()
+                return Invoke(None, name, [string])
 
         self.failure_save()
         if self.next_is_rc(CTokens.OPAR, False):
             self.handle_hidden_right()
-            self.parse_expr_list(False, True)
+            expr_list = self.parse_expr_list() or []
             if self.next_is_rc(CTokens.CPAR, False):
-                return self.success()
+                self.success()
+                return Call(None, expr_list)
 
         self.failure_save()
-        if self.parse_table_constructor(False):
-            return self.success()
+        table = self.parse_table_constructor(False)
+        if table:
+            self.success()
+            return table
 
         self.failure_save()
         if self.next_is_rc(CTokens.STRING, False):
-            return self.success()
+            string = String(self.text)
+            self.success()
+            return string
 
         return self.failure()
 
-    def parse_expr_list(self, force_indent=False, force_no_indent=False):
+    def parse_expr_list(self):
+        expr_list = []
         self.save()
-        if self.parse_expr():
+        expr = self.parse_expr()
+        if expr:
+            expr_list.append(expr)
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.COMMA) and self.parse_expr():
-                    self.success()
+                if self.next_is_rc(CTokens.COMMA):
+                    expr = self.parse_expr()
+                    if expr:
+                        expr_list.append(expr)
+                        self.success()
+                    else:
+                        # a comma is alone at the end
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return expr
         return self.failure()
 
     def parse_do_block(self):
@@ -430,22 +505,24 @@ class Builder:
     def parse_local(self):
         self.save()
         if self.next_is_rc(CTokens.LOCAL):
-            self.save()
             targets = self.parse_name_list()
             if targets:
-                # optional
+                values = []
                 self.save()
-                if self.next_is_rc(CTokens.ASSIGN) and self.parse_expr_list():
-                    self.success()
+                if self.next_is_rc(CTokens.ASSIGN):
+                    values = self.parse_expr_list()
+                    if values:
+                        self.success()
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
-                self.success()
+
                 self.success()
                 return LocalAssign(targets, None)
 
-            self.failure_save()
             if self.next_is_rc(CTokens.FUNCTION) and self.next_is_rc(CTokens.NAME) and self.parse_func_body():
-                self.success()
                 return self.success()
             self.failure()
 
@@ -512,7 +589,7 @@ class Builder:
             self.failure_save()
             if self.parse_name_list() and \
                     self.next_is_rc(CTokens.IN) and \
-                    self.parse_expr_list(True) and \
+                    self.parse_expr_list() and \
                     self.parse_do_block():
                 self.success()
                 return self.success()
@@ -611,7 +688,8 @@ class Builder:
         self.failure()
         self.save()
         if self.next_is_rc(CTokens.NAME):
-            return self.success()
+            self.success()
+            return Name(self.text)
         return self.failure()
 
     def parse_expr(self):
@@ -619,77 +697,161 @@ class Builder:
 
     def parse_or_expr(self):
         self.save()
-        if self.parse_and_expr():
+        left = self.parse_and_expr()
+        if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.OR) and \
-                        self.parse_and_expr():
-                    self._last_expr_type = Expr.OR
-                    self.success()
+                if self.next_is_rc(CTokens.OR):
+                    right = self.parse_and_expr()
+                    if right:
+                        self.success()
+                        left = OrLoOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return left
+
         self.failure()
 
     def parse_and_expr(self):
         self.save()
-        if self.parse_rel_expr():
+        left = self.parse_rel_expr()
+        if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.AND) and \
-                        self.parse_rel_expr():
-                    self._last_expr_type = Expr.AND
-                    self.success()
+                if self.next_is_rc(CTokens.AND):
+                    right = self.parse_rel_expr()
+                    if right:
+                        self.success()
+                        left = AndLoOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return left
+
         self.failure()
 
     def parse_rel_expr(self):
         self.save()
-        if self.parse_concat_expr():
+        left = self.parse_concat_expr()
+        if left:
             self.save()
-            if self.next_in_rc(self.REL_OPERATORS) and \
-                    self.parse_concat_expr():
-                self._last_expr_type = Expr.REL
-                self.success()
+            if self.next_in_rc(self.REL_OPERATORS):
+                op = self.type
+                right = self.parse_concat_expr()
+                if right:
+                    self.success()
+                    if op == CTokens.LT:
+                        left = LessThanOp(left, right)
+                    elif op == CTokens.GT:
+                        left = GreaterThanOp(left, right)
+                    elif op == CTokens.LTEQ:
+                        left = LessOrEqThanOp(left, right)
+                    elif op == CTokens.GTEQ:
+                        left = GreaterOrEqThanOp(left, right)
+                    elif op == CTokens.NEQ:
+                        left = NotEqToOp(left, right)
+                    elif op == CTokens.EQ:
+                        left = EqToOp(left, right)
+                else:
+                    self.failure()
+                    return self.failure()
             else:
                 self.failure()
-            return self.success()
+            self.success()
+            return left
         self.failure()
 
-    def  parse_concat_expr(self):
+    def parse_concat_expr(self):
         self.save()
-        if self.parse_add_expr():
+        left = self.parse_add_expr()
+        if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.CONCAT) and self.parse_add_expr():
-                    self._last_expr_type = Expr.CONCAT
-                    self.success()
+                if self.next_is_rc(CTokens.CONCAT):
+                    right = self.parse_add_expr()
+                    if right:
+                        self.success()
+                        left = OrLoOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return left
+
         self.failure()
 
     def parse_add_expr(self):
         self.save()
-        if self.parse_mult_expr():
+        left = self.parse_mult_expr()
+        if left:
             while True:
                 self.save()
-                if self.next_in_rc([CTokens.ADD, CTokens.MINUS]) and \
-                        self.parse_mult_expr():
-                    self._last_expr_type = Expr.ADD
-                    self.success()
+                if self.next_in_rc([CTokens.ADD, CTokens.MINUS]):
+                    op = self.type
+                    right = self.parse_mult_expr()
+                    if right:
+                        self.success()
+                        if op == CTokens.ADD:
+                            left = AddOp(left, right)
+                        elif op == CTokens.MINUS:
+                            left = SubOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return left
+
         self.failure()
 
     def parse_mult_expr(self):
+        self.save()
+        left = self.parse_bitwise_expr()
+        if left:
+            while True:
+                self.save()
+                if self.next_in_rc([CTokens.MULT,
+                                   CTokens.DIV,
+                                   CTokens.MOD,
+                                   CTokens.FLOOR]):
+                    op = self.type
+                    right = self.parse_bitwise_expr()
+                    if right:
+                        self.success()
+                        if op == CTokens.MULT:
+                            left = MultOp(left, right)
+                        elif op == CTokens.DIV:
+                            left = FloatDivOp(left, right)
+                        elif op == CTokens.MOD:
+                            left = ModOp(left, right)
+                        elif op == CTokens.FLOOR:
+                            left = FloorDivOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
+                else:
+                    self.failure()
+                    break
+            self.success()
+            return left
+
+        self.failure()
+
+
         self.save()
         if self.parse_bitwise_expr():
             while True:
@@ -708,77 +870,146 @@ class Builder:
 
     def parse_bitwise_expr(self):
         self.save()
-        if self.parse_unary_expr():
+        left = self.parse_unary_expr()
+        if left:
             while True:
                 self.save()
                 if self.next_in_rc([CTokens.BITAND,
-                                 CTokens.BITOR,
-                                 CTokens.BITNOT,
-                                 CTokens.BITRSHIFT,
-                                 CTokens.BITRLEFT]) and self.parse_unary_expr():
-                    self._last_expr_type = Expr.BITWISE
-                    self.success()
+                                    CTokens.BITOR,
+                                    CTokens.BITNOT,
+                                    CTokens.BITRSHIFT,
+                                    CTokens.BITRLEFT]):
+                    op = self.type
+                    right = self.parse_unary_expr()
+                    if right:
+                        self.success()
+                        if op == CTokens.BITAND:
+                            left = BAndOp(left, right)
+                        elif op == CTokens.BITOR:
+                            left = BOrOp(left, right)
+                        elif op == CTokens.BITNOT:
+                            left = BXorOp(left, right)
+                        elif op == CTokens.BITRSHIFT:
+                            left = BShiftROp(left, right)
+                        elif op == CTokens.BITRLEFT:
+                            left = BShiftLOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return left
+
         self.failure()
 
     def parse_unary_expr(self):
         self.save()
-        if self.next_is_rc(CTokens.MINUS) and self.parse_unary_expr():
-            self._last_expr_type = Expr.UNARY
-            return self.success()
+        if self.next_is_rc(CTokens.MINUS):
+            expr = self.parse_unary_expr()
+            if expr:
+                self.success()
+                return UMinusOp(expr)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.LENGTH) and self.parse_pow_expr():
-            self._last_expr_type = Expr.UNARY
-            return self.success()
+        if self.next_is_rc(CTokens.LENGTH):
+            expr = self.parse_pow_expr()
+            if expr:
+                self.success()
+                return ULengthOP(expr)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.NOT) and self.parse_unary_expr():
-            self._last_expr_type = Expr.UNARY
-            return self.success()
+        if self.next_is_rc(CTokens.NOT):
+            expr = self.parse_unary_expr()
+            if expr:
+                self.success()
+                return ULNotOp(expr)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.BITNOT) and self.parse_unary_expr():
-            self._last_expr_type = Expr.UNARY
-            return self.success()
+        if self.next_is_rc(CTokens.BITNOT):
+            expr = self.parse_unary_expr()
+            if expr:
+                self.success()
+                return UBNotOp(expr)
 
         self.failure_save()
-        if self.parse_pow_expr():
-            return self.success()
+        expr = self.parse_pow_expr()
+        if expr:
+            self.success()
+            return expr
 
         return self.failure()
 
     def parse_pow_expr(self):
         self.save()
-        if self.parse_atom():
+        left = self.parse_atom()
+        if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.POW) and self.parse_atom():
-                    self._last_expr_type = Expr.POW
-                    self.success()
+                if self.next_is_rc(CTokens.POW):
+                    right = self.parse_atom()
+                    if right:
+                        self.success()
+                        left = ExpoOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return left
+
         self.failure()
 
     def parse_atom(self):
-        self.save()
-        if self.parse_var() or \
-                self.parse_function_literal() or \
-                self.parse_table_constructor() or \
-                self.next_in_rc([CTokens.VARARGS,
-                                 CTokens.NUMBER,
-                                 CTokens.STRING,
-                                 CTokens.NIL,
-                                 CTokens.TRUE,
-                                 CTokens.FALSE]):
-            self._last_expr_type = Expr.ATOM
-            return self.success()
-        return self.failure()
+        atom = self.parse_var()
+        if atom:
+            return atom
+        atom = self.parse_table_constructor()
+        if atom:
+            return atom
+        if self.next_is(CTokens.VARARGS) and self.next_is_rc(CTokens.VARARGS):
+            return Varargs()
+
+        if self.next_is(CTokens.NUMBER) and self.next_is_rc(CTokens.NUMBER):
+            # TODO: optimize
+            # using python number eval to parse lua number
+            try:
+                number = ast.literal_eval(self.text)
+            except:
+                # exception occurs with leading zero number: 002
+                number = float(self.text)
+            return Number(number)
+
+        if self.next_is(CTokens.STRING) and self.next_is_rc(CTokens.STRING):
+            # TODO: optimize
+            lua_str = self.text
+            p = re.compile('^\[=+\[(.*)\]=+\]')  # nested quote pattern
+            # try remove double quote:
+            if lua_str.startswith('"') and lua_str.endswith('"'):
+                lua_str = lua_str[1:-1]
+            # try remove single quote:
+            elif lua_str.startswith("'") and lua_str.endswith("'"):
+                lua_str = lua_str[1:-1]
+            # try remove double square bracket:
+            elif lua_str.startswith("[[") and lua_str.endswith("]]"):
+                lua_str = lua_str[2:-2]
+            # nested quote
+            elif p.match(lua_str):
+                lua_str = p.search(lua_str).group(1)
+            return String(lua_str)
+
+        if self.next_is(CTokens.NIL) and self.next_is_rc(CTokens.NIL):
+            return Nil()
+
+        if self.next_is(CTokens.TRUE) and self.next_is_rc(CTokens.TRUE):
+            return True()
+
+        if self.next_is(CTokens.FALSE) and self.next_is_rc(CTokens.FALSE):
+            return False()
+        return None
 
     def parse_function_literal(self):
         self.save()
