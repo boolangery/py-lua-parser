@@ -283,6 +283,7 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     def test_concatenation(self):
         tree = ast.parse(r'str = "begin".."end"')
+        print(ast.toPrettyStr(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('str')],
             values=[Concat(
@@ -302,13 +303,6 @@ class ExpressionsTestCase(tests.TestCase):
             values=[ULengthOP(operand=Name('t'))]
         )]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-        self.assertIsInstance(nodes[4], ULengthOP)
-        self.assertEqual(nodes[4].tokens[0].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[1].value.text, '#')
-        self.assertEqual(nodes[4].tokens[2].value.text, 't')
 
 
     ''' ----------------------------------------------------------------------- '''
@@ -331,27 +325,6 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[4], Table)
-        self.assertEqual(nodes[4].tokens[0].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[1].value.text, '{')
-        self.assertEqual(nodes[4].tokens[2].value.text, 'foo')
-        self.assertEqual(nodes[4].tokens[3].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[4].value.text, '=')
-        self.assertEqual(nodes[4].tokens[5].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[6].value.text, '"bar"')
-        self.assertEqual(nodes[4].tokens[7].value.text, ',')
-        self.assertEqual(nodes[4].tokens[8].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[9].value.text, 'bar')
-        self.assertEqual(nodes[4].tokens[10].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[11].value.text, '=')
-        self.assertEqual(nodes[4].tokens[12].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[13].value.text, '"foo"')
-        self.assertEqual(nodes[4].tokens[14].value.text, '}')
-
-
     def test_nested_dict(self):
         tree = ast.parse(textwrap.dedent(r'''
             foo = {
@@ -373,7 +346,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Table(keys=[Name('radio')], values=[TrueExpr()]),
                 ]
             )]
-        )]))
+        ), SemiColon(), SemiColon(), SemiColon()]))
         self.assertEqual(exp, tree)
 
     def test_array(self):
@@ -385,6 +358,7 @@ class ExpressionsTestCase(tests.TestCase):
           512,  1024,   2048
         }
         '''))
+        print(ast.toPrettyStr(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
             values=[Table(
@@ -427,18 +401,8 @@ class ExpressionsTestCase(tests.TestCase):
                     FalseExpr(), TrueExpr()
                 ]
             )]
-        )]))
+        ), SemiColon()]))
         self.assertEqual(exp, tree)
-
-        # test if all tokens included in '[true]' key
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[13], TrueExpr)
-        self.assertEqual(nodes[13].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[13].tokens[1].value.text, '  ')
-        self.assertEqual(nodes[13].tokens[2].value.text, '[')
-        self.assertEqual(nodes[13].tokens[3].value.text, 'true')
-        self.assertEqual(nodes[13].tokens[4].value.text, ']')
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.10 – Function Calls                                                 '''
@@ -450,15 +414,6 @@ class ExpressionsTestCase(tests.TestCase):
             args=[String('hello')]
         )]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Call)
-        self.assertEqual(nodes[2].tokens[0].value.text, 'print')
-        self.assertEqual(nodes[2].tokens[1].value.text, '(')
-        self.assertEqual(nodes[2].tokens[2].value.text, '"hello"')
-        self.assertEqual(nodes[2].tokens[3].value.text, ')')
 
     def test_function_call_no_par_string(self):
         tree = ast.parse(r'print "hello"')
@@ -495,17 +450,6 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Invoke)
-        self.assertEqual(nodes[2].tokens[0].value.text, 'foo')
-        self.assertEqual(nodes[2].tokens[1].value.text, ':')
-        self.assertEqual(nodes[2].tokens[2].value.text, 'print')
-        self.assertEqual(nodes[2].tokens[3].value.text, '(')
-        self.assertEqual(nodes[2].tokens[4].value.text, '"hello"')
-        self.assertEqual(nodes[2].tokens[5].value.text, ')')
-
     def test_function_nested_invoke(self):
         tree = ast.parse(r'foo:bar():print("hello")')
         exp = Chunk(Block([Invoke(
@@ -518,29 +462,6 @@ class ExpressionsTestCase(tests.TestCase):
             args=[String('hello')]
         )]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Invoke)
-        self.assertEqual(nodes[2].tokens[0].value.text, 'foo')
-        self.assertEqual(nodes[2].tokens[1].value.text, ':')
-        self.assertEqual(nodes[2].tokens[2].value.text, 'bar')
-        self.assertEqual(nodes[2].tokens[3].value.text, '(')
-        self.assertEqual(nodes[2].tokens[4].value.text, ')')
-        self.assertEqual(nodes[2].tokens[5].value.text, ':')
-        self.assertEqual(nodes[2].tokens[6].value.text, 'print')
-        self.assertEqual(nodes[2].tokens[7].value.text, '(')
-        self.assertEqual(nodes[2].tokens[8].value.text, '"hello"')
-        self.assertEqual(nodes[2].tokens[9].value.text, ')')
-
-        self.assertIsInstance(nodes[3], Invoke)
-        self.assertEqual(nodes[3].tokens[0].value.text, 'foo')
-        self.assertEqual(nodes[3].tokens[1].value.text, ':')
-        self.assertEqual(nodes[3].tokens[2].value.text, 'bar')
-        self.assertEqual(nodes[3].tokens[3].value.text, '(')
-        self.assertEqual(nodes[3].tokens[4].value.text, ')')
-
 
     def test_function_call_args(self):
         tree = ast.parse(r'print("hello",  42)')
@@ -566,21 +487,6 @@ class ExpressionsTestCase(tests.TestCase):
             )]
         )]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[4], AnonymousFunction)
-        self.assertEqual(nodes[4].tokens[0].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[1].value.text, 'function')
-        self.assertEqual(nodes[4].tokens[2].value.text, '(')
-        self.assertEqual(nodes[4].tokens[3].value.text, ')')
-        self.assertEqual(nodes[4].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[5].value.text, 'local')
-        self.assertEqual(nodes[4].tokens[6].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[7].value.text, 'a')
-        self.assertEqual(nodes[4].tokens[8].value.text, ' ')
-        self.assertEqual(nodes[4].tokens[9].value.text, 'end')
 
     def test_function_def_global(self):
         tree = ast.parse(r'function f() end')

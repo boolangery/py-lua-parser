@@ -620,15 +620,14 @@ class Builder:
                             # optional step
                             if self.next_is(CTokens.COMMA) and self.next_is_rc(CTokens.COMMA):
                                 step = self.parse_expr()
-                                if step:
-                                    body = self.parse_do_block()
-                                    if body:
-                                        self.success()
-                                        self.success()
-                                        return Fornum(target, start, stop, step, body)
-                                else:
-                                    self.failure()
-                                    return self.failure()
+
+                            body = self.parse_do_block()
+                            if not body:
+                                self.failure()
+                                return self.failure()
+                            self.success()
+                            self.success()
+                            return Fornum(target, start, stop, step, body)
 
             self.failure_save()
             target = self.parse_name_list()
@@ -709,7 +708,7 @@ class Builder:
                 return param_list
             else:
                 self.failure()
-                return None
+                return param_list
 
         self.save()
         if self.next_is_rc(CTokens.VARARGS):
@@ -850,7 +849,7 @@ class Builder:
                     right = self.parse_add_expr()
                     if right:
                         self.success()
-                        left = OrLoOp(left, right)
+                        left = Concat(left, right)
                     else:
                         self.failure()
                         return self.failure()
@@ -1020,6 +1019,9 @@ class Builder:
         atom = self.parse_var()
         if atom:
             return atom
+        atom = self.parse_function_literal()
+        if atom:
+            return atom
         atom = self.parse_table_constructor()
         if atom:
             return atom
@@ -1091,6 +1093,7 @@ class Builder:
                     for pair in field_list:
                         if pair[0] is None:
                             keys.append(Number(table_index))
+                            table_index += 1
                         else:
                             keys.append(pair[0])
                         values.append(pair[1])
@@ -1114,14 +1117,15 @@ class Builder:
                         field_list.append(field)
                         self.success()
                     else:
-                        self.failure()
-                        return self.failure()
+                        self.success()
+                        self.success()
+                        return field_list
                 else:
                     self.failure()
                     break
             self.parse_field_sep()
             self.success()
-            return field
+            return field_list
         return self.failure()
 
     def parse_field(self):
