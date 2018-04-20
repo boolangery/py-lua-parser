@@ -10,15 +10,14 @@ class StatementsTestCase(tests.TestCase):
     """
     def test_empty_block(self):
         tree = ast.parse(";;;;")
-        exp = Chunk(Block([]))
+        exp = Chunk(Block([SemiColon(), SemiColon(), SemiColon(), SemiColon()]))
         self.assertEqual(exp, tree)
 
     def test_2_block(self):
-        tree = ast.parse_v2("local a;local b;")
-        print(ast.toPrettyStr(tree))
+        tree = ast.parse("local a;local b;")
         exp = Chunk(Block([
-            LocalAssign(targets=[Name('a')],values=[]),
-            LocalAssign(targets=[Name('b')],values=[])
+            LocalAssign(targets=[Name('a')],values=[]),SemiColon(),
+            LocalAssign(targets=[Name('b')],values=[]),SemiColon(),
         ]))
         self.assertEqual(exp, tree)
 
@@ -55,6 +54,7 @@ class StatementsTestCase(tests.TestCase):
 
     def test_set_multi(self):
         tree = ast.parse('x, y = y, x')
+
         exp = Chunk(Block([
             Assign(targets=[Name('x'), Name('y')],values=[Name('y'), Name('x')])
         ]))
@@ -72,67 +72,11 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=Call(func=Name('pairs'), args=[Table(keys=[], values=[])]),
+                iter=[Call(func=Name('pairs'), args=[Table(keys=[], values=[])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Forin)
-        self.assertEqual(nodes[2].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[1].value.text, 'for')
-        self.assertEqual(nodes[2].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[3].value.text, 'k')
-        self.assertEqual(nodes[2].tokens[4].value.text, ',')
-        self.assertEqual(nodes[2].tokens[5].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[6].value.text, 'v')
-        self.assertEqual(nodes[2].tokens[7].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[8].value.text, 'in')
-        self.assertEqual(nodes[2].tokens[9].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[10].value.text, 'pairs')
-        self.assertEqual(nodes[2].tokens[11].value.text, '(')
-        self.assertEqual(nodes[2].tokens[12].value.text, '{')
-        self.assertEqual(nodes[2].tokens[13].value.text, '}')
-        self.assertEqual(nodes[2].tokens[14].value.text, ')')
-        self.assertEqual(nodes[2].tokens[15].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[16].value.text, 'do')
-        self.assertEqual(nodes[2].tokens[17].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[18].value.text, '  ')
-        self.assertEqual(nodes[2].tokens[19].value.text, 'print')
-        self.assertEqual(nodes[2].tokens[20].value.text, '(')
-        self.assertEqual(nodes[2].tokens[21].value.text, 'k')
-        self.assertEqual(nodes[2].tokens[22].value.text, ',')
-        self.assertEqual(nodes[2].tokens[23].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[24].value.text, 'v')
-        self.assertEqual(nodes[2].tokens[25].value.text, ')')
-        self.assertEqual(nodes[2].tokens[26].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[27].value.text, 'end')
-
-        self.assertIsInstance(nodes[5], Call)
-        self.assertEqual(nodes[5].tokens[0].value.text, ' ')
-        self.assertEqual(nodes[5].tokens[1].value.text, 'pairs')
-        self.assertEqual(nodes[5].tokens[2].value.text, '(')
-        self.assertEqual(nodes[5].tokens[3].value.text, '{')
-        self.assertEqual(nodes[5].tokens[4].value.text, '}')
-        self.assertEqual(nodes[5].tokens[5].value.text, ')')
-
-        self.assertIsInstance(nodes[7], Table)
-        self.assertEqual(nodes[7].tokens[0].value.text, '{')
-        self.assertEqual(nodes[7].tokens[1].value.text, '}')
-
-        self.assertIsInstance(nodes[8], Block)
-        self.assertEqual(nodes[8].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[8].tokens[1].value.text, '  ')
-        self.assertEqual(nodes[8].tokens[2].value.text, 'print')
-        self.assertEqual(nodes[8].tokens[3].value.text, '(')
-        self.assertEqual(nodes[8].tokens[4].value.text, 'k')
-        self.assertEqual(nodes[8].tokens[5].value.text, ',')
-        self.assertEqual(nodes[8].tokens[6].value.text, ' ')
-        self.assertEqual(nodes[8].tokens[7].value.text, 'v')
-        self.assertEqual(nodes[8].tokens[8].value.text, ')')
 
     def test_for_in_2(self):
         tree = ast.parse(textwrap.dedent("""
@@ -143,7 +87,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=Call(func=Index(Name('pairs'), Name('foo')), args=[Table(keys=[], values=[])]),
+                iter=[Call(func=Index(Name('pairs'), Name('foo')), args=[Table(keys=[], values=[])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -158,7 +102,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=Invoke(source=Name('foo'), func=Name('pairs'), args=[Table(keys=[], values=[])]),
+                iter=[Invoke(source=Name('foo'), func=Name('pairs'), args=[Table(keys=[], values=[])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -173,7 +117,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table(keys=[], values=[])]),
+                iter=[Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table(keys=[], values=[])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -188,10 +132,10 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=Invoke(
+                iter=[Invoke(
                     source=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)]),
                     func=Name('pairs'),
-                    args=[Table(keys=[], values=[])]),
+                    args=[Table(keys=[], values=[])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -206,9 +150,9 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=Call(
+                iter=[Call(
                     func=Index(idx=Name('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
-                    args=[Table(keys=[], values=[])]),
+                    args=[Table(keys=[], values=[])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -269,6 +213,7 @@ class StatementsTestCase(tests.TestCase):
             if true then    
             end
             """))
+
         exp = Chunk(Block([
             If(
                 test=TrueExpr(),
@@ -356,54 +301,6 @@ class StatementsTestCase(tests.TestCase):
         ]))
         self.assertEqual(exp, tree)
 
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], If)
-        self.assertEqual(nodes[2].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[1].value.text, 'if')
-        self.assertEqual(nodes[2].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[3].value.text, 'true')
-        self.assertEqual(nodes[2].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[5].value.text, 'then')
-        self.assertEqual(nodes[2].tokens[6].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[7].value.text, 'elseif')
-        self.assertEqual(nodes[2].tokens[8].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[9].value.text, 'false')
-        self.assertEqual(nodes[2].tokens[10].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[11].value.text, 'then')
-        self.assertEqual(nodes[2].tokens[12].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[13].value.text, 'elseif')
-        self.assertEqual(nodes[2].tokens[14].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[15].value.text, '42')
-        self.assertEqual(nodes[2].tokens[16].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[17].value.text, 'then')
-        self.assertEqual(nodes[2].tokens[18].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[19].value.text, 'else')
-        self.assertEqual(nodes[2].tokens[20].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[21].value.text, '  ')
-        self.assertEqual(nodes[2].tokens[22].value.text, 'return')
-        self.assertEqual(nodes[2].tokens[23].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[24].value.text, 'true')
-        self.assertEqual(nodes[2].tokens[25].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[26].value.text, 'end')
-
-        self.assertIsInstance(nodes[5], ElseIf)
-        self.assertEqual(nodes[5].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[5].tokens[1].value.text, 'elseif')
-        self.assertEqual(nodes[5].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[5].tokens[3].value.text, 'false')
-        self.assertEqual(nodes[5].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[5].tokens[5].value.text, 'then')
-
-        self.assertIsInstance(nodes[8], ElseIf)
-        self.assertEqual(nodes[8].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[8].tokens[1].value.text, 'elseif')
-        self.assertEqual(nodes[8].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[8].tokens[3].value.text, '42')
-        self.assertEqual(nodes[8].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[8].tokens[5].value.text, 'then')
-
     def test_label(self):
         tree = ast.parse(textwrap.dedent("""
             ::foo::
@@ -412,15 +309,6 @@ class StatementsTestCase(tests.TestCase):
             Label(Name('foo'))
         ]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Label)
-        self.assertEqual(nodes[2].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[1].value.text, '::')
-        self.assertEqual(nodes[2].tokens[2].value.text, 'foo')
-        self.assertEqual(nodes[2].tokens[3].value.text, '::')
 
     def test_goto(self):
         tree = ast.parse(textwrap.dedent("""
@@ -432,15 +320,6 @@ class StatementsTestCase(tests.TestCase):
             Label(Name('foo'))
         ]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Goto)
-        self.assertEqual(nodes[2].tokens[0].value.text, '\n')
-        self.assertEqual(nodes[2].tokens[1].value.text, 'goto')
-        self.assertEqual(nodes[2].tokens[2].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[3].value.text, 'foo')
 
     def test_break(self):
         tree = ast.parse(textwrap.dedent("""
@@ -464,18 +343,3 @@ class StatementsTestCase(tests.TestCase):
             Nil(), String('error'), Number(42)
         ])]))
         self.assertEqual(exp, tree)
-
-        # test tokens
-        nodes = list(ast.walk(tree))
-
-        self.assertIsInstance(nodes[2], Return)
-        self.assertEqual(nodes[2].tokens[0].value.text, 'return')
-        self.assertEqual(nodes[2].tokens[1].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[2].value.text, 'nil')
-        self.assertEqual(nodes[2].tokens[3].value.text, ',')
-        self.assertEqual(nodes[2].tokens[4].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[5].value.text, '"error"')
-        self.assertEqual(nodes[2].tokens[6].value.text, ',')
-        self.assertEqual(nodes[2].tokens[7].value.text, ' ')
-        self.assertEqual(nodes[2].tokens[8].value.text, '42')
-        self.assertEqual(nodes[2].tokens[9].value.text, ';')

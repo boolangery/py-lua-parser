@@ -11,14 +11,8 @@ from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
 import llist
 
-def parse(source):
-    lexer = LuaLexer(InputStream(source))
-    parser = LuaParser(CommonTokenStream(lexer))
-    parser.addErrorListener(ParserErrorListener())
-    astVisitor = ParseTreeVisitor()
-    return astVisitor.visit(parser.chunk())
 
-def parse_v2(source):
+def parse(source):
     from luaparser.builder import Builder
     return Builder(source).process()
 

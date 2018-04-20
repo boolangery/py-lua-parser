@@ -164,12 +164,12 @@ class Builder:
 
     def next_is_rc(self, type, hidden_right=True):
         token = self._stream.LT(1)
-        toktype = token.type
+        tok_type = token.type
         self._right_index = self._stream.index
 
-        if toktype == type:
+        if tok_type == type:
             self.text = token.text
-            self.type = toktype
+            self.type = tok_type
             self._stream.consume()
             if hidden_right:
                 self.handle_hidden_right()
@@ -178,10 +178,10 @@ class Builder:
 
     def next_is_c(self, type, hidden_right=True):
         token = self._stream.LT(1)
-        toktype = token.type
+        tok_type = token.type
         self._right_index = self._stream.index
 
-        if toktype == type:
+        if tok_type == type:
             self._stream.consume()
             if hidden_right:
                 self.handle_hidden_right()
@@ -197,6 +197,7 @@ class Builder:
         self._right_index = self._stream.index
 
         if tok_type in types:
+            self.type = tok_type
             self._stream.consume()
             if hidden_right:
                 self.handle_hidden_right()
@@ -210,13 +211,13 @@ class Builder:
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
         if tokens:
             for t in tokens:
-                print(t)
+                pass
 
     def handle_hidden_right(self, is_newline=False):
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
-                print(t)
+                pass
 
     def parse_chunk(self):
         self.save()
@@ -241,7 +242,10 @@ class Builder:
                 break
             statements.append(stat)
 
-        self.parse_ret_stat()
+        # optional ret stat
+        stat = self.parse_ret_stat()
+        if stat:
+            statements.append(stat)
         self.success()
         return Block(statements)
 
@@ -257,7 +261,7 @@ class Builder:
         stat = self.parse_do_block()
         if stat:
             self.handle_hidden_right()
-            return stat
+            return Do(stat)
         stat = self.parse_while_stat()
         if stat:
             self.handle_hidden_right()
@@ -303,14 +307,13 @@ class Builder:
     def parse_ret_stat(self):
         self.save()
         if self.next_is_rc(CTokens.RETURN):
-            self.parse_expr_list()  # optional
-            self.save()
-            if self.next_is_rc(CTokens.SEMCOL):
-                self.success()
-            else:
-                self.failure()
+            expr_list = self.parse_expr_list()  # optional
+            # consume optional token
+            if self.next_is(CTokens.SEMCOL):
+                self.next_is_rc(CTokens.SEMCOL)
 
-            return self.success()
+            self.success()
+            return Return(expr_list)
         return self.failure()
 
     def parse_assignment(self):
@@ -395,7 +398,7 @@ class Builder:
         self.save()
         if self.next_is_rc(CTokens.DOT) and self.next_is_rc(CTokens.NAME, False):
             self.success()
-            return Index(self.text, None)  # value must be set in parent
+            return Index(Name(self.text), None)  # value must be set in parent
 
         self.failure_save()
         if self.next_is_rc(CTokens.OBRACK):
@@ -406,7 +409,7 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
-            name = self.text
+            name = Name(self.text)
             if self.next_is_rc(CTokens.OPAR):
                 expr_list = self.parse_expr_list() or []
                 if self.next_is_rc(CTokens.CPAR, False):
@@ -415,7 +418,7 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
-            name = self.text
+            name = Name(self.text)
             table = self.parse_table_constructor(False)
             if table:
                 self.success()
@@ -423,9 +426,9 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
-            name = self.text
+            name = Name(self.text)
             if self.next_is_rc(CTokens.STRING, False):
-                string = String(self.text)
+                string = self.parse_lua_str(self.text)
                 self.success()
                 return Invoke(None, name, [string])
 
@@ -445,7 +448,7 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(CTokens.STRING, False):
-            string = String(self.text)
+            string = self.parse_lua_str(self.text)
             self.success()
             return string
 
@@ -472,23 +475,29 @@ class Builder:
                     self.failure()
                     break
             self.success()
-            return expr
+            return expr_list
         return self.failure()
 
     def parse_do_block(self):
-        save = self.save()
+        self.save()
         if self.next_is_rc(CTokens.DO, False):
             self.handle_hidden_right()
-            if self.parse_block():
-                self.dec_level()
+            block = self.parse_block()
+            if block:
                 if self.next_is_rc(CTokens.END):
-                    return self.success()
+                    self.success()
+                    return block
         return self.failure()
 
     def parse_while_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.WHILE) and self.parse_expr() and self.parse_do_block():
-            return self.success()
+        if self.next_is_rc(CTokens.WHILE):
+            expr = self.parse_expr()
+            if expr:
+                body = self.parse_do_block()
+                if body:
+                    self.success()
+                    return While(expr, body)
 
         return self.failure()
 
@@ -496,9 +505,13 @@ class Builder:
         self.save()
         if self.next_is_rc(CTokens.REPEAT, False):
             self.handle_hidden_right()
-            if self.parse_block():
-                if self.next_is_rc(CTokens.UNTIL) and self.parse_expr():
-                    return self.success()
+            body = self.parse_block()
+            if body:
+                if self.next_is_rc(CTokens.UNTIL):
+                    expr = self.parse_expr()
+                    if expr:
+                        self.success()
+                        return Repeat(body, expr)
 
         return self.failure()
 
@@ -520,10 +533,17 @@ class Builder:
                     self.failure()
 
                 self.success()
-                return LocalAssign(targets, None)
+                return LocalAssign(targets, values)
 
-            if self.next_is_rc(CTokens.FUNCTION) and self.next_is_rc(CTokens.NAME) and self.parse_func_body():
-                return self.success()
+            self.save()
+
+            if self.next_is_rc(CTokens.FUNCTION) and self.next_is_rc(CTokens.NAME):
+                name = Name(self.text)
+                body = self.parse_func_body()
+                if body:
+                    self.success()
+                    self.success()
+                    return LocalFunction(name, body[0], body[1])
             self.failure()
 
         return self.failure()
@@ -531,32 +551,47 @@ class Builder:
     def parse_goto_stat(self):
         self.save()
         if self.next_is_rc(CTokens.GOTO) and self.next_is_rc(CTokens.NAME):
-            return self.success()
+            self.success()
+            return Goto(Name(self.text))
         return self.failure()
 
     def parse_if_stat(self):
         self.save()
         if self.next_is_rc(CTokens.IFTOK):
-            if self.parse_expr():
+            test = self.parse_expr()
+            if test:
                 if self.next_is_rc(CTokens.THEN, False):
                     self.handle_hidden_right()
-                    if self.parse_block():
-                        while self.parse_elseif_stat():  # one or more
-                            pass
-                        self.parse_else_stat()  # optional
+                    body = self.parse_block()
+                    if body:
+                        main = If(test, body, None)
+                        root = main
+                        while True:  # zero or more
+                            orelse = self.parse_elseif_stat()
+                            if not orelse:
+                                break
+                            else:
+                                root.orelse = orelse
+                                root = orelse
+
+                        else_exp = self.parse_else_stat()  # optional
+                        root.orelse = else_exp
                         if self.next_is_rc(CTokens.END):
-                            return self.success()
+                            self.success()
+                            return main
         return self.failure()
 
     def parse_elseif_stat(self):
         self.save()
-        if self.next_is(CTokens.ELSEIF):
-            if self.next_is_rc(CTokens.ELSEIF):
-                if self.parse_expr():
-                    if self.next_is_rc(CTokens.THEN, False):
-                        self.handle_hidden_right()
-                        if self.parse_block():
-                            return self.success()
+        if self.next_is_rc(CTokens.ELSEIF):
+            test = self.parse_expr()
+            if test:
+                if self.next_is_rc(CTokens.THEN, False):
+                    self.handle_hidden_right()
+                    body = self.parse_block()
+                    if body:
+                        self.success()
+                        return ElseIf(test, body, None)  # orelse will be set in parent
         return self.failure()
 
     def parse_else_stat(self):
@@ -564,96 +599,125 @@ class Builder:
         if self.next_is(CTokens.ELSETOK):
             if self.next_is_rc(CTokens.ELSETOK, False):
                 self.handle_hidden_right()
-                if self.parse_block():
-                    return self.success()
+                body = self.parse_block()
+                if body:
+                    self.success()
+                    return body
         return self.failure()
 
     def  parse_for_stat(self):
         self.save()
         if self.next_is_rc(CTokens.FOR):
             self.save()
-            if self.next_is_rc(CTokens.NAME) and \
-                    self.next_is_rc(CTokens.ASSIGN) and \
-                    self.parse_expr() and \
-                    self.next_is_rc(CTokens.COMMA) and \
-                    self.parse_expr():
-                self.save()
-                if self.next_is_rc(CTokens.COMMA) and self.parse_expr():
-                    self.success()
-                else:
-                    self.failure()
-                if self.parse_do_block():
-                    self.success()
-                    return self.success()
+            if self.next_is_rc(CTokens.NAME):
+                target = Name(self.text)
+                if self.next_is_rc(CTokens.ASSIGN):
+                    start = self.parse_expr()
+                    if start and self.next_is_rc(CTokens.COMMA):
+                        stop = self.parse_expr()
+                        if stop:
+                            step = 1
+                            # optional step
+                            if self.next_is(CTokens.COMMA) and self.next_is_rc(CTokens.COMMA):
+                                step = self.parse_expr()
+                                if step:
+                                    body = self.parse_do_block()
+                                    if body:
+                                        self.success()
+                                        self.success()
+                                        return Fornum(target, start, stop, step, body)
+                                else:
+                                    self.failure()
+                                    return self.failure()
 
             self.failure_save()
-            if self.parse_name_list() and \
-                    self.next_is_rc(CTokens.IN) and \
-                    self.parse_expr_list() and \
-                    self.parse_do_block():
-                self.success()
-                return self.success()
+            target = self.parse_name_list()
+            if target and self.next_is_rc(CTokens.IN):
+                iter = self.parse_expr_list()
+                if iter:
+                    body = self.parse_do_block()
+                    if body:
+                        self.success()
+                        self.success()
+                        return Forin(body, iter, target)
             self.failure()
 
         return self.failure()
 
     def parse_function(self):
         self.save()
-        if self.next_is_rc(CTokens.FUNCTION) and self.parse_names():
-            self.save()
-            if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
-                if self.parse_func_body():
-                    self.success()
-                    return self.success()
+        if self.next_is_rc(CTokens.FUNCTION):
+            names = self.parse_names()
+            if names:
+                self.save()
+                if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+                    name = Name(self.text)
+                    func_body = self.parse_func_body()
+                    if func_body:
+                        self.success()
+                        self.success()
+                        return Method(names, name, func_body[0], func_body[1])
 
-            self.failure_save()
-            if self.parse_func_body():
-                return self.success()
-            self.failure()
+                self.failure()
+                func_body = self.parse_func_body()
+                if func_body:
+                    return Function(names, func_body[0], func_body[1])
+                self.failure()
 
         return self.failure()
 
     def parse_names(self):
         self.save()
         if self.next_is_rc(CTokens.NAME):
+            child = Name(self.text)
             while True:
                 self.save()
                 if self.next_is_rc(CTokens.DOT) and self.next_is_rc(CTokens.NAME):
                     self.success()
+                    child = Index(Name(self.text), child)
                 else:
                     self.failure()
                     break
-            return self.success()
+            self.success()
+            return child
         self.failure()
 
     def parse_func_body(self):
+        """If success, return a tuple (args, body)"""
         self.save()
         if self.next_is_rc(CTokens.OPAR, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
-            if self.parse_param_list():
+            args = self.parse_param_list()
+            if args is not None:  # may be an empty table
                 if self.next_is_rc(CTokens.CPAR, False):  # do not render right hidden
                     self.handle_hidden_right()  # render hidden after new level
-                    if self.parse_block():
+                    body = self.parse_block()
+                    if body:
                         if self.next_is_rc(CTokens.END):
-                            return self.success()
+                            self.success()
+                            return args, body
         return self.failure()
 
     def parse_param_list(self):
-        self.save()
-        if self.parse_name_list():
+        param_list = self.parse_name_list()
+        if param_list:
             self.save()
             if self.next_is_rc(CTokens.COMMA) and \
                     self.next_is_rc(CTokens.VARARGS):
                 self.success()
+                param_list.append(Varargs())
+                return param_list
             else:
                 self.failure()
-            return self.success()
-        self.failure_save()
+                return None
 
+        self.save()
         if self.next_is_rc(CTokens.VARARGS):
-            return self.success()
+            self.success()
+            return [Varargs()]
 
-        return self.success()
+        self.success()
+        return []
 
     def parse_name_list(self):
         self.save()
@@ -674,17 +738,23 @@ class Builder:
 
     def parse_label(self):
         self.save()
-        if self.next_is_rc(CTokens.COLCOL) and self.next_is_rc(CTokens.NAME) and self.next_is_rc(CTokens.COLCOL):
-            return self.success()
+        if self.next_is_rc(CTokens.COLCOL) and self.next_is_rc(CTokens.NAME):
+            name = Name(self.text)
+            if self.next_is_rc(CTokens.COLCOL):
+                self.success()
+                return Label(name)
 
         return self.failure()
 
     def parse_callee(self):
         self.save()
         if self.next_is_rc(CTokens.OPAR):
-            if self.parse_expr():
+            expr = self.parse_expr()
+            if expr:
                 if self.next_is_rc(CTokens.CPAR):
-                    return self.success()
+                    self.success()
+                    # TODO: create a node to indicate parenthesis
+                    return expr
         self.failure()
         self.save()
         if self.next_is_rc(CTokens.NAME):
@@ -715,7 +785,7 @@ class Builder:
             self.success()
             return left
 
-        self.failure()
+        return self.failure()
 
     def parse_and_expr(self):
         self.save()
@@ -737,7 +807,7 @@ class Builder:
             self.success()
             return left
 
-        self.failure()
+        return self.failure()
 
     def parse_rel_expr(self):
         self.save()
@@ -768,7 +838,7 @@ class Builder:
                 self.failure()
             self.success()
             return left
-        self.failure()
+        return self.failure()
 
     def parse_concat_expr(self):
         self.save()
@@ -790,7 +860,7 @@ class Builder:
             self.success()
             return left
 
-        self.failure()
+        return self.failure()
 
     def parse_add_expr(self):
         self.save()
@@ -816,7 +886,7 @@ class Builder:
             self.success()
             return left
 
-        self.failure()
+        return self.failure()
 
     def parse_mult_expr(self):
         self.save()
@@ -849,24 +919,7 @@ class Builder:
             self.success()
             return left
 
-        self.failure()
-
-
-        self.save()
-        if self.parse_bitwise_expr():
-            while True:
-                self.save()
-                if self.next_in_rc([CTokens.MULT,
-                                   CTokens.DIV,
-                                   CTokens.MOD,
-                                   CTokens.FLOOR]) and self.parse_bitwise_expr():
-                    self._last_expr_type = Expr.MULT
-                    self.success()
-                else:
-                    self.failure()
-                    break
-            return self.success()
-        self.failure()
+        return self.failure()
 
     def parse_bitwise_expr(self):
         self.save()
@@ -902,7 +955,7 @@ class Builder:
             self.success()
             return left
 
-        self.failure()
+        return self.failure()
 
     def parse_unary_expr(self):
         self.save()
@@ -984,37 +1037,41 @@ class Builder:
             return Number(number)
 
         if self.next_is(CTokens.STRING) and self.next_is_rc(CTokens.STRING):
-            # TODO: optimize
-            lua_str = self.text
-            p = re.compile('^\[=+\[(.*)\]=+\]')  # nested quote pattern
-            # try remove double quote:
-            if lua_str.startswith('"') and lua_str.endswith('"'):
-                lua_str = lua_str[1:-1]
-            # try remove single quote:
-            elif lua_str.startswith("'") and lua_str.endswith("'"):
-                lua_str = lua_str[1:-1]
-            # try remove double square bracket:
-            elif lua_str.startswith("[[") and lua_str.endswith("]]"):
-                lua_str = lua_str[2:-2]
-            # nested quote
-            elif p.match(lua_str):
-                lua_str = p.search(lua_str).group(1)
-            return String(lua_str)
+            return self.parse_lua_str(self.text)
 
         if self.next_is(CTokens.NIL) and self.next_is_rc(CTokens.NIL):
             return Nil()
 
         if self.next_is(CTokens.TRUE) and self.next_is_rc(CTokens.TRUE):
-            return True()
+            return TrueExpr()
 
         if self.next_is(CTokens.FALSE) and self.next_is_rc(CTokens.FALSE):
-            return False()
+            return FalseExpr()
         return None
+
+    def parse_lua_str(self, lua_str):
+        p = re.compile(r'^\[=+\[(.*)\]=+\]')  # nested quote pattern
+        # try remove double quote:
+        if lua_str.startswith('"') and lua_str.endswith('"'):
+            lua_str = lua_str[1:-1]
+        # try remove single quote:
+        elif lua_str.startswith("'") and lua_str.endswith("'"):
+            lua_str = lua_str[1:-1]
+        # try remove double square bracket:
+        elif lua_str.startswith("[[") and lua_str.endswith("]]"):
+            lua_str = lua_str[2:-2]
+        # nested quote
+        elif p.match(lua_str):
+            lua_str = p.search(lua_str).group(1)
+        return String(lua_str)
 
     def parse_function_literal(self):
         self.save()
-        if self.next_is_rc(CTokens.FUNCTION) and self.parse_func_body():
-            return self.success()
+        if self.next_is_rc(CTokens.FUNCTION):
+            func_body = self.parse_func_body()
+            if func_body:
+                self.success()
+                return AnonymousFunction(func_body[0], func_body[1])
 
         return self.failure()
 
@@ -1023,45 +1080,75 @@ class Builder:
         if self.next_is_rc(CTokens.OBRACE, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
 
-            self.parse_field_list()
+            field_list = self.parse_field_list()
             if self.next_is_rc(CTokens.CBRACE, render_last_hidden):
-                return self.success()
+                self.success()
+
+                keys = []
+                values = []
+                table_index = 1
+                if field_list:  # optional
+                    for pair in field_list:
+                        if pair[0] is None:
+                            keys.append(Number(table_index))
+                        else:
+                            keys.append(pair[0])
+                        values.append(pair[1])
+
+                return Table(keys, values)
+
         return self.failure()
 
     def parse_field_list(self):
+        field_list = []
         self.save()
-        if self.parse_field():
+        field = self.parse_field()
+        if field:
+            field_list.append(field)
             while True:
                 self.save()
                 # if check_field_list, no space is allowed between COMMA and key
-                if self.next_in_rc([CTokens.COMMA, CTokens.SEMCOL]) and \
-                        self.parse_field():
-                    self.success()
+                if self.next_in_rc([CTokens.COMMA, CTokens.SEMCOL]):
+                    field = self.parse_field()
+                    if field:
+                        field_list.append(field)
+                        self.success()
+                    else:
+                        self.failure()
+                        return self.failure()
                 else:
                     self.failure()
                     break
             self.parse_field_sep()
-            return self.success()
+            self.success()
+            return field
         return self.failure()
-
 
     def parse_field(self):
         self.save()
-        if self.next_is_rc(CTokens.OBRACK) and self.parse_expr() \
-                and self.next_is_rc(CTokens.CBRACK):
-            if self.next_is_rc(CTokens.ASSIGN):
-                if self.parse_expr():
-                    return self.success()
+        if self.next_is_rc(CTokens.OBRACK):
+            key = self.parse_expr()
+            if key and self.next_is_rc(CTokens.CBRACK):
+                if self.next_is_rc(CTokens.ASSIGN):
+                    value = self.parse_expr()
+                    if value:
+                        self.success()
+                        return key, value
 
         self.failure_save()
         if self.next_is_rc(CTokens.NAME):
+            key = Name(self.text)
             if self.next_is_rc(CTokens.ASSIGN):
-                if self.parse_expr():
-                    return self.success()
+                value = self.parse_expr()
+                if value:
+                    self.success()
+                    return key, value
 
         self.failure_save()
-        if self.parse_expr():
-            return self.success()
+        value = self.parse_expr()
+        if value:
+            self.success()
+            return None, value
 
         return self.failure()
 
