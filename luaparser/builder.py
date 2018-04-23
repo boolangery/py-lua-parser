@@ -90,8 +90,8 @@ class CTokens:
 
 
 def _listify(obj):
-    if not isinstance(obj, NodeList):
-        l = NodeList()
+    if not isinstance(obj, list):
+        l = []
         l.append(obj)
         return l
     else:
@@ -134,6 +134,7 @@ class Builder:
         self._right_index_stack = []
         self.text = ''  # last token text
         self.type = -1  # last token type
+
 
     def process(self):
         node = self.parse_chunk()

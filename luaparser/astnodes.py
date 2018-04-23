@@ -4,108 +4,15 @@
 
     Contains all Ast Node definitions.
 """
-from enum import Enum
-from luaparser import asttokens
-import llist
 
-class TokenisedSourcePart(object):
-    """Represent a tokenized source code part.
-    """
-    def __init__(self):
-        self._allTokens = llist.dllist()
-        self._ldllnodeTokens = []
-        self._start = 0
-        self._stop = 0
-
-    def initTokens(self, dllTokens, ldllnodeTokens, start, stop):
-        """
-        Initialized object.
-
-        :param allTokens: Full list of tokens
-        :type allTokens: llist.dllist of CommonToken
-        :param start: First token index in full token list
-        :type start: int
-        :param stop: Last token index in full token list
-        :type stop: int
-
-        :return: This instance
-        """
-        self._allTokens = dllTokens
-        self._ldllnodeTokens = ldllnodeTokens
-        self._start = start
-        self._stop = stop
-        return self
-
-    @property
-    def tokens(self):
-        """
-        Get a token list that is a sub range of full token list.
-
-        :return: A list of llist.dllistnode
-        """
-        return self._ldllnodeTokens[self.start:self.stop+1]
-
-    @property
-    def start(self):
-        """
-        Get start token index
-        .
-        :return: Start index
-        :rtype: int
-        """
-        return self._start
-
-    @start.setter
-    def start(self, value):
-        """
-        Set start token index.
-
-        :param value: Start index
-        :type value: int
-        """
-        self._start = value
-
-    @property
-    def stop(self):
-        """
-        Get stop token index.
-
-        :return: Stop index
-        :rtype: int
-        """
-        return self._stop
-
-    @stop.setter
-    def stop(self, value):
-        """
-        Set stop token index.
-
-        :param value: Stop index
-        :type value: int
-        """
-        self._stop = value
-
-    def edit(self):
-        """
-        Get a token group editor.
-
-        :return: A token editor
-        :rtype: asttokens.GroupEditor
-        """
-        return asttokens.GroupEditor(self.tokens, self._allTokens)
-
-
-class Node(TokenisedSourcePart):
+class Node:
     """Base class for AST node.
 
     Attributes:
         displayName (`str`): Node display name (to pretty print).
     """
     def __init__(self, name):
-        TokenisedSourcePart.__init__(self)
         self._name = name
-        self._start = 0
-        self._stop = 0
 
     @property
     def displayName(self):
@@ -123,18 +30,9 @@ class Node(TokenisedSourcePart):
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
-            return self._equalDicts(self.__dict__, other.__dict__, ['_start', '_stop', '_allTokens', '_ldllnodeTokens'])
+            return self._equalDicts(self.__dict__, other.__dict__, [])
         return False
 
-class NodeList(list, TokenisedSourcePart):
-    """
-    Represent a tokenized node list.
-
-    A list of AST nodes can represent the same source code part.
-    """
-    def __init__(self, *args):
-        list.__init__(self, *args)
-        TokenisedSourcePart.__init__(self)
 
 class Chunk(Node):
     """Define a Lua chunk.
@@ -145,6 +43,7 @@ class Chunk(Node):
     def __init__(self, body):
         super(Chunk, self).__init__('Chunk')
         self.body = body
+
 
 class Block(Node):
     """Define a Lua Block.
@@ -165,6 +64,7 @@ class Statement(Node):
     """
     pass
 
+
 class Assign(Statement):
     """Lua global assignment statement.
 
@@ -178,6 +78,7 @@ class Assign(Statement):
         self.targets = targets
         self.values  = values
 
+
 class LocalAssign(Assign):
     """Lua local assignment statement.
 
@@ -188,6 +89,7 @@ class LocalAssign(Assign):
     def __init__(self, targets, values):
         super(LocalAssign, self).__init__(targets, values)
         self._name = 'LocalAssign'
+
 
 class While(Statement):
     """Lua while statement.
@@ -201,6 +103,7 @@ class While(Statement):
         self.test = test
         self.body = body
 
+
 class Do(Statement):
     """Lua do end statement.
 
@@ -210,6 +113,7 @@ class Do(Statement):
     def __init__(self, body):
         super(Do, self).__init__('Do')
         self.body = body
+
 
 class Repeat(Statement):
     """Lua repeat until statement.
@@ -222,6 +126,7 @@ class Repeat(Statement):
         super(Repeat, self).__init__('Repeat')
         self.body = body
         self.test = test
+
 
 class If(Statement):
     """Lua if statement.
@@ -237,6 +142,7 @@ class If(Statement):
         self.body = body
         self.orelse = orelse
 
+
 class ElseIf(Statement):
     """Define the elseif lua statement.
 
@@ -251,6 +157,7 @@ class ElseIf(Statement):
         self.body = body
         self.orelse = orelse
 
+
 class Label(Statement):
     """Define the label lua statement.
 
@@ -260,6 +167,7 @@ class Label(Statement):
     def __init__(self, id):
         super(Label, self).__init__('Label')
         self.id = id
+
 
 class Goto(Statement):
     """Define the goto lua statement.
@@ -271,11 +179,13 @@ class Goto(Statement):
         super(Goto, self).__init__('Goto')
         self.label = label
 
+
 class SemiColon(Statement):
     """Define the semi-colon lua statement.
     """
     def __init__(self):
         super(SemiColon, self).__init__('SemiColon')
+
 
 class Break(Statement):
     """Define the break lua statement.
@@ -283,6 +193,7 @@ class Break(Statement):
     """
     def __init__(self):
         super(Break, self).__init__('Break')
+
 
 class Return(Statement):
     """Define the Lua return statement.
@@ -313,6 +224,7 @@ class Fornum(Statement):
         self.step   = step
         self.body   = body
 
+
 class Forin(Statement):
     """Define the for in lua statement.
 
@@ -327,6 +239,7 @@ class Forin(Statement):
         self.iter = iter
         self.targets = targets
 
+
 class Call(Statement):
     """Define the function call lua statement.
 
@@ -338,6 +251,7 @@ class Call(Statement):
         super(Call, self).__init__('Call')
         self.func = func
         self.args = args
+
 
 class Invoke(Statement):
     """Define the invoke function call lua statement (magic syntax with ':').
@@ -353,6 +267,7 @@ class Invoke(Statement):
         self.func = func
         self.args = args
 
+
 class Function(Statement):
     """Define the Lua function declaration statement.
 
@@ -367,6 +282,7 @@ class Function(Statement):
         self.args = args
         self.body = body
 
+
 class LocalFunction(Statement):
     """Define the Lua local function declaration statement.
 
@@ -380,6 +296,7 @@ class LocalFunction(Statement):
         self.name = name
         self.args = args
         self.body = body
+
 
 class Method(Statement):
     """Define the Lua Object Oriented function statement.
@@ -415,17 +332,20 @@ class Nil(Expression):
     def __init__(self):
         super(Nil, self).__init__('Nil')
 
+
 class TrueExpr(Expression):
     """Define the Lua true expression.
     """
     def __init__(self):
         super(TrueExpr, self).__init__('True')
 
+
 class FalseExpr(Expression):
     """Define the Lua false expression.
     """
     def __init__(self):
         super(FalseExpr, self).__init__('False')
+
 
 class Number(Expression):
     """Define the Lua number expression.
@@ -437,12 +357,14 @@ class Number(Expression):
         super(Number, self).__init__('Number')
         self.n = n
 
+
 class Varargs(Expression):
     """Define the Lua Varargs expression (...).
 
     """
     def __init__(self):
         super(Varargs, self).__init__('Varargs')
+
 
 class String(Expression):
     """Define the Lua string expression.
@@ -453,6 +375,7 @@ class String(Expression):
     def __init__(self, s):
         super(String, self).__init__('String')
         self.s = s
+
 
 class Table(Expression):
     """Define the Lua table expression.
@@ -466,11 +389,13 @@ class Table(Expression):
         self.keys = keys
         self.values = values
 
+
 class Dots(Expression):
     """Define the Lua dots (...) expression.
     """
     def __init__(self):
         super(Dots, self).__init__('Dots')
+
 
 class AnonymousFunction(Expression):
     """Define the Lua anonymous function expression.
@@ -492,6 +417,7 @@ class Op(Expression):
     """
     pass
 
+
 class BinaryOp(Op):
     """Base class for Lua 'Left Op Right' Operators.
 
@@ -511,6 +437,7 @@ class AriOp(BinaryOp):
     """Base class for Arithmetic Operators"""
     pass
 
+
 class AddOp(AriOp):
     """Add expression.
 
@@ -520,6 +447,7 @@ class AddOp(AriOp):
     """
     def __init__(self, left, right):
         super(AddOp, self).__init__('AddOp', left, right)
+
 
 class SubOp(AriOp):
     """Substract expression.
@@ -531,6 +459,7 @@ class SubOp(AriOp):
     def __init__(self, left, right):
         super(SubOp, self).__init__('SubOp', left, right)
 
+
 class MultOp(AriOp):
     """Multiplication expression.
 
@@ -540,6 +469,7 @@ class MultOp(AriOp):
     """
     def __init__(self, left, right):
         super(MultOp, self).__init__('MultOp', left, right)
+
 
 class FloatDivOp(AriOp):
     """Float division expression.
@@ -551,6 +481,7 @@ class FloatDivOp(AriOp):
     def __init__(self, left, right):
         super(FloatDivOp, self).__init__('FloatDivOp', left, right)
 
+
 class FloorDivOp(AriOp):
     """Floor division expression.
 
@@ -561,6 +492,7 @@ class FloorDivOp(AriOp):
     def __init__(self, left, right):
         super(FloorDivOp, self).__init__('FloorDivOp', left, right)
 
+
 class ModOp(AriOp):
     """Modulo expression.
 
@@ -570,6 +502,7 @@ class ModOp(AriOp):
     """
     def __init__(self, left, right):
         super(ModOp, self).__init__('ModOp', left, right)
+
 
 class ExpoOp(AriOp):
     """Exponent expression.
@@ -590,6 +523,7 @@ class BitOp(BinaryOp):
     """
     pass
 
+
 class BAndOp(BitOp):
     """Bitwise and expression.
 
@@ -599,6 +533,7 @@ class BAndOp(BitOp):
     """
     def __init__(self, left, right):
         super(BAndOp, self).__init__('BAndOp', left, right)
+
 
 class BOrOp(BitOp):
     """Bitwise or expression.
@@ -610,6 +545,7 @@ class BOrOp(BitOp):
     def __init__(self, left, right):
         super(BOrOp, self).__init__('BOrOp', left, right)
 
+
 class BXorOp(BitOp):
     """Bitwise xor expression.
 
@@ -620,6 +556,7 @@ class BXorOp(BitOp):
     def __init__(self, left, right):
         super(BXorOp, self).__init__('BXorOp', left, right)
 
+
 class BShiftROp(BitOp):
     """Bitwise right shift expression.
 
@@ -629,6 +566,7 @@ class BShiftROp(BitOp):
     """
     def __init__(self, left, right):
         super(BShiftROp, self).__init__('BShiftROp', left, right)
+
 
 class BShiftLOp(BitOp):
     """Bitwise left shift expression.
@@ -649,6 +587,7 @@ class RelOp(BinaryOp):
     """
     pass
 
+
 class LessThanOp(RelOp):
     """Less than expression.
 
@@ -658,6 +597,7 @@ class LessThanOp(RelOp):
     """
     def __init__(self, left, right):
         super(LessThanOp, self).__init__('RLtOp', left, right)
+
 
 class GreaterThanOp(RelOp):
     """Greater than expression.
@@ -669,6 +609,7 @@ class GreaterThanOp(RelOp):
     def __init__(self, left, right):
         super(GreaterThanOp, self).__init__('RGtOp', left, right)
 
+
 class LessOrEqThanOp(RelOp):
     """Less or equal expression.
 
@@ -678,6 +619,7 @@ class LessOrEqThanOp(RelOp):
     """
     def __init__(self, left, right):
         super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right)
+
 
 class GreaterOrEqThanOp(RelOp):
     """Greater or equal expression.
@@ -689,6 +631,7 @@ class GreaterOrEqThanOp(RelOp):
     def __init__(self, left, right):
         super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right)
 
+
 class EqToOp(RelOp):
     """Equal to expression.
 
@@ -698,6 +641,7 @@ class EqToOp(RelOp):
     """
     def __init__(self, left, right):
         super(EqToOp, self).__init__('REqOp', left, right)
+
 
 class NotEqToOp(RelOp):
     """Not equal to expression.
@@ -717,6 +661,7 @@ class LoOp(BinaryOp):
     """
     pass
 
+
 class AndLoOp(LoOp):
     """Logical and expression.
 
@@ -726,6 +671,7 @@ class AndLoOp(LoOp):
     """
     def __init__(self, left, right):
         super(AndLoOp, self).__init__('LAndOp', left, right)
+
 
 class OrLoOp(LoOp):
     """Logical or expression.
@@ -763,6 +709,7 @@ class UnaryOp(Expression):
         super(UnaryOp, self).__init__(name)
         self.operand = operand
 
+
 class UMinusOp(UnaryOp):
     """Lua minus unitary operator.
 
@@ -772,6 +719,7 @@ class UMinusOp(UnaryOp):
     def __init__(self, operand):
         super(UMinusOp, self).__init__('UMinusOp', operand)
 
+
 class UBNotOp(UnaryOp):
     """Lua binary not unitary operator.
 
@@ -780,6 +728,7 @@ class UBNotOp(UnaryOp):
     """
     def __init__(self, operand):
         super(UBNotOp, self).__init__('UBNotOp', operand)
+
 
 class ULNotOp(UnaryOp):
     """Logical not operator.
@@ -799,6 +748,7 @@ class ULengthOP(UnaryOp):
     def __init__(self, operand):
         super(ULengthOP, self).__init__('ULengthOp', operand)
 
+
 '''
 Left Hand Side expression.
 '''
@@ -806,6 +756,7 @@ class Lhs(Expression):
     """Define a Lua Left Hand Side expression.
     """
     pass
+
 
 class Name(Lhs):
     """Define a Lua name expression.
@@ -816,6 +767,7 @@ class Name(Lhs):
     def __init__(self, id):
         super(Name, self).__init__('Name')
         self.id = id
+
 
 class Index(Lhs):
     """Define a Lua index expression.
