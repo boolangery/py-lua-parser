@@ -1,20 +1,19 @@
-import ast
-import re
 from antlr4 import *
 from luaparser.parser.LuaLexer import LuaLexer
-from luaparser.parser.LuaVisitor import LuaVisitor
 from luaparser.astnodes import *
-from luaparser.asttokens import Tokens
-from luaparser.parser.LuaParser import LuaParser
 from luaparser import printers
 from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
-import llist
 
 
 def parse(source):
     from luaparser.builder import Builder
     return Builder(source).process()
+
+def get_token_stream(source):
+    lexer = LuaLexer(InputStream(source))
+    stream = CommonTokenStream(lexer)
+    return stream
 
 def walk(root):
     # base case:

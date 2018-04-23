@@ -2,7 +2,6 @@ from luaparser.astnodes import *
 from luaparser.utils.visitor import *
 from enum import Enum
 import xml.etree.cElementTree as ET
-from luaparser.asttokens import Tokens
 from xml.dom import minidom
 
 class Style(Enum):
@@ -170,11 +169,6 @@ class HTMLStyleVisitor:
                     xml_attr.extend(child_node)
                 else:
                     xml_attr.append(child_node)
-
-        # tokens
-        xml_tokens = ET.SubElement(xml_node, 'tokens')
-        for token in node.tokens:
-            ET.SubElement(xml_tokens, Tokens(token.value.type).name, text=raw(token.value.text))
 
         return xml_node
 
