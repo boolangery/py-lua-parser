@@ -4,6 +4,7 @@ import logging
 from optparse import OptionParser, OptionGroup
 import luaparser
 from luaparser import ast
+from luaparser.builder import SyntaxException
 
 
 def abort(msg):
@@ -37,25 +38,28 @@ def main():
     if not options.source and not len(args) > 0:
         abort('Expected a filepath')
 
-    if options.source:
-        tree = ast.parse(options.source)
-    else:
-        with open(args[0], 'r') as content_file:
-            content = content_file.read()
-        tree = ast.parse(content)
+    try:
+        if options.source:
+            tree = ast.parse(options.source)
+        else:
+            with open(args[0], 'r') as content_file:
+                content = content_file.read()
+            tree = ast.parse(content)
 
-    # output format
-    if options.xml:
-        output = ast.toXmlStr(tree)
-    else:
-        output = ast.toPrettyStr(tree)
+        # output format
+        if options.xml:
+            output = ast.toXmlStr(tree)
+        else:
+            output = ast.toPrettyStr(tree)
 
-    # output
-    if options.output:
-        with open(options.output, 'w') as content_file:
-            content_file.write(output)
-    else:
-        print(output)
+        # output
+        if options.output:
+            with open(options.output, 'w') as content_file:
+                content_file.write(output)
+        else:
+            print(output)
+    except SyntaxException as e:
+        print('error: ' + str(e))
 
 
 if __name__ == '__main__':

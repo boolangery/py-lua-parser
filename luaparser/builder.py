@@ -1,12 +1,13 @@
-import logging
 from luaparser import ast, asttokens
 from luaparser.astnodes import *
-from luaparser.asttokens import Tokens
+from luaparser.parser.LuaLexer import LuaLexer
 from enum import Enum
-from antlr4.Token import CommonToken
 import ast
 import re
 
+
+class SyntaxException(Exception):
+    pass
 
 
 class Expr(Enum):
@@ -88,6 +89,17 @@ class CTokens:
     SHEBANG = 63
     LongBracket = 64
 
+LITERAL_NAMES = [ "<INVALID>",
+            "'and'", "'break'", "'do'", "'else'", "'elseif'", "'end'", "'false'",
+            "'for'", "'function'", "'goto'", "'if'", "'in'", "'local'",
+            "'nil'", "'not'", "'or'", "'repeat'", "'return'", "'then'",
+            "'true'", "'until'", "'while'", "'+'", "'-'", "'*'", "'/'",
+            "'//'", "'%'", "'^'", "'#'", "'=='", "'~='", "'<='", "'>='",
+            "'<'", "'>'", "'='", "'&'", "'|'", "'~'", "'>>'", "'<<'", "'('",
+            "')'", "'{'", "'}'", "'['", "']'", "'::'", "':'", "','", "'...'",
+            "'..'", "'.'", "';'", "NAME", "NUMBER", "STRING", "COMMENT", "LINE_COMMENT",
+            "SPACE", "NEWLINE", "SHEBANG", "LONG_BRACKET"]
+
 
 def _listify(obj):
     if not isinstance(obj, list):
@@ -135,9 +147,13 @@ class Builder:
         self.text = ''  # last token text
         self.type = -1  # last token type
 
+        # contains expected token in case of invalid input code
+        self._expected = []
+
 
     def process(self):
         node = self.parse_chunk()
+
         if not node:
             raise Exception("Expecting a chunk")
         return node
@@ -175,6 +191,7 @@ class Builder:
             if hidden_right:
                 self.handle_hidden_right()
             return True
+        self._expected.append(type)
         return False
 
     def next_is_c(self, type, hidden_right=True):
@@ -187,10 +204,15 @@ class Builder:
             if hidden_right:
                 self.handle_hidden_right()
             return True
+        self._expected.append(type)
         return False
 
     def next_is(self, type):
-        return self._stream.LT(1).type == type
+        if self._stream.LT(1).type == type:
+            return True
+        else:
+            self._expected.append(type)
+            return False
 
     def next_in_rc(self, types, hidden_right=True):
         token = self._stream.LT(1)
@@ -203,10 +225,15 @@ class Builder:
             if hidden_right:
                 self.handle_hidden_right()
             return True
+        self._expected.extend(types)
         return False
 
     def next_in(self, types):
-        return self._stream.LT(1).type in types
+        if self._stream.LT(1).type in types:
+            return True
+        else:
+            self._expected.extend(types)
+            return False
 
     def handle_hidden_left(self):
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
@@ -219,6 +246,15 @@ class Builder:
         if tokens:
             for t in tokens:
                 pass
+
+    def abort(self):
+        types_str = []
+        token = self._stream.LT(2)
+        expected = set(self._expected)
+        for type in expected:
+            types_str.append(LITERAL_NAMES[type])
+
+        raise SyntaxException("Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(token.column))
 
     def parse_chunk(self):
         self.save()
@@ -326,6 +362,9 @@ class Builder:
                 if values:
                     self.success()
                     return Assign(targets, values)
+                else:
+                    self.abort()
+
         return self.failure()
 
     def parse_var_list(self):
@@ -464,6 +503,7 @@ class Builder:
             while True:
                 self.save()
                 if self.next_is_rc(CTokens.COMMA):
+                    self._expected = []
                     expr = self.parse_expr()
                     if expr:
                         expr_list.append(expr)
@@ -471,7 +511,8 @@ class Builder:
                     else:
                         # a comma is alone at the end
                         self.failure()
-                        return self.failure()
+                        self.failure()
+                        self.abort()
                 else:
                     self.failure()
                     break
@@ -518,6 +559,7 @@ class Builder:
 
     def parse_local(self):
         self.save()
+        self._expected = []
         if self.next_is_rc(CTokens.LOCAL):
             targets = self.parse_name_list()
             if targets:
@@ -529,7 +571,8 @@ class Builder:
                         self.success()
                     else:
                         self.failure()
-                        return self.failure()
+                        self.failure()
+                        self.abort()
                 else:
                     self.failure()
 
@@ -546,6 +589,7 @@ class Builder:
                     self.success()
                     return LocalFunction(name, body[0], body[1])
             self.failure()
+            self.abort()
 
         return self.failure()
 
@@ -646,6 +690,7 @@ class Builder:
 
     def parse_function(self):
         self.save()
+        self._expected = []
         if self.next_is_rc(CTokens.FUNCTION):
             names = self.parse_names()
             if names:
@@ -659,12 +704,15 @@ class Builder:
                         return Method(names, name, func_body[0], func_body[1])
 
                 self.failure()
+
                 func_body = self.parse_func_body()
                 if func_body:
                     return Function(names, func_body[0], func_body[1])
-                self.failure()
+            self.abort()
 
         return self.failure()
+
+
 
     def parse_names(self):
         self.save()
@@ -685,6 +733,7 @@ class Builder:
     def parse_func_body(self):
         """If success, return a tuple (args, body)"""
         self.save()
+        self._expected = []
         if self.next_is_rc(CTokens.OPAR, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
             args = self.parse_param_list()
@@ -693,9 +742,14 @@ class Builder:
                     self.handle_hidden_right()  # render hidden after new level
                     body = self.parse_block()
                     if body:
+                        self._expected = []
                         if self.next_is_rc(CTokens.END):
                             self.success()
                             return args, body
+                        else:
+                            self.abort()
+                else:
+                    self.abort()
         return self.failure()
 
     def parse_param_list(self):
@@ -847,13 +901,15 @@ class Builder:
             while True:
                 self.save()
                 if self.next_is_rc(CTokens.CONCAT):
+                    self._expected = []
                     right = self.parse_add_expr()
                     if right:
                         self.success()
                         left = Concat(left, right)
                     else:
                         self.failure()
-                        return self.failure()
+                        self.failure()
+                        self.abort()
                 else:
                     self.failure()
                     break
