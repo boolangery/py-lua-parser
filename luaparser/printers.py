@@ -76,6 +76,18 @@ class PythonStyleVisitor():
         res = self.indentStr() + node.displayName + ': ' + self.prettyCount(node)
 
         self.indent()
+
+        # comments
+        comments = node.comments_before
+        if comments:
+            res += self.indentStr() + 'comments' + ': ' + self.prettyCount(comments)
+            k = 0
+            self.indent()
+            for c in comments:
+                res += self.indentStr() + str(k) + ': ' + self.visit(c.s)
+                k += 1
+            self.dedent()
+
         for attr, attrValue in node.__dict__.items():
             if not attr.startswith('_'):
                 if isinstance(attrValue, Node) or isinstance(attrValue, list):

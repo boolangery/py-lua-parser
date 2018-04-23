@@ -149,6 +149,9 @@ class Builder:
         # contains expected token in case of invalid input code
         self._expected = []
 
+        # comments waiting to be inserted into ast nodes
+        self._pending_comments = []
+
 
     def process(self):
         node = self.parse_chunk()
@@ -238,13 +241,24 @@ class Builder:
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
         if tokens:
             for t in tokens:
-                pass
+                if t.type == CTokens.LINE_COMMENT:
+                    self._pending_comments.append(Comment(t.text))
+                elif t.type == CTokens.COMMENT:
+                    self._pending_comments.append(Comment(t.text, True))
 
     def handle_hidden_right(self, is_newline=False):
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
-                pass
+                if t.type == CTokens.LINE_COMMENT:
+                    self._pending_comments.append(Comment(t.text))
+                elif t.type == CTokens.COMMENT:
+                    self._pending_comments.append(Comment(t.text, True))
+
+    def init_node(self, node):
+        node.comments_before.extend(self._pending_comments)
+        self._pending_comments = []
+        return node
 
     def abort(self):
         types_str = []
@@ -576,7 +590,7 @@ class Builder:
                     self.failure()
 
                 self.success()
-                return LocalAssign(targets, values)
+                return self.init_node(LocalAssign(targets, values))
 
             self.save()
 

@@ -13,10 +13,15 @@ class Node:
     """
     def __init__(self, name):
         self._name = name
+        self._comments_before = []
 
     @property
     def displayName(self):
         return self._name
+
+    @property
+    def comments_before(self):
+        return self._comments_before
 
     def _equalDicts(self, d1, d2, ignore_keys):
         ignored = set(ignore_keys)
@@ -32,6 +37,12 @@ class Node:
         if isinstance(self, other.__class__):
             return self._equalDicts(self.__dict__, other.__dict__, [])
         return False
+
+
+class Comment:
+    def __init__(self, s, is_multi_line=False):
+        self.s = s
+        self.is_multi_line = is_multi_line
 
 
 class Chunk(Node):
@@ -780,11 +791,3 @@ class Index(Lhs):
         super(Index, self).__init__('Index')
         self.idx   = idx
         self.value = value
-
-''' ----------------------------------------------------------------------- '''
-''' Comments                                                                '''
-''' ----------------------------------------------------------------------- '''
-class Comment(Statement):
-    def __init__(self, s):
-        super(Comment, self).__init__('Comment')
-        self.s = s
