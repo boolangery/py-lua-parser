@@ -312,14 +312,10 @@ class ExpressionsTestCase(tests.TestCase):
         tree = ast.parse(r'a = {foo = "bar", bar = "foo"}')
         exp = Chunk(Block([Assign(
             targets=[Name('a')],
-            values=[Table(
-                keys=[
-                    Name('foo'),
-                    Name('bar')
-                ],
-                values=[
-                    String('bar'),
-                    String('foo')
+            values=[
+                Table([
+                    Field(Name('foo'), String('bar')),
+                    Field(Name('bar'), String('foo'))
                 ]
             )]
         )]))
@@ -336,14 +332,10 @@ class ExpressionsTestCase(tests.TestCase):
             '''))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
-            values=[Table(
-                keys=[
-                    Name('car'),
-                    Name('options')
-                ],
-                values=[
-                    Table(keys=[Name('name')], values=[String('bmw')]),
-                    Table(keys=[Name('radio')], values=[TrueExpr()]),
+            values=[
+                Table([
+                    Field(Name('car'), Table([Field(Name('name'), String('bmw'))])),
+                    Field(Name('options'), Table([Field(Name('radio'), TrueExpr())]))
                 ]
             )]
         ), SemiColon(), SemiColon(), SemiColon()]))
@@ -361,18 +353,20 @@ class ExpressionsTestCase(tests.TestCase):
         print(ast.toPrettyStr(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
-            values=[Table(
-                keys=[
-                    Number(1),  Number(2),  Number(3),
-                    Number(4),  Number(5),  Number(6),
-                    Number(7),  Number(8),  Number(9),
-                    Number(10), Number(11), Number(12)
-                ],
-                values=[
-                    Number(1),  Number(2),   Number(4),
-                    Number(8),  Number(16),  Number(32),
-                    Number(64), Number(128), Number(256),
-                    Number(512),Number(1024),Number(2048)
+            values=[
+                Table([
+                    Field(Number(1),    Number(1)),
+                    Field(Number(2),    Number(2)),
+                    Field(Number(3),    Number(4)),
+                    Field(Number(4),    Number(8)),
+                    Field(Number(5),    Number(16)),
+                    Field(Number(6),    Number(32)),
+                    Field(Number(7),    Number(64)),
+                    Field(Number(8),    Number(128)),
+                    Field(Number(9),    Number(256)),
+                    Field(Number(10),   Number(512)),
+                    Field(Number(11),   Number(1024)),
+                    Field(Number(12),   Number(2048))
                 ]
             )]
         )]))
@@ -390,15 +384,13 @@ class ExpressionsTestCase(tests.TestCase):
         '''))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
-            values=[Table(
-                keys=[
-                    Name('options'),  Number(1),  Number(2),
-                    TrueExpr(), String('true')
-                ],
-                values=[
-                    Table(keys=[Name('radio')], values=[TrueExpr()]),
-                    String('enabled'), Number(157),
-                    FalseExpr(), TrueExpr()
+            values=[
+                Table([
+                    Field(Name('options'), Table([Field(Name('radio'), TrueExpr())])),
+                    Field(Number(1), String('enabled')),
+                    Field(Number(2), Number(157)),
+                    Field(TrueExpr(), FalseExpr()),
+                    Field(String('true'), TrueExpr()),
                 ]
             )]
         ), SemiColon()]))
@@ -429,7 +421,7 @@ class ExpressionsTestCase(tests.TestCase):
         tree = ast.parse(r'print {}')
         exp = Chunk(Block([Call(
             func=Name('print'),
-            args=[Table([], [])]
+            args=[Table([])]
         )]))
         self.assertEqual(exp, tree)
 
@@ -437,7 +429,7 @@ class ExpressionsTestCase(tests.TestCase):
         tree = ast.parse(r'foo.print {}')
         exp = Chunk(Block([Call(
             func=Index(Name('print'), Name('foo')),
-            args=[Table([], [])]
+            args=[Table([])]
         )]))
         self.assertEqual(exp, tree)
 

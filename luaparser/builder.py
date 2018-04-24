@@ -150,7 +150,8 @@ class Builder:
         self._expected = []
 
         # comments waiting to be inserted into ast nodes
-        self._pending_comments = []
+        self._comments_index_stack = []
+        self.comments = []
 
 
     def process(self):
@@ -164,17 +165,21 @@ class Builder:
         #logging.debug('trying ' + inspect.stack()[1][3])
         self._index_stack.append(self._stream.index)
         self._right_index_stack.append(self._right_index)
+        self._comments_index_stack.append(len(self.comments))
 
     def success(self):
         self._index_stack.pop()
         self._right_index_stack.pop()
-        #logging.debug('success ' + inspect.stack()[1][3])
+        self._comments_index_stack.pop()
         return True
 
     def failure(self):
         #logging.debug('failure ' + inspect.stack()[1][3])
         self._stream.seek(self._index_stack.pop())
         self._right_index = self._right_index_stack.pop()
+        n_elem_to_delete = len(self.comments) - self._comments_index_stack.pop()
+        if n_elem_to_delete >= 1:
+            del self.comments[-n_elem_to_delete:]
         return None
 
     def failure_save(self):
@@ -242,23 +247,36 @@ class Builder:
         if tokens:
             for t in tokens:
                 if t.type == CTokens.LINE_COMMENT:
-                    self._pending_comments.append(Comment(t.text))
+                    self.comments.append(Comment(t.text))
                 elif t.type == CTokens.COMMENT:
-                    self._pending_comments.append(Comment(t.text, True))
+                    self.comments.append(Comment(t.text, True))
+                elif t.type == CTokens.NEWLINE:
+                    self.comments.append(None)  # indicate newline
 
     def handle_hidden_right(self, is_newline=False):
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
                 if t.type == CTokens.LINE_COMMENT:
-                    self._pending_comments.append(Comment(t.text))
+                    self.comments.append(Comment(t.text))
                 elif t.type == CTokens.COMMENT:
-                    self._pending_comments.append(Comment(t.text, True))
+                    self.comments.append(Comment(t.text, True))
+                elif t.type == CTokens.NEWLINE:
+                    self.comments.append(None)  # indicate newline
 
-    def init_node(self, node):
-        node.comments_before.extend(self._pending_comments)
-        self._pending_comments = []
-        return node
+    def get_comments(self):
+        comments = [c for c in self.comments if c is not None]
+        self.comments = []
+        return comments
+
+    def get_inline_comment(self):
+        if self.comments:
+            c = self.comments.pop(0)
+            if c is None:
+                return None
+            else:
+                return c
+        return None
 
     def abort(self):
         types_str = []
@@ -300,50 +318,25 @@ class Builder:
         return Block(statements)
 
     def parse_stat(self):
-        stat = self.parse_assignment()
+        stat = self.parse_assignment() or \
+               self.parse_var(True) or \
+               self.parse_while_stat() or \
+               self.parse_repeat_stat() or \
+               self.parse_local() or \
+               self.parse_goto_stat() or \
+               self.parse_if_stat() or \
+               self.parse_for_stat() or \
+               self.parse_function() or \
+               self.parse_label()
+
         if stat:
             self.handle_hidden_right()
             return stat
-        stat = self.parse_var(True)
-        if stat:
-            self.handle_hidden_right()
-            return stat
+
         stat = self.parse_do_block()
         if stat:
             self.handle_hidden_right()
             return Do(stat)
-        stat = self.parse_while_stat()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_repeat_stat()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_local()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_goto_stat()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_if_stat()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_for_stat()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_function()
-        if stat:
-            self.handle_hidden_right()
-            return stat
-        stat = self.parse_label()
-        if stat:
-            self.handle_hidden_right()
-            return stat
 
         if self.next_is(CTokens.BREAK) and self.next_is_rc(CTokens.BREAK):
             self.handle_hidden_right()
@@ -374,7 +367,7 @@ class Builder:
                 values = self.parse_expr_list()
                 if values:
                     self.success()
-                    return Assign(targets, values)
+                    return Assign(targets, values, self.get_comments())
                 else:
                     self.abort()
 
@@ -547,12 +540,15 @@ class Builder:
     def parse_while_stat(self):
         self.save()
         if self.next_is_rc(CTokens.WHILE):
+            self._expected = []
             expr = self.parse_expr()
             if expr:
+                self._expected = []
                 body = self.parse_do_block()
                 if body:
                     self.success()
                     return While(expr, body)
+            self.abort()
 
         return self.failure()
 
@@ -566,7 +562,7 @@ class Builder:
                     expr = self.parse_expr()
                     if expr:
                         self.success()
-                        return Repeat(body, expr)
+                        return Repeat(body, expr, self.get_comments())
 
         return self.failure()
 
@@ -574,6 +570,7 @@ class Builder:
         self.save()
         self._expected = []
         if self.next_is_rc(CTokens.LOCAL):
+            comments = self.get_comments()
             targets = self.parse_name_list()
             if targets:
                 values = []
@@ -590,7 +587,7 @@ class Builder:
                     self.failure()
 
                 self.success()
-                return self.init_node(LocalAssign(targets, values))
+                return LocalAssign(targets, values, comments)
 
             self.save()
 
@@ -610,19 +607,20 @@ class Builder:
         self.save()
         if self.next_is_rc(CTokens.GOTO) and self.next_is_rc(CTokens.NAME):
             self.success()
-            return Goto(Name(self.text))
+            return Goto(Name(self.text), self.get_comments())
         return self.failure()
 
     def parse_if_stat(self):
         self.save()
         if self.next_is_rc(CTokens.IFTOK):
+            self._expected = []
             test = self.parse_expr()
             if test:
                 if self.next_is_rc(CTokens.THEN, False):
                     self.handle_hidden_right()
                     body = self.parse_block()
                     if body:
-                        main = If(test, body, None)
+                        main = If(test, body, None, self.get_comments())
                         root = main
                         while True:  # zero or more
                             orelse = self.parse_elseif_stat()
@@ -637,6 +635,7 @@ class Builder:
                         if self.next_is_rc(CTokens.END):
                             self.success()
                             return main
+            self.abort()
         return self.failure()
 
     def parse_elseif_stat(self):
@@ -685,7 +684,7 @@ class Builder:
                                 return self.failure()
                             self.success()
                             self.success()
-                            return Fornum(target, start, stop, step, body)
+                            return Fornum(target, start, stop, step, body, self.get_comments())
 
             self.failure_save()
             target = self.parse_name_list()
@@ -696,7 +695,7 @@ class Builder:
                     if body:
                         self.success()
                         self.success()
-                        return Forin(body, iter, target)
+                        return Forin(body, iter, target, self.get_comments())
             self.failure()
 
         return self.failure()
@@ -1152,23 +1151,18 @@ class Builder:
         if self.next_is_rc(CTokens.OBRACE, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
 
-            field_list = self.parse_field_list()
+            fields = self.parse_field_list()
             if self.next_is_rc(CTokens.CBRACE, render_last_hidden):
                 self.success()
 
-                keys = []
-                values = []
-                table_index = 1
-                if field_list:  # optional
-                    for pair in field_list:
-                        if pair[0] is None:
-                            keys.append(Number(table_index))
-                            table_index += 1
-                        else:
-                            keys.append(pair[0])
-                        values.append(pair[1])
+                array_like_index = 1
+                if fields:  # optional
+                    for field in fields:
+                        if field.key is None:
+                            field.key = Number(array_like_index)
+                            array_like_index += 1
 
-                return Table(keys, values)
+                return Table(fields or [])
 
         return self.failure()
 
@@ -1180,8 +1174,10 @@ class Builder:
             field_list.append(field)
             while True:
                 self.save()
-                # if check_field_list, no space is allowed between COMMA and key
                 if self.next_in_rc([CTokens.COMMA, CTokens.SEMCOL]):
+                    inline_com = self.get_inline_comment()
+                    if inline_com:
+                        field.comments.append(inline_com)
                     field = self.parse_field()
                     if field:
                         field_list.append(field)
@@ -1191,6 +1187,8 @@ class Builder:
                         self.success()
                         return field_list
                 else:
+
+                    field.comments = self.get_comments()
                     self.failure()
                     break
             self.parse_field_sep()
@@ -1200,29 +1198,33 @@ class Builder:
 
     def parse_field(self):
         self.save()
+
         if self.next_is_rc(CTokens.OBRACK):
             key = self.parse_expr()
             if key and self.next_is_rc(CTokens.CBRACK):
                 if self.next_is_rc(CTokens.ASSIGN):
+                    comments = self.get_comments()
                     value = self.parse_expr()
                     if value:
                         self.success()
-                        return key, value
+                        return Field(key, value, comments)
 
         self.failure_save()
         if self.next_is_rc(CTokens.NAME):
             key = Name(self.text)
             if self.next_is_rc(CTokens.ASSIGN):
+                comments = self.get_comments()
                 value = self.parse_expr()
                 if value:
                     self.success()
-                    return key, value
+                    return Field(key, value, comments)
 
         self.failure_save()
+        comments = self.get_comments()
         value = self.parse_expr()
         if value:
             self.success()
-            return None, value
+            return Field(None, value, comments)  # Key will be set in parse_table_constructor
 
         return self.failure()
 

@@ -72,7 +72,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=[Call(func=Name('pairs'), args=[Table(keys=[], values=[])])],
+                iter=[Call(func=Name('pairs'), args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -87,7 +87,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=[Call(func=Index(Name('pairs'), Name('foo')), args=[Table(keys=[], values=[])])],
+                iter=[Call(func=Index(Name('pairs'), Name('foo')), args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -102,7 +102,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=[Invoke(source=Name('foo'), func=Name('pairs'), args=[Table(keys=[], values=[])])],
+                iter=[Invoke(source=Name('foo'), func=Name('pairs'), args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -117,7 +117,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=[Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table(keys=[], values=[])])],
+                iter=[Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -135,7 +135,7 @@ class StatementsTestCase(tests.TestCase):
                 iter=[Invoke(
                     source=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)]),
                     func=Name('pairs'),
-                    args=[Table(keys=[], values=[])])],
+                    args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -152,7 +152,7 @@ class StatementsTestCase(tests.TestCase):
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=[Call(
                     func=Index(idx=Name('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
-                    args=[Table(keys=[], values=[])])],
+                    args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -179,11 +179,13 @@ class StatementsTestCase(tests.TestCase):
               local foo = 'bar'
             end
             """))
+        print(ast.toPrettyStr(tree))
         exp = Chunk(Block([
             Do(
                 body=Block([LocalAssign(targets=[Name('foo')],values=[String('bar')])])
             )
         ]))
+        print(ast.toPrettyStr(exp))
         self.assertEqual(exp, tree)
 
     def test_while(self):

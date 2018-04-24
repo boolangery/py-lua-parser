@@ -5,25 +5,7 @@
     Contains all Ast Node definitions.
 """
 
-class Node:
-    """Base class for AST node.
-
-    Attributes:
-        displayName (`str`): Node display name (to pretty print).
-    """
-    def __init__(self, name):
-        self._name = name
-        self._comments_before = []
-
-    @property
-    def displayName(self):
-        return self._name
-
-    @property
-    def comments_before(self):
-        return self._comments_before
-
-    def _equalDicts(self, d1, d2, ignore_keys):
+def _equalDicts(d1, d2, ignore_keys):
         ignored = set(ignore_keys)
         for k1, v1 in d1.items():
             if k1 not in ignored and (k1 not in d2 or d2[k1] != v1):
@@ -33,9 +15,24 @@ class Node:
                 return False
         return True
 
+
+class Node:
+    """Base class for AST node.
+
+    Attributes:
+        displayName (`str`): Node display name (to pretty print).
+    """
+    def __init__(self, name, comments=[]):
+        self._name = name
+        self.comments = comments
+
+    @property
+    def displayName(self):
+        return self._name
+
     def __eq__(self, other):
         if isinstance(self, other.__class__):
-            return self._equalDicts(self.__dict__, other.__dict__, [])
+            return _equalDicts(self.__dict__, other.__dict__, [])
         return False
 
 
@@ -43,6 +40,11 @@ class Comment:
     def __init__(self, s, is_multi_line=False):
         self.s = s
         self.is_multi_line = is_multi_line
+
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            return _equalDicts(self.__dict__, other.__dict__, [])
+        return False
 
 
 class Chunk(Node):
@@ -84,8 +86,8 @@ class Assign(Statement):
         values (`list<Node>`): List of values.
 
     """
-    def __init__(self, targets, values):
-        super(Assign, self).__init__('Assign')
+    def __init__(self, targets, values, comments=[]):
+        super(Assign, self).__init__('Assign', comments)
         self.targets = targets
         self.values  = values
 
@@ -97,8 +99,8 @@ class LocalAssign(Assign):
         targets (`list<Node>`): List of targets.
         values (`list<Node>`): List of values.
     """
-    def __init__(self, targets, values):
-        super(LocalAssign, self).__init__(targets, values)
+    def __init__(self, targets, values, comments=[]):
+        super(LocalAssign, self).__init__(targets, values, comments)
         self._name = 'LocalAssign'
 
 
@@ -133,8 +135,8 @@ class Repeat(Statement):
         test (`Node`): Expression to test.
         body (`list<Statement>`): List of statements to execute.
     """
-    def __init__(self, body, test):
-        super(Repeat, self).__init__('Repeat')
+    def __init__(self, body, test, comments=[]):
+        super(Repeat, self).__init__('Repeat', comments)
         self.body = body
         self.test = test
 
@@ -147,8 +149,8 @@ class If(Statement):
         body (`list<Statement>`): List of statements to execute if test is true.
         orelse (`list<Node> or ElseIf`): List of statements or ElseIf if test if false.
     """
-    def __init__(self, test, body, orelse):
-        super(If, self).__init__('If')
+    def __init__(self, test, body, orelse, comments=[]):
+        super(If, self).__init__('If', comments)
         self.test = test
         self.body = body
         self.orelse = orelse
@@ -186,8 +188,8 @@ class Goto(Statement):
     Attributes:
         label (`Node`): Label node.
     """
-    def __init__(self, label):
-        super(Goto, self).__init__('Goto')
+    def __init__(self, label, comments=[]):
+        super(Goto, self).__init__('Goto', comments)
         self.label = label
 
 
@@ -227,8 +229,8 @@ class Fornum(Statement):
         step (`Expression`): Step value.
         body (`list<Statement>`): List of statements to execute.
     """
-    def __init__(self, target, start, stop, step, body):
-        super(Fornum, self).__init__('Fornum')
+    def __init__(self, target, start, stop, step, body, comments=[]):
+        super(Fornum, self).__init__('Fornum', comments)
         self.target = target
         self.start  = start
         self.stop   = stop
@@ -244,8 +246,8 @@ class Forin(Statement):
         iter (`list<Expression>`): Iterable expressions.
         targets (`list<Name>`): Start index value.
     """
-    def __init__(self, body, iter, targets):
-        super(Forin, self).__init__('Forin')
+    def __init__(self, body, iter, targets, comments=[]):
+        super(Forin, self).__init__('Forin', comments)
         self.body = body
         self.iter = iter
         self.targets = targets
@@ -392,13 +394,24 @@ class Table(Expression):
     """Define the Lua table expression.
 
     Attributes:
-        keys (`list<Expression>`): Table keys.
-        values (`list<Expression>`): Table values.
+        fields (`list<TableField>`): Table fields.
     """
-    def __init__(self, keys, values):
+    def __init__(self, fields):
         super(Table, self).__init__('Table')
-        self.keys = keys
-        self.values = values
+        self.fields = fields
+
+
+class Field(Expression):
+    """Define a lua table field expression
+
+    Attributes:
+        key (`Expression`): Key.
+        value (`Expression`): Value.
+    """
+    def __init__(self, key, value, comments=[]):
+        super(Field, self).__init__('Field', comments)
+        self.key = key
+        self.value = value
 
 
 class Dots(Expression):

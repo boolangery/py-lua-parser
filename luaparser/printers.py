@@ -15,9 +15,9 @@ class PythonStyleVisitor():
 
     @visitor(str)
     def visit(self, node):
-        if node.startswith('"') and node.endswith('"'):
-            node = node[1:-1]
-        return '"' + node + '"'
+        # if node.startswith('"') and node.endswith('"'):
+        #     node = node[1:-1]
+        return repr(node)
 
     @visitor(float)
     def visit(self, node):
@@ -78,7 +78,7 @@ class PythonStyleVisitor():
         self.indent()
 
         # comments
-        comments = node.comments_before
+        comments = node.comments
         if comments:
             res += self.indentStr() + 'comments' + ': ' + self.prettyCount(comments)
             k = 0
@@ -89,7 +89,7 @@ class PythonStyleVisitor():
             self.dedent()
 
         for attr, attrValue in node.__dict__.items():
-            if not attr.startswith('_'):
+            if not attr.startswith(('_', 'comments')):
                 if isinstance(attrValue, Node) or isinstance(attrValue, list):
                     res += self.indentStr() + attr + ': ' + self.prettyCount(attrValue)
                     self.indent()
