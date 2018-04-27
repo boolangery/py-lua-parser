@@ -320,8 +320,8 @@ class Method(Statement):
         args (`list<Expression>`): Function arguments.
         body (`list<Statement>`): List of statements to execute.
     """
-    def __init__(self, source, name, args, body):
-        super(Method, self).__init__('Method')
+    def __init__(self, source, name, args, body, comments=[]):
+        super(Method, self).__init__('Method', comments)
         self.source = source
         self.name = name
         self.args = args

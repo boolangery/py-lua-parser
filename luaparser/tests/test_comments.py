@@ -2,7 +2,9 @@ from luaparser.utils  import tests
 from luaparser import ast
 from luaparser.astnodes import *
 import textwrap
+import logging
 
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
 
 class CommentsTestCase(tests.TestCase):
     def test_comment_before_local_assign(self):
@@ -38,6 +40,31 @@ class CommentsTestCase(tests.TestCase):
                 [Name('rate_limit')],
                 [Number(192)],
                 [Comment('-- rate limit')]
+            )
+        ]))
+        self.assertEqual(exp, tree)
+
+    def test_comment_before_method(self):
+        tree = ast.parse(textwrap.dedent("""
+            --- a test module
+            -- @module test
+            
+            --- @class Test
+            local test = {}
+            
+            --- description
+            --- @tparam string arg a string
+            function Class:print(arg)
+            end
+            """))
+        print(ast.toPrettyStr(tree))
+        exp = Chunk(Block([
+            Method(
+                source=Name('Class'),
+                name=Name('print'),
+                args=[Name('arg')],
+                body=Block([]),
+                comments=[Comment('--- description'), Comment('--- @tparam string arg a string')]
             )
         ]))
         self.assertEqual(exp, tree)

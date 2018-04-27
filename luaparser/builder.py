@@ -318,6 +318,7 @@ class Builder:
         return Block(statements)
 
     def parse_stat(self):
+
         stat = self.parse_assignment() or \
                self.parse_var(True) or \
                self.parse_while_stat() or \
@@ -330,7 +331,6 @@ class Builder:
                self.parse_label()
 
         if stat:
-            self.handle_hidden_right()
             return stat
 
         stat = self.parse_do_block()
@@ -345,7 +345,7 @@ class Builder:
             self.handle_hidden_right()
             return SemiColon()
 
-        return False
+        return None
 
     def parse_ret_stat(self):
         self.save()
@@ -713,7 +713,7 @@ class Builder:
                     if func_body:
                         self.success()
                         self.success()
-                        return Method(names, name, func_body[0], func_body[1])
+                        return Method(names, name, func_body[0], func_body[1], self.get_comments())
 
                 self.failure()
 
