@@ -22,7 +22,7 @@ class Expr(Enum):
     ATOM    = 10
 
 
-class CTokens:
+class Tokens:
     AND = 1
     BREAK = 2
     DO = 3
@@ -112,25 +112,25 @@ def _listify(obj):
 
 class Builder:
     CLOSING_TOKEN = [
-        CTokens.END,
-        CTokens.CBRACE,
-        CTokens.CPAR]
+        Tokens.END,
+        Tokens.CBRACE,
+        Tokens.CPAR]
 
     HIDDEN_TOKEN = [
-        CTokens.SHEBANG,
-        CTokens.LINE_COMMENT,
-        CTokens.COMMENT,
-        CTokens.NEWLINE,
-        CTokens.SPACE,
+        Tokens.SHEBANG,
+        Tokens.LINE_COMMENT,
+        Tokens.COMMENT,
+        Tokens.NEWLINE,
+        Tokens.SPACE,
         -2]
 
     REL_OPERATORS = [
-        CTokens.LT,
-        CTokens.GT,
-        CTokens.LTEQ,
-        CTokens.GTEQ,
-        CTokens.NEQ,
-        CTokens.EQ]
+        Tokens.LT,
+        Tokens.GT,
+        Tokens.LTEQ,
+        Tokens.GTEQ,
+        Tokens.NEQ,
+        Tokens.EQ]
 
 
     def __init__(self, source):
@@ -246,22 +246,22 @@ class Builder:
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
         if tokens:
             for t in tokens:
-                if t.type == CTokens.LINE_COMMENT:
+                if t.type == Tokens.LINE_COMMENT:
                     self.comments.append(Comment(t.text))
-                elif t.type == CTokens.COMMENT:
+                elif t.type == Tokens.COMMENT:
                     self.comments.append(Comment(t.text, True))
-                elif t.type == CTokens.NEWLINE:
+                elif t.type == Tokens.NEWLINE:
                     self.comments.append(None)  # indicate newline
 
     def handle_hidden_right(self, is_newline=False):
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
-                if t.type == CTokens.LINE_COMMENT:
+                if t.type == Tokens.LINE_COMMENT:
                     self.comments.append(Comment(t.text))
-                elif t.type == CTokens.COMMENT:
+                elif t.type == Tokens.COMMENT:
                     self.comments.append(Comment(t.text, True))
-                elif t.type == CTokens.NEWLINE:
+                elif t.type == Tokens.NEWLINE:
                     self.comments.append(None)  # indicate newline
 
     def get_comments(self):
@@ -338,10 +338,10 @@ class Builder:
             self.handle_hidden_right()
             return Do(stat)
 
-        if self.next_is(CTokens.BREAK) and self.next_is_rc(CTokens.BREAK):
+        if self.next_is(Tokens.BREAK) and self.next_is_rc(Tokens.BREAK):
             self.handle_hidden_right()
             return Break()
-        if self.next_is(CTokens.SEMCOL) and self.next_is_rc(CTokens.SEMCOL):
+        if self.next_is(Tokens.SEMCOL) and self.next_is_rc(Tokens.SEMCOL):
             self.handle_hidden_right()
             return SemiColon()
 
@@ -349,11 +349,11 @@ class Builder:
 
     def parse_ret_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.RETURN):
+        if self.next_is_rc(Tokens.RETURN):
             expr_list = self.parse_expr_list()  # optional
             # consume optional token
-            if self.next_is(CTokens.SEMCOL):
-                self.next_is_rc(CTokens.SEMCOL)
+            if self.next_is(Tokens.SEMCOL):
+                self.next_is_rc(Tokens.SEMCOL)
 
             self.success()
             return Return(expr_list)
@@ -363,7 +363,7 @@ class Builder:
         self.save()
         targets = self.parse_var_list()
         if targets:
-            if self.next_is_rc(CTokens.ASSIGN):
+            if self.next_is_rc(Tokens.ASSIGN):
                 values = self.parse_expr_list()
                 if values:
                     self.success()
@@ -381,7 +381,7 @@ class Builder:
             vars.append(var)
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.COMMA):
+                if self.next_is_rc(Tokens.COMMA):
                     var = self.parse_var()
                     if var:
                         vars.append(var)
@@ -442,28 +442,28 @@ class Builder:
     def parse_tail(self):
         # do not render last hidden
         self.save()
-        if self.next_is_rc(CTokens.DOT) and self.next_is_rc(CTokens.NAME, False):
+        if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME, False):
             self.success()
             return Index(Name(self.text), None)  # value must be set in parent
 
         self.failure_save()
-        if self.next_is_rc(CTokens.OBRACK):
+        if self.next_is_rc(Tokens.OBRACK):
             expr = self.parse_expr()
-            if expr and self.next_is_rc(CTokens.CBRACK, False):
+            if expr and self.next_is_rc(Tokens.CBRACK, False):
                 self.success()
                 return Index(expr, None)  # value must be set in parent
 
         self.failure_save()
-        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
             name = Name(self.text)
-            if self.next_is_rc(CTokens.OPAR):
+            if self.next_is_rc(Tokens.OPAR):
                 expr_list = self.parse_expr_list() or []
-                if self.next_is_rc(CTokens.CPAR, False):
+                if self.next_is_rc(Tokens.CPAR, False):
                     self.success()
                     return Invoke(None, name, expr_list)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
             name = Name(self.text)
             table = self.parse_table_constructor(False)
             if table:
@@ -471,18 +471,18 @@ class Builder:
                 return Invoke(None, name, [table])
 
         self.failure_save()
-        if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
             name = Name(self.text)
-            if self.next_is_rc(CTokens.STRING, False):
+            if self.next_is_rc(Tokens.STRING, False):
                 string = self.parse_lua_str(self.text)
                 self.success()
                 return Invoke(None, name, [string])
 
         self.failure_save()
-        if self.next_is_rc(CTokens.OPAR, False):
+        if self.next_is_rc(Tokens.OPAR, False):
             self.handle_hidden_right()
             expr_list = self.parse_expr_list() or []
-            if self.next_is_rc(CTokens.CPAR, False):
+            if self.next_is_rc(Tokens.CPAR, False):
                 self.success()
                 return Call(None, expr_list)
 
@@ -493,7 +493,7 @@ class Builder:
             return table
 
         self.failure_save()
-        if self.next_is_rc(CTokens.STRING, False):
+        if self.next_is_rc(Tokens.STRING, False):
             string = self.parse_lua_str(self.text)
             self.success()
             return string
@@ -508,7 +508,7 @@ class Builder:
             expr_list.append(expr)
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.COMMA):
+                if self.next_is_rc(Tokens.COMMA):
                     self._expected = []
                     expr = self.parse_expr()
                     if expr:
@@ -528,18 +528,18 @@ class Builder:
 
     def parse_do_block(self):
         self.save()
-        if self.next_is_rc(CTokens.DO, False):
+        if self.next_is_rc(Tokens.DO, False):
             self.handle_hidden_right()
             block = self.parse_block()
             if block:
-                if self.next_is_rc(CTokens.END):
+                if self.next_is_rc(Tokens.END):
                     self.success()
                     return block
         return self.failure()
 
     def parse_while_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.WHILE):
+        if self.next_is_rc(Tokens.WHILE):
             self._expected = []
             expr = self.parse_expr()
             if expr:
@@ -554,11 +554,11 @@ class Builder:
 
     def parse_repeat_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.REPEAT, False):
+        if self.next_is_rc(Tokens.REPEAT, False):
             self.handle_hidden_right()
             body = self.parse_block()
             if body:
-                if self.next_is_rc(CTokens.UNTIL):
+                if self.next_is_rc(Tokens.UNTIL):
                     expr = self.parse_expr()
                     if expr:
                         self.success()
@@ -569,13 +569,13 @@ class Builder:
     def parse_local(self):
         self.save()
         self._expected = []
-        if self.next_is_rc(CTokens.LOCAL):
+        if self.next_is_rc(Tokens.LOCAL):
             comments = self.get_comments()
             targets = self.parse_name_list()
             if targets:
                 values = []
                 self.save()
-                if self.next_is_rc(CTokens.ASSIGN):
+                if self.next_is_rc(Tokens.ASSIGN):
                     values = self.parse_expr_list()
                     if values:
                         self.success()
@@ -591,7 +591,7 @@ class Builder:
 
             self.save()
 
-            if self.next_is_rc(CTokens.FUNCTION) and self.next_is_rc(CTokens.NAME):
+            if self.next_is_rc(Tokens.FUNCTION) and self.next_is_rc(Tokens.NAME):
                 name = Name(self.text)
                 body = self.parse_func_body()
                 if body:
@@ -605,18 +605,18 @@ class Builder:
 
     def parse_goto_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.GOTO) and self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.GOTO) and self.next_is_rc(Tokens.NAME):
             self.success()
             return Goto(Name(self.text), self.get_comments())
         return self.failure()
 
     def parse_if_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.IFTOK):
+        if self.next_is_rc(Tokens.IFTOK):
             self._expected = []
             test = self.parse_expr()
             if test:
-                if self.next_is_rc(CTokens.THEN, False):
+                if self.next_is_rc(Tokens.THEN, False):
                     self.handle_hidden_right()
                     body = self.parse_block()
                     if body:
@@ -632,7 +632,7 @@ class Builder:
 
                         else_exp = self.parse_else_stat()  # optional
                         root.orelse = else_exp
-                        if self.next_is_rc(CTokens.END):
+                        if self.next_is_rc(Tokens.END):
                             self.success()
                             return main
             self.abort()
@@ -640,10 +640,10 @@ class Builder:
 
     def parse_elseif_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.ELSEIF):
+        if self.next_is_rc(Tokens.ELSEIF):
             test = self.parse_expr()
             if test:
-                if self.next_is_rc(CTokens.THEN, False):
+                if self.next_is_rc(Tokens.THEN, False):
                     self.handle_hidden_right()
                     body = self.parse_block()
                     if body:
@@ -653,8 +653,8 @@ class Builder:
 
     def parse_else_stat(self):
         self.save()
-        if self.next_is(CTokens.ELSETOK):
-            if self.next_is_rc(CTokens.ELSETOK, False):
+        if self.next_is(Tokens.ELSETOK):
+            if self.next_is_rc(Tokens.ELSETOK, False):
                 self.handle_hidden_right()
                 body = self.parse_block()
                 if body:
@@ -664,18 +664,18 @@ class Builder:
 
     def  parse_for_stat(self):
         self.save()
-        if self.next_is_rc(CTokens.FOR):
+        if self.next_is_rc(Tokens.FOR):
             self.save()
-            if self.next_is_rc(CTokens.NAME):
+            if self.next_is_rc(Tokens.NAME):
                 target = Name(self.text)
-                if self.next_is_rc(CTokens.ASSIGN):
+                if self.next_is_rc(Tokens.ASSIGN):
                     start = self.parse_expr()
-                    if start and self.next_is_rc(CTokens.COMMA):
+                    if start and self.next_is_rc(Tokens.COMMA):
                         stop = self.parse_expr()
                         if stop:
                             step = 1
                             # optional step
-                            if self.next_is(CTokens.COMMA) and self.next_is_rc(CTokens.COMMA):
+                            if self.next_is(Tokens.COMMA) and self.next_is_rc(Tokens.COMMA):
                                 step = self.parse_expr()
 
                             body = self.parse_do_block()
@@ -688,7 +688,7 @@ class Builder:
 
             self.failure_save()
             target = self.parse_name_list()
-            if target and self.next_is_rc(CTokens.IN):
+            if target and self.next_is_rc(Tokens.IN):
                 iter = self.parse_expr_list()
                 if iter:
                     body = self.parse_do_block()
@@ -703,11 +703,11 @@ class Builder:
     def parse_function(self):
         self.save()
         self._expected = []
-        if self.next_is_rc(CTokens.FUNCTION):
+        if self.next_is_rc(Tokens.FUNCTION):
             names = self.parse_names()
             if names:
                 self.save()
-                if self.next_is_rc(CTokens.COL) and self.next_is_rc(CTokens.NAME):
+                if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
                     name = Name(self.text)
                     func_body = self.parse_func_body()
                     if func_body:
@@ -728,11 +728,11 @@ class Builder:
 
     def parse_names(self):
         self.save()
-        if self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.NAME):
             child = Name(self.text)
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.DOT) and self.next_is_rc(CTokens.NAME):
+                if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME):
                     self.success()
                     child = Index(Name(self.text), child)
                 else:
@@ -746,16 +746,16 @@ class Builder:
         """If success, return a tuple (args, body)"""
         self.save()
         self._expected = []
-        if self.next_is_rc(CTokens.OPAR, False):  # do not render right hidden
+        if self.next_is_rc(Tokens.OPAR, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
             args = self.parse_param_list()
             if args is not None:  # may be an empty table
-                if self.next_is_rc(CTokens.CPAR, False):  # do not render right hidden
+                if self.next_is_rc(Tokens.CPAR, False):  # do not render right hidden
                     self.handle_hidden_right()  # render hidden after new level
                     body = self.parse_block()
                     if body:
                         self._expected = []
-                        if self.next_is_rc(CTokens.END):
+                        if self.next_is_rc(Tokens.END):
                             self.success()
                             return args, body
                         else:
@@ -768,8 +768,8 @@ class Builder:
         param_list = self.parse_name_list()
         if param_list:
             self.save()
-            if self.next_is_rc(CTokens.COMMA) and \
-                    self.next_is_rc(CTokens.VARARGS):
+            if self.next_is_rc(Tokens.COMMA) and \
+                    self.next_is_rc(Tokens.VARARGS):
                 self.success()
                 param_list.append(Varargs())
                 return param_list
@@ -778,7 +778,7 @@ class Builder:
                 return param_list
 
         self.save()
-        if self.next_is_rc(CTokens.VARARGS):
+        if self.next_is_rc(Tokens.VARARGS):
             self.success()
             return [Varargs()]
 
@@ -788,11 +788,11 @@ class Builder:
     def parse_name_list(self):
         self.save()
         names = []
-        if self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.NAME):
             names.append(Name(self.text))
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.COMMA) and self.next_is_rc(CTokens.NAME):
+                if self.next_is_rc(Tokens.COMMA) and self.next_is_rc(Tokens.NAME):
                     names.append(Name(self.text))
                     self.success()
                 else:
@@ -804,9 +804,9 @@ class Builder:
 
     def parse_label(self):
         self.save()
-        if self.next_is_rc(CTokens.COLCOL) and self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.COLCOL) and self.next_is_rc(Tokens.NAME):
             name = Name(self.text)
-            if self.next_is_rc(CTokens.COLCOL):
+            if self.next_is_rc(Tokens.COLCOL):
                 self.success()
                 return Label(name)
 
@@ -814,16 +814,16 @@ class Builder:
 
     def parse_callee(self):
         self.save()
-        if self.next_is_rc(CTokens.OPAR):
+        if self.next_is_rc(Tokens.OPAR):
             expr = self.parse_expr()
             if expr:
-                if self.next_is_rc(CTokens.CPAR):
+                if self.next_is_rc(Tokens.CPAR):
                     self.success()
                     # TODO: create a node to indicate parenthesis
                     return expr
         self.failure()
         self.save()
-        if self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.NAME):
             self.success()
             return Name(self.text)
         return self.failure()
@@ -837,7 +837,7 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.OR):
+                if self.next_is_rc(Tokens.OR):
                     right = self.parse_and_expr()
                     if right:
                         self.success()
@@ -859,7 +859,7 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.AND):
+                if self.next_is_rc(Tokens.AND):
                     right = self.parse_rel_expr()
                     if right:
                         self.success()
@@ -885,17 +885,17 @@ class Builder:
                 right = self.parse_concat_expr()
                 if right:
                     self.success()
-                    if op == CTokens.LT:
+                    if op == Tokens.LT:
                         left = LessThanOp(left, right)
-                    elif op == CTokens.GT:
+                    elif op == Tokens.GT:
                         left = GreaterThanOp(left, right)
-                    elif op == CTokens.LTEQ:
+                    elif op == Tokens.LTEQ:
                         left = LessOrEqThanOp(left, right)
-                    elif op == CTokens.GTEQ:
+                    elif op == Tokens.GTEQ:
                         left = GreaterOrEqThanOp(left, right)
-                    elif op == CTokens.NEQ:
+                    elif op == Tokens.NEQ:
                         left = NotEqToOp(left, right)
-                    elif op == CTokens.EQ:
+                    elif op == Tokens.EQ:
                         left = EqToOp(left, right)
                 else:
                     self.failure()
@@ -912,7 +912,7 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.CONCAT):
+                if self.next_is_rc(Tokens.CONCAT):
                     self._expected = []
                     right = self.parse_add_expr()
                     if right:
@@ -936,14 +936,14 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_in_rc([CTokens.ADD, CTokens.MINUS]):
+                if self.next_in_rc([Tokens.ADD, Tokens.MINUS]):
                     op = self.type
                     right = self.parse_mult_expr()
                     if right:
                         self.success()
-                        if op == CTokens.ADD:
+                        if op == Tokens.ADD:
                             left = AddOp(left, right)
-                        elif op == CTokens.MINUS:
+                        elif op == Tokens.MINUS:
                             left = SubOp(left, right)
                     else:
                         self.failure()
@@ -962,21 +962,21 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_in_rc([CTokens.MULT,
-                                   CTokens.DIV,
-                                   CTokens.MOD,
-                                   CTokens.FLOOR]):
+                if self.next_in_rc([Tokens.MULT,
+                                   Tokens.DIV,
+                                   Tokens.MOD,
+                                   Tokens.FLOOR]):
                     op = self.type
                     right = self.parse_bitwise_expr()
                     if right:
                         self.success()
-                        if op == CTokens.MULT:
+                        if op == Tokens.MULT:
                             left = MultOp(left, right)
-                        elif op == CTokens.DIV:
+                        elif op == Tokens.DIV:
                             left = FloatDivOp(left, right)
-                        elif op == CTokens.MOD:
+                        elif op == Tokens.MOD:
                             left = ModOp(left, right)
-                        elif op == CTokens.FLOOR:
+                        elif op == Tokens.FLOOR:
                             left = FloorDivOp(left, right)
                     else:
                         self.failure()
@@ -995,24 +995,24 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_in_rc([CTokens.BITAND,
-                                    CTokens.BITOR,
-                                    CTokens.BITNOT,
-                                    CTokens.BITRSHIFT,
-                                    CTokens.BITRLEFT]):
+                if self.next_in_rc([Tokens.BITAND,
+                                    Tokens.BITOR,
+                                    Tokens.BITNOT,
+                                    Tokens.BITRSHIFT,
+                                    Tokens.BITRLEFT]):
                     op = self.type
                     right = self.parse_unary_expr()
                     if right:
                         self.success()
-                        if op == CTokens.BITAND:
+                        if op == Tokens.BITAND:
                             left = BAndOp(left, right)
-                        elif op == CTokens.BITOR:
+                        elif op == Tokens.BITOR:
                             left = BOrOp(left, right)
-                        elif op == CTokens.BITNOT:
+                        elif op == Tokens.BITNOT:
                             left = BXorOp(left, right)
-                        elif op == CTokens.BITRSHIFT:
+                        elif op == Tokens.BITRSHIFT:
                             left = BShiftROp(left, right)
-                        elif op == CTokens.BITRLEFT:
+                        elif op == Tokens.BITRLEFT:
                             left = BShiftLOp(left, right)
                     else:
                         self.failure()
@@ -1027,28 +1027,28 @@ class Builder:
 
     def parse_unary_expr(self):
         self.save()
-        if self.next_is_rc(CTokens.MINUS):
+        if self.next_is_rc(Tokens.MINUS):
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
                 return UMinusOp(expr)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.LENGTH):
+        if self.next_is_rc(Tokens.LENGTH):
             expr = self.parse_pow_expr()
             if expr:
                 self.success()
                 return ULengthOP(expr)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.NOT):
+        if self.next_is_rc(Tokens.NOT):
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
                 return ULNotOp(expr)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.BITNOT):
+        if self.next_is_rc(Tokens.BITNOT):
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
@@ -1068,7 +1068,7 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_is_rc(CTokens.POW):
+                if self.next_is_rc(Tokens.POW):
                     right = self.parse_atom()
                     if right:
                         self.success()
@@ -1094,10 +1094,10 @@ class Builder:
         atom = self.parse_table_constructor()
         if atom:
             return atom
-        if self.next_is(CTokens.VARARGS) and self.next_is_rc(CTokens.VARARGS):
+        if self.next_is(Tokens.VARARGS) and self.next_is_rc(Tokens.VARARGS):
             return Varargs()
 
-        if self.next_is(CTokens.NUMBER) and self.next_is_rc(CTokens.NUMBER):
+        if self.next_is(Tokens.NUMBER) and self.next_is_rc(Tokens.NUMBER):
             # TODO: optimize
             # using python number eval to parse lua number
             try:
@@ -1107,16 +1107,16 @@ class Builder:
                 number = float(self.text)
             return Number(number)
 
-        if self.next_is(CTokens.STRING) and self.next_is_rc(CTokens.STRING):
+        if self.next_is(Tokens.STRING) and self.next_is_rc(Tokens.STRING):
             return self.parse_lua_str(self.text)
 
-        if self.next_is(CTokens.NIL) and self.next_is_rc(CTokens.NIL):
+        if self.next_is(Tokens.NIL) and self.next_is_rc(Tokens.NIL):
             return Nil()
 
-        if self.next_is(CTokens.TRUE) and self.next_is_rc(CTokens.TRUE):
+        if self.next_is(Tokens.TRUE) and self.next_is_rc(Tokens.TRUE):
             return TrueExpr()
 
-        if self.next_is(CTokens.FALSE) and self.next_is_rc(CTokens.FALSE):
+        if self.next_is(Tokens.FALSE) and self.next_is_rc(Tokens.FALSE):
             return FalseExpr()
         return None
 
@@ -1138,7 +1138,7 @@ class Builder:
 
     def parse_function_literal(self):
         self.save()
-        if self.next_is_rc(CTokens.FUNCTION):
+        if self.next_is_rc(Tokens.FUNCTION):
             func_body = self.parse_func_body()
             if func_body:
                 self.success()
@@ -1148,11 +1148,11 @@ class Builder:
 
     def parse_table_constructor(self, render_last_hidden=True):
         self.save()
-        if self.next_is_rc(CTokens.OBRACE, False):  # do not render right hidden
+        if self.next_is_rc(Tokens.OBRACE, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
 
             fields = self.parse_field_list()
-            if self.next_is_rc(CTokens.CBRACE, render_last_hidden):
+            if self.next_is_rc(Tokens.CBRACE, render_last_hidden):
                 self.success()
 
                 array_like_index = 1
@@ -1174,7 +1174,7 @@ class Builder:
             field_list.append(field)
             while True:
                 self.save()
-                if self.next_in_rc([CTokens.COMMA, CTokens.SEMCOL]):
+                if self.next_in_rc([Tokens.COMMA, Tokens.SEMCOL]):
                     inline_com = self.get_inline_comment()
                     if inline_com:
                         field.comments.append(inline_com)
@@ -1199,10 +1199,10 @@ class Builder:
     def parse_field(self):
         self.save()
 
-        if self.next_is_rc(CTokens.OBRACK):
+        if self.next_is_rc(Tokens.OBRACK):
             key = self.parse_expr()
-            if key and self.next_is_rc(CTokens.CBRACK):
-                if self.next_is_rc(CTokens.ASSIGN):
+            if key and self.next_is_rc(Tokens.CBRACK):
+                if self.next_is_rc(Tokens.ASSIGN):
                     comments = self.get_comments()
                     value = self.parse_expr()
                     if value:
@@ -1210,9 +1210,9 @@ class Builder:
                         return Field(key, value, comments)
 
         self.failure_save()
-        if self.next_is_rc(CTokens.NAME):
+        if self.next_is_rc(Tokens.NAME):
             key = Name(self.text)
-            if self.next_is_rc(CTokens.ASSIGN):
+            if self.next_is_rc(Tokens.ASSIGN):
                 comments = self.get_comments()
                 value = self.parse_expr()
                 if value:
@@ -1230,6 +1230,6 @@ class Builder:
 
     def parse_field_sep(self):
         self.save()
-        if self.next_in_rc([CTokens.COMMA, CTokens.SEMCOL]):
+        if self.next_in_rc([Tokens.COMMA, Tokens.SEMCOL]):
             return self.success()
         return self.failure()

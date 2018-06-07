@@ -45,13 +45,7 @@ class CommentsTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_comment_before_method(self):
-        tree = ast.parse(textwrap.dedent("""
-            --- a test module
-            -- @module test
-            
-            --- @class Test
-            local test = {}
-            
+        tree = ast.parse(textwrap.dedent("""       
             --- description
             --- @tparam string arg a string
             function Class:print(arg)

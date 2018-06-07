@@ -1,4 +1,4 @@
-from antlr4 import *
+from antlr4 import InputStream, CommonTokenStream
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astnodes import *
 from luaparser import printers
