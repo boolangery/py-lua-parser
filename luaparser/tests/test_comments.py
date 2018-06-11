@@ -1,5 +1,5 @@
 from luaparser.utils  import tests
-from luaparser import ast
+from luaparser import astutils
 from luaparser.astnodes import *
 import textwrap
 import logging
@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
 
 class CommentsTestCase(tests.TestCase):
     def test_comment_before_local_assign(self):
-        tree = ast.parse(textwrap.dedent("""
+        tree = astutils.parse(textwrap.dedent("""
             -- rate limit
             -- an other comment
             --[==[ a long
@@ -30,11 +30,11 @@ class CommentsTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_comment_before_global_assign(self):
-        tree = ast.parse(textwrap.dedent("""
+        tree = astutils.parse(textwrap.dedent("""
             -- rate limit
             rate_limit = 192
             """))
-        print(ast.toPrettyStr(tree))
+        print(astutils.toPrettyStr(tree))
         exp = Chunk(Block([
             Assign(
                 [Name('rate_limit')],
@@ -45,13 +45,13 @@ class CommentsTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_comment_before_method(self):
-        tree = ast.parse(textwrap.dedent("""       
+        tree = astutils.parse(textwrap.dedent("""       
             --- description
             --- @tparam string arg a string
             function Class:print(arg)
             end
             """))
-        print(ast.toPrettyStr(tree))
+        print(astutils.toPrettyStr(tree))
         exp = Chunk(Block([
             Method(
                 source=Name('Class'),
@@ -64,7 +64,7 @@ class CommentsTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_comment_in_table(self):
-        tree = ast.parse(textwrap.dedent("""
+        tree = astutils.parse(textwrap.dedent("""
             --- @table a table of constants
             local limits = {
               -- pre field 1
@@ -79,7 +79,7 @@ class CommentsTestCase(tests.TestCase):
               Model = true -- model
             }
             """))
-        print(ast.toPrettyStr(tree))
+        print(astutils.toPrettyStr(tree))
         exp = Chunk(Block([
             LocalAssign(
                 [Name('limits')],
@@ -94,7 +94,7 @@ class CommentsTestCase(tests.TestCase):
                 [Comment('--- @table a table of constants')]
             )
         ]))
-        #print(ast.toPrettyStr(exp))
+        #print(astutils.toPrettyStr(exp))
         self.assertEqual(exp, tree)
 
 

@@ -3,7 +3,7 @@ import os
 import logging
 from optparse import OptionParser, OptionGroup
 import luaparser
-from luaparser import ast
+from luaparser import astutils
 from luaparser.builder import SyntaxException
 
 
@@ -40,17 +40,17 @@ def main():
 
     try:
         if options.source:
-            tree = ast.parse(options.source)
+            tree = astutils.parse(options.source)
         else:
             with open(args[0], 'r') as content_file:
                 content = content_file.read()
-            tree = ast.parse(content)
+            tree = astutils.parse(content)
 
         # output format
         if options.xml:
-            output = ast.toXmlStr(tree)
+            output = astutils.toXmlStr(tree)
         else:
-            output = ast.toPrettyStr(tree)
+            output = astutils.toPrettyStr(tree)
 
         # output
         if options.output:

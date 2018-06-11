@@ -1,5 +1,5 @@
-from luaparser.utils  import tests
-from luaparser import ast
+from luaparser.utils import tests
+from luaparser import astutils
 from luaparser.astnodes import *
 import textwrap
 
@@ -9,9 +9,9 @@ class TokensTestCase(tests.TestCase):
         src = textwrap.dedent("""
             local a = 1
             """)
-        tree = ast.parse(src)
+        tree = astutils.parse(src)
         chunk, block, local, name, number = False, False, False, False, False
-        for node in ast.walk(tree):
+        for node in astutils.walk(tree):
             if isinstance(node, Chunk): chunk = True
             if isinstance(node, Block): block = True
             if isinstance(node, LocalAssign): local = True
@@ -29,12 +29,12 @@ class TokensTestCase(tests.TestCase):
             """)
 
         called = False
-        class NumberVisitor(ast.ASTVisitor):
+        class NumberVisitor(astutils.ASTVisitor):
             def visit_Number(self, node):
                 nonlocal called
                 called = True
 
-        tree = ast.parse(src)
+        tree = astutils.parse(src)
         NumberVisitor().visit(tree)
         self.assertTrue(called)
 
@@ -43,6 +43,6 @@ class TokensTestCase(tests.TestCase):
             local a = if
             """)
 
-        self.assertRaises(Exception, ast.parse, src)
+        self.assertRaises(Exception, astutils.parse, src)
 
 
