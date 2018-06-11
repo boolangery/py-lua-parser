@@ -22,9 +22,6 @@ cdef class Node:
     Attributes:
         displayName (`str`): Node display name (to pretty print).
     """
-    cdef str _name
-    cdef public object comments
-
     def __init__(self, name, comments=[]):
         self._name = name
         self.comments = comments
@@ -39,7 +36,7 @@ cdef class Node:
         return False
 
 
-class Comment:
+cdef class Comment:
     def __init__(self, s, is_multi_line=False):
         self.s = s
         self.is_multi_line = is_multi_line
@@ -56,14 +53,12 @@ cdef class Chunk(Node):
     Attributes:
         body (`Block`): Chunk body.
     """
-    cdef public object body
-
     def __init__(self, body):
         super(Chunk, self).__init__('Chunk')
         self.body = body
 
 
-class Block(Node):
+cdef class Block(Node):
     """Define a Lua Block.
 
     Attributes:
@@ -77,13 +72,13 @@ class Block(Node):
 ''' ----------------------------------------------------------------------- '''
 ''' Statements                                                              '''
 ''' ----------------------------------------------------------------------- '''
-class Statement(Node):
+cdef class Statement(Node):
     """Base class for Lua statement.
     """
     pass
 
 
-class Assign(Statement):
+cdef class Assign(Statement):
     """Lua global assignment statement.
 
     Attributes:
@@ -97,32 +92,34 @@ class Assign(Statement):
         self.values  = values
 
 
-class LocalAssign(Assign):
+cdef class LocalAssign(Assign):
     """Lua local assignment statement.
 
     Attributes:
         targets (`list<Node>`): List of targets.
         values (`list<Node>`): List of values.
     """
+
     def __init__(self, targets, values, comments=[]):
         super(LocalAssign, self).__init__(targets, values, comments)
         self._name = 'LocalAssign'
 
 
-class While(Statement):
+cdef class While(Statement):
     """Lua while statement.
 
     Attributes:
         test (`Node`): Expression to test.
         body (`list<Statement>`): List of statements to execute.
     """
+
     def __init__(self, test, body):
         super(While, self).__init__('While')
         self.test = test
         self.body = body
 
 
-class Do(Statement):
+cdef class Do(Statement):
     """Lua do end statement.
 
     Attributes:
@@ -133,7 +130,7 @@ class Do(Statement):
         self.body = body
 
 
-class Repeat(Statement):
+cdef class Repeat(Statement):
     """Lua repeat until statement.
 
     Attributes:
@@ -146,7 +143,7 @@ class Repeat(Statement):
         self.test = test
 
 
-class If(Statement):
+cdef class If(Statement):
     """Lua if statement.
 
     Attributes:
@@ -161,7 +158,7 @@ class If(Statement):
         self.orelse = orelse
 
 
-class ElseIf(Statement):
+cdef class ElseIf(Statement):
     """Define the elseif lua statement.
 
     Attributes:
@@ -176,7 +173,7 @@ class ElseIf(Statement):
         self.orelse = orelse
 
 
-class Label(Statement):
+cdef class Label(Statement):
     """Define the label lua statement.
 
     Attributes:
@@ -187,7 +184,7 @@ class Label(Statement):
         self.id = id
 
 
-class Goto(Statement):
+cdef class Goto(Statement):
     """Define the goto lua statement.
 
     Attributes:
@@ -198,14 +195,14 @@ class Goto(Statement):
         self.label = label
 
 
-class SemiColon(Statement):
+cdef class SemiColon(Statement):
     """Define the semi-colon lua statement.
     """
     def __init__(self):
         super(SemiColon, self).__init__('SemiColon')
 
 
-class Break(Statement):
+cdef class Break(Statement):
     """Define the break lua statement.
 
     """
@@ -213,7 +210,7 @@ class Break(Statement):
         super(Break, self).__init__('Break')
 
 
-class Return(Statement):
+cdef class Return(Statement):
     """Define the Lua return statement.
 
     Attributes:
@@ -224,7 +221,7 @@ class Return(Statement):
         self.values = values
 
 
-class Fornum(Statement):
+cdef class Fornum(Statement):
     """Define the numeric for lua statement.
 
     Attributes:
@@ -243,7 +240,7 @@ class Fornum(Statement):
         self.body   = body
 
 
-class Forin(Statement):
+cdef class Forin(Statement):
     """Define the for in lua statement.
 
     Attributes:
@@ -258,7 +255,7 @@ class Forin(Statement):
         self.targets = targets
 
 
-class Call(Statement):
+cdef class Call(Statement):
     """Define the function call lua statement.
 
     Attributes:
@@ -271,7 +268,7 @@ class Call(Statement):
         self.args = args
 
 
-class Invoke(Statement):
+cdef class Invoke(Statement):
     """Define the invoke function call lua statement (magic syntax with ':').
 
     Attributes:
@@ -286,7 +283,7 @@ class Invoke(Statement):
         self.args = args
 
 
-class Function(Statement):
+cdef class Function(Statement):
     """Define the Lua function declaration statement.
 
     Attributes:
@@ -301,7 +298,7 @@ class Function(Statement):
         self.body = body
 
 
-class LocalFunction(Statement):
+cdef class LocalFunction(Statement):
     """Define the Lua local function declaration statement.
 
     Attributes:
@@ -316,7 +313,7 @@ class LocalFunction(Statement):
         self.body = body
 
 
-class Method(Statement):
+cdef class Method(Statement):
     """Define the Lua Object Oriented function statement.
 
     Attributes:
@@ -336,7 +333,7 @@ class Method(Statement):
 ''' ----------------------------------------------------------------------- '''
 ''' Lua Expression                                                          '''
 ''' ----------------------------------------------------------------------- '''
-class Expression(Node):
+cdef class Expression(Node):
     """Define a Lua expression.
     """
     pass
@@ -344,28 +341,28 @@ class Expression(Node):
 ''' ----------------------------------------------------------------------- '''
 ''' Types and values                                                        '''
 ''' ----------------------------------------------------------------------- '''
-class Nil(Expression):
+cdef class Nil(Expression):
     """Define the Lua nil expression.
     """
     def __init__(self):
         super(Nil, self).__init__('Nil')
 
 
-class TrueExpr(Expression):
+cdef class TrueExpr(Expression):
     """Define the Lua true expression.
     """
     def __init__(self):
         super(TrueExpr, self).__init__('True')
 
 
-class FalseExpr(Expression):
+cdef class FalseExpr(Expression):
     """Define the Lua false expression.
     """
     def __init__(self):
         super(FalseExpr, self).__init__('False')
 
 
-class Number(Expression):
+cdef class Number(Expression):
     """Define the Lua number expression.
 
     Attributes:
@@ -376,7 +373,7 @@ class Number(Expression):
         self.n = n
 
 
-class Varargs(Expression):
+cdef class Varargs(Expression):
     """Define the Lua Varargs expression (...).
 
     """
@@ -384,7 +381,7 @@ class Varargs(Expression):
         super(Varargs, self).__init__('Varargs')
 
 
-class String(Expression):
+cdef class String(Expression):
     """Define the Lua string expression.
 
     Attributes:
@@ -395,7 +392,7 @@ class String(Expression):
         self.s = s
 
 
-class Table(Expression):
+cdef class Table(Expression):
     """Define the Lua table expression.
 
     Attributes:
@@ -406,7 +403,7 @@ class Table(Expression):
         self.fields = fields
 
 
-class Field(Expression):
+cdef class Field(Expression):
     """Define a lua table field expression
 
     Attributes:
@@ -419,14 +416,14 @@ class Field(Expression):
         self.value = value
 
 
-class Dots(Expression):
+cdef class Dots(Expression):
     """Define the Lua dots (...) expression.
     """
     def __init__(self):
         super(Dots, self).__init__('Dots')
 
 
-class AnonymousFunction(Expression):
+cdef class AnonymousFunction(Expression):
     """Define the Lua anonymous function expression.
 
     Attributes:
@@ -441,14 +438,14 @@ class AnonymousFunction(Expression):
 ''' ----------------------------------------------------------------------- '''
 ''' Operators                                                               '''
 ''' ----------------------------------------------------------------------- '''
-class Op(Expression):
-    """Base class for Lua operators.
+cdef class Op(Expression):
+    """Base cdef class for Lua operators.
     """
     pass
 
 
-class BinaryOp(Op):
-    """Base class for Lua 'Left Op Right' Operators.
+cdef class BinaryOp(Op):
+    """Base cdef class for Lua 'Left Op Right' Operators.
 
     Attributes:
         left (`Expression`): Left expression.
@@ -462,12 +459,12 @@ class BinaryOp(Op):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.1 – Arithmetic Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
-class AriOp(BinaryOp):
-    """Base class for Arithmetic Operators"""
+cdef class AriOp(BinaryOp):
+    """Base cdef class for Arithmetic Operators"""
     pass
 
 
-class AddOp(AriOp):
+cdef class AddOp(AriOp):
     """Add expression.
 
     Attributes:
@@ -478,7 +475,7 @@ class AddOp(AriOp):
         super(AddOp, self).__init__('AddOp', left, right)
 
 
-class SubOp(AriOp):
+cdef class SubOp(AriOp):
     """Substract expression.
 
     Attributes:
@@ -489,7 +486,7 @@ class SubOp(AriOp):
         super(SubOp, self).__init__('SubOp', left, right)
 
 
-class MultOp(AriOp):
+cdef class MultOp(AriOp):
     """Multiplication expression.
 
     Attributes:
@@ -500,7 +497,7 @@ class MultOp(AriOp):
         super(MultOp, self).__init__('MultOp', left, right)
 
 
-class FloatDivOp(AriOp):
+cdef class FloatDivOp(AriOp):
     """Float division expression.
 
     Attributes:
@@ -511,7 +508,7 @@ class FloatDivOp(AriOp):
         super(FloatDivOp, self).__init__('FloatDivOp', left, right)
 
 
-class FloorDivOp(AriOp):
+cdef class FloorDivOp(AriOp):
     """Floor division expression.
 
     Attributes:
@@ -522,7 +519,7 @@ class FloorDivOp(AriOp):
         super(FloorDivOp, self).__init__('FloorDivOp', left, right)
 
 
-class ModOp(AriOp):
+cdef class ModOp(AriOp):
     """Modulo expression.
 
     Attributes:
@@ -533,7 +530,7 @@ class ModOp(AriOp):
         super(ModOp, self).__init__('ModOp', left, right)
 
 
-class ExpoOp(AriOp):
+cdef class ExpoOp(AriOp):
     """Exponent expression.
 
     Attributes:
@@ -547,13 +544,13 @@ class ExpoOp(AriOp):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.2 – Bitwise Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
-class BitOp(BinaryOp):
-    """Base class for bitwise Operators.
+cdef class BitOp(BinaryOp):
+    """Base cdef class for bitwise Operators.
     """
     pass
 
 
-class BAndOp(BitOp):
+cdef class BAndOp(BitOp):
     """Bitwise and expression.
 
     Attributes:
@@ -564,7 +561,7 @@ class BAndOp(BitOp):
         super(BAndOp, self).__init__('BAndOp', left, right)
 
 
-class BOrOp(BitOp):
+cdef class BOrOp(BitOp):
     """Bitwise or expression.
 
     Attributes:
@@ -575,7 +572,7 @@ class BOrOp(BitOp):
         super(BOrOp, self).__init__('BOrOp', left, right)
 
 
-class BXorOp(BitOp):
+cdef class BXorOp(BitOp):
     """Bitwise xor expression.
 
     Attributes:
@@ -586,7 +583,7 @@ class BXorOp(BitOp):
         super(BXorOp, self).__init__('BXorOp', left, right)
 
 
-class BShiftROp(BitOp):
+cdef class BShiftROp(BitOp):
     """Bitwise right shift expression.
 
     Attributes:
@@ -597,7 +594,7 @@ class BShiftROp(BitOp):
         super(BShiftROp, self).__init__('BShiftROp', left, right)
 
 
-class BShiftLOp(BitOp):
+cdef class BShiftLOp(BitOp):
     """Bitwise left shift expression.
 
     Attributes:
@@ -611,13 +608,13 @@ class BShiftLOp(BitOp):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.4 – Relational Operators                                            '''
 ''' ----------------------------------------------------------------------- '''
-class RelOp(BinaryOp):
-    """Base class for Lua relational operators.
+cdef class RelOp(BinaryOp):
+    """Base cdef class for Lua relational operators.
     """
     pass
 
 
-class LessThanOp(RelOp):
+cdef class LessThanOp(RelOp):
     """Less than expression.
 
     Attributes:
@@ -628,7 +625,7 @@ class LessThanOp(RelOp):
         super(LessThanOp, self).__init__('RLtOp', left, right)
 
 
-class GreaterThanOp(RelOp):
+cdef class GreaterThanOp(RelOp):
     """Greater than expression.
 
     Attributes:
@@ -639,7 +636,7 @@ class GreaterThanOp(RelOp):
         super(GreaterThanOp, self).__init__('RGtOp', left, right)
 
 
-class LessOrEqThanOp(RelOp):
+cdef class LessOrEqThanOp(RelOp):
     """Less or equal expression.
 
     Attributes:
@@ -650,7 +647,7 @@ class LessOrEqThanOp(RelOp):
         super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right)
 
 
-class GreaterOrEqThanOp(RelOp):
+cdef class GreaterOrEqThanOp(RelOp):
     """Greater or equal expression.
 
     Attributes:
@@ -661,7 +658,7 @@ class GreaterOrEqThanOp(RelOp):
         super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right)
 
 
-class EqToOp(RelOp):
+cdef class EqToOp(RelOp):
     """Equal to expression.
 
     Attributes:
@@ -672,7 +669,7 @@ class EqToOp(RelOp):
         super(EqToOp, self).__init__('REqOp', left, right)
 
 
-class NotEqToOp(RelOp):
+cdef class NotEqToOp(RelOp):
     """Not equal to expression.
 
     Attributes:
@@ -685,13 +682,13 @@ class NotEqToOp(RelOp):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.5 – Logical Operators                                               '''
 ''' ----------------------------------------------------------------------- '''
-class LoOp(BinaryOp):
-    """Base class for logical operators.
+cdef class LoOp(BinaryOp):
+    """Base cdef class for logical operators.
     """
     pass
 
 
-class AndLoOp(LoOp):
+cdef class AndLoOp(LoOp):
     """Logical and expression.
 
     Attributes:
@@ -702,7 +699,7 @@ class AndLoOp(LoOp):
         super(AndLoOp, self).__init__('LAndOp', left, right)
 
 
-class OrLoOp(LoOp):
+cdef class OrLoOp(LoOp):
     """Logical or expression.
 
     Attributes:
@@ -715,7 +712,7 @@ class OrLoOp(LoOp):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.6 Concat operators                                                  '''
 ''' ----------------------------------------------------------------------- '''
-class Concat(BinaryOp):
+cdef class Concat(BinaryOp):
     """Concat expression.
 
     Attributes:
@@ -728,8 +725,8 @@ class Concat(BinaryOp):
 ''' ----------------------------------------------------------------------- '''
 ''' Unary operators                                                         '''
 ''' ----------------------------------------------------------------------- '''
-class UnaryOp(Expression):
-    """Base class for Lua unitary operator.
+cdef class UnaryOp(Expression):
+    """Base cdef class for Lua unitary operator.
 
     Attributes:
         operand (`Expression`): Operand.
@@ -739,7 +736,7 @@ class UnaryOp(Expression):
         self.operand = operand
 
 
-class UMinusOp(UnaryOp):
+cdef class UMinusOp(UnaryOp):
     """Lua minus unitary operator.
 
     Attributes:
@@ -749,7 +746,7 @@ class UMinusOp(UnaryOp):
         super(UMinusOp, self).__init__('UMinusOp', operand)
 
 
-class UBNotOp(UnaryOp):
+cdef class UBNotOp(UnaryOp):
     """Lua binary not unitary operator.
 
     Attributes:
@@ -759,7 +756,7 @@ class UBNotOp(UnaryOp):
         super(UBNotOp, self).__init__('UBNotOp', operand)
 
 
-class ULNotOp(UnaryOp):
+cdef class ULNotOp(UnaryOp):
     """Logical not operator.
 
     Attributes:
@@ -771,7 +768,7 @@ class ULNotOp(UnaryOp):
 ''' ----------------------------------------------------------------------- '''
 ''' 3.4.7 – The Length Operator                                             '''
 ''' ----------------------------------------------------------------------- '''
-class ULengthOP(UnaryOp):
+cdef class ULengthOP(UnaryOp):
     """Length operator.
     """
     def __init__(self, operand):
@@ -781,13 +778,13 @@ class ULengthOP(UnaryOp):
 '''
 Left Hand Side expression.
 '''
-class Lhs(Expression):
+cdef class Lhs(Expression):
     """Define a Lua Left Hand Side expression.
     """
     pass
 
 
-class Name(Lhs):
+cdef class Name(Lhs):
     """Define a Lua name expression.
 
     Attributes:
@@ -798,7 +795,7 @@ class Name(Lhs):
         self.id = id
 
 
-class Index(Lhs):
+cdef class Index(Lhs):
     """Define a Lua index expression.
 
     Attributes:

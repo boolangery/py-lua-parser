@@ -1,4 +1,4 @@
-from luaparser.astnodes import *
+from luaparser.astnodes cimport *
 from enum import Enum
 from libcpp cimport bool
 from libcpp.vector cimport vector
