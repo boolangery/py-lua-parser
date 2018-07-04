@@ -152,6 +152,8 @@ class Builder:
         # comments waiting to be inserted into ast nodes
         self._comments_index_stack = []
         self.comments = []
+        self._hidden_handled = False
+        self._hidden_handled_stack = []
 
 
     def process(self):
@@ -166,17 +168,20 @@ class Builder:
         self._index_stack.append(self._stream.index)
         self._right_index_stack.append(self._right_index)
         self._comments_index_stack.append(len(self.comments))
+        self._hidden_handled_stack.append(self._hidden_handled)
 
     def success(self):
         self._index_stack.pop()
         self._right_index_stack.pop()
         self._comments_index_stack.pop()
+        self._hidden_handled_stack.pop()
         return True
 
     def failure(self):
         #logging.debug('failure ' + inspect.stack()[1][3])
         self._stream.seek(self._index_stack.pop())
         self._right_index = self._right_index_stack.pop()
+        self._hidden_handled = self._hidden_handled_stack.pop()
         n_elem_to_delete = len(self.comments) - self._comments_index_stack.pop()
         if n_elem_to_delete >= 1:
             del self.comments[-n_elem_to_delete:]
@@ -195,6 +200,7 @@ class Builder:
             self.text = token.text
             self.type = tok_type
             self._stream.consume()
+            self._hidden_handled = False
             if hidden_right:
                 self.handle_hidden_right()
             return True
@@ -208,6 +214,7 @@ class Builder:
 
         if tok_type == type:
             self._stream.consume()
+            self._hidden_handled = False
             if hidden_right:
                 self.handle_hidden_right()
             return True
@@ -229,6 +236,7 @@ class Builder:
         if tok_type in types:
             self.type = tok_type
             self._stream.consume()
+            self._hidden_handled = False
             if hidden_right:
                 self.handle_hidden_right()
             return True
@@ -246,23 +254,31 @@ class Builder:
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
         if tokens:
             for t in tokens:
-                if t.type == Tokens.LINE_COMMENT:
-                    self.comments.append(Comment(t.text))
-                elif t.type == Tokens.COMMENT:
-                    self.comments.append(Comment(t.text, True))
-                elif t.type == Tokens.NEWLINE:
-                    self.comments.append(None)  # indicate newline
+                if not self._hidden_handled:
+                    if t.type == Tokens.LINE_COMMENT:
+                        self.comments.append(Comment(t.text))
+                    elif t.type == Tokens.COMMENT:
+                        self.comments.append(Comment(t.text, True))
+                    elif t.type == Tokens.NEWLINE:
+                        # append n time a None value (indicate newline)
+                        self.comments += t.text.count('\n') * [None]
+
+        self._hidden_handled = True
 
     def handle_hidden_right(self, is_newline=False):
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
-                if t.type == Tokens.LINE_COMMENT:
-                    self.comments.append(Comment(t.text))
-                elif t.type == Tokens.COMMENT:
-                    self.comments.append(Comment(t.text, True))
-                elif t.type == Tokens.NEWLINE:
-                    self.comments.append(None)  # indicate newline
+                if not self._hidden_handled:
+                    if t.type == Tokens.LINE_COMMENT:
+                        self.comments.append(Comment(t.text))
+                    elif t.type == Tokens.COMMENT:
+                        self.comments.append(Comment(t.text, True))
+                    elif t.type == Tokens.NEWLINE:
+                        # append n time a None value (indicate newline)
+                        self.comments += t.text.count('\n') * [None]
+
+        self._hidden_handled = True
 
     def get_comments(self):
         comments = [c for c in self.comments if c is not None]
@@ -318,6 +334,7 @@ class Builder:
         return Block(statements)
 
     def parse_stat(self):
+        comments = self.get_comments()
 
         stat = self.parse_assignment() or \
                self.parse_var(True) or \
@@ -331,6 +348,7 @@ class Builder:
                self.parse_label()
 
         if stat:
+            stat.comments = comments
             return stat
 
         stat = self.parse_do_block()
@@ -367,7 +385,7 @@ class Builder:
                 values = self.parse_expr_list()
                 if values:
                     self.success()
-                    return Assign(targets, values, self.get_comments())
+                    return Assign(targets, values)
                 else:
                     self.abort()
 
@@ -562,7 +580,7 @@ class Builder:
                     expr = self.parse_expr()
                     if expr:
                         self.success()
-                        return Repeat(body, expr, self.get_comments())
+                        return Repeat(body, expr)
 
         return self.failure()
 
@@ -570,7 +588,7 @@ class Builder:
         self.save()
         self._expected = []
         if self.next_is_rc(Tokens.LOCAL):
-            comments = self.get_comments()
+
             targets = self.parse_name_list()
             if targets:
                 values = []
@@ -587,7 +605,7 @@ class Builder:
                     self.failure()
 
                 self.success()
-                return LocalAssign(targets, values, comments)
+                return LocalAssign(targets, values)
 
             self.save()
 
@@ -597,7 +615,9 @@ class Builder:
                 if body:
                     self.success()
                     self.success()
-                    return LocalFunction(name, body[0], body[1])
+                    node = LocalFunction(name, body[0], body[1])
+                    self.handle_hidden_right()
+                    return node
             self.failure()
             self.abort()
 
@@ -607,7 +627,7 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.GOTO) and self.next_is_rc(Tokens.NAME):
             self.success()
-            return Goto(Name(self.text), self.get_comments())
+            return Goto(Name(self.text))
         return self.failure()
 
     def parse_if_stat(self):
@@ -620,7 +640,7 @@ class Builder:
                     self.handle_hidden_right()
                     body = self.parse_block()
                     if body:
-                        main = If(test, body, None, self.get_comments())
+                        main = If(test, body, None)
                         root = main
                         while True:  # zero or more
                             orelse = self.parse_elseif_stat()
@@ -662,7 +682,7 @@ class Builder:
                     return body
         return self.failure()
 
-    def  parse_for_stat(self):
+    def parse_for_stat(self):
         self.save()
         if self.next_is_rc(Tokens.FOR):
             self.save()
@@ -684,7 +704,7 @@ class Builder:
                                 return self.failure()
                             self.success()
                             self.success()
-                            return Fornum(target, start, stop, step, body, self.get_comments())
+                            return Fornum(target, start, stop, step, body)
 
             self.failure_save()
             target = self.parse_name_list()
@@ -695,7 +715,7 @@ class Builder:
                     if body:
                         self.success()
                         self.success()
-                        return Forin(body, iter, target, self.get_comments())
+                        return Forin(body, iter, target)
             self.failure()
 
         return self.failure()
@@ -713,13 +733,17 @@ class Builder:
                     if func_body:
                         self.success()
                         self.success()
-                        return Method(names, name, func_body[0], func_body[1], self.get_comments())
+                        node = Method(names, name, func_body[0], func_body[1])
+                        self.handle_hidden_right()
+                        return node
 
                 self.failure()
 
                 func_body = self.parse_func_body()
                 if func_body:
-                    return Function(names, func_body[0], func_body[1])
+                    node = Function(names, func_body[0], func_body[1])
+                    self.handle_hidden_right()
+                    return node
             self.abort()
 
         return self.failure()
@@ -755,7 +779,7 @@ class Builder:
                     body = self.parse_block()
                     if body:
                         self._expected = []
-                        if self.next_is_rc(Tokens.END):
+                        if self.next_is_rc(Tokens.END, False):
                             self.success()
                             return args, body
                         else:
@@ -1142,7 +1166,9 @@ class Builder:
             func_body = self.parse_func_body()
             if func_body:
                 self.success()
-                return AnonymousFunction(func_body[0], func_body[1])
+                node = AnonymousFunction(func_body[0], func_body[1])
+                self.handle_hidden_right()
+                return node
 
         return self.failure()
 

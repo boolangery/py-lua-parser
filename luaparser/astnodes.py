@@ -53,8 +53,8 @@ class Chunk(Node):
     Attributes:
         body (`Block`): Chunk body.
     """
-    def __init__(self, body):
-        super(Chunk, self).__init__('Chunk')
+    def __init__(self, body, comments=[]):
+        super(Chunk, self).__init__('Chunk', comments)
         self.body = body
 
 
@@ -260,8 +260,8 @@ class Call(Statement):
         func (`Expression`): Function to call.
         args (`list<Expression>`): Function call arguments.
     """
-    def __init__(self, func, args):
-        super(Call, self).__init__('Call')
+    def __init__(self, func, args, comments=[]):
+        super(Call, self).__init__('Call', comments)
         self.func = func
         self.args = args
 
