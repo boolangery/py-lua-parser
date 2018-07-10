@@ -1,6 +1,7 @@
-from luaparser.utils  import tests
+from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
+from luaparser.builder import SyntaxException
 import textwrap
 
 
@@ -345,3 +346,10 @@ class StatementsTestCase(tests.TestCase):
             Nil(), String('error'), Number(42)
         ])]))
         self.assertEqual(exp, tree)
+
+    def test_ambiguous_syntax(self):
+        src = textwrap.dedent("""
+            local a = b
+            (print)('foo')
+            """)
+        self.assertRaises(SyntaxException, ast.parse, src)

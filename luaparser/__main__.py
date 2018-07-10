@@ -59,7 +59,7 @@ def main():
         else:
             print(output)
     except SyntaxException as e:
-        print('error: ' + str(e))
+        print(str(e))
 
 
 if __name__ == '__main__':

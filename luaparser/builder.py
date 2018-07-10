@@ -6,7 +6,12 @@ import re
 
 
 class SyntaxException(Exception):
-    pass
+    def __init__(self, user_msg, token=None):
+        if token:
+            message = '(' + str(token.line) + ',' + str(token.start) + '): Error: ' + user_msg
+        else:
+            message = 'Error: ' + user_msg
+        super().__init__(message)
 
 
 class Expr(Enum):
@@ -228,6 +233,9 @@ class Builder:
             self._expected.append(type)
             return False
 
+    def prev_is(self, type):
+        return self._stream.LT(-1).type == type
+
     def next_in_rc(self, types, hidden_right=True):
         token = self._stream.LT(1)
         tok_type = token.type
@@ -293,6 +301,9 @@ class Builder:
             else:
                 return c
         return None
+
+    def has_newline_before(self):
+        return None in self.comments
 
     def abort(self):
         types_str = []
@@ -497,6 +508,15 @@ class Builder:
                 return Invoke(None, name, [string])
 
         self.failure_save()
+        if self.next_is(Tokens.OPAR):
+            # handle the ambiguous syntax
+            # http://lua-users.org/lists/lua-l/2009-08/msg00543.html
+            # example:
+            #   a = b + c;
+            #   (print or io.write)('foo')
+            if self.has_newline_before() and not self.prev_is(Tokens.SEMCOL):
+                raise SyntaxException('Ambiguous syntax detected', self._stream.LT(-1))
+
         if self.next_is_rc(Tokens.OPAR, False):
             self.handle_hidden_right()
             expr_list = self.parse_expr_list() or []
