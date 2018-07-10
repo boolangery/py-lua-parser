@@ -1,6 +1,7 @@
+from antlr4 import InputStream, CommonTokenStream
+from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astnodes import *
 from enum import Enum
-from luaparser.ast import *
 import ast
 import re
 
@@ -139,7 +140,7 @@ class Builder:
 
 
     def __init__(self, source):
-        self._stream = get_token_stream(source)
+        self._stream = CommonTokenStream(LuaLexer(InputStream(source)))
         # contains a list of CommonTokens
         self._line_count = 0
         self._right_index = 0

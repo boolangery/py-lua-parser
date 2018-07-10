@@ -1,5 +1,5 @@
 """
-    ``astNodes`` module
+    ``astnodes`` module
     ===================
 
     Contains all Ast Node definitions.

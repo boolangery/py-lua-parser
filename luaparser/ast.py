@@ -2,12 +2,12 @@ from antlr4 import InputStream, CommonTokenStream
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astnodes import *
 from luaparser import printers
+from luaparser.builder import Builder
 from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
 
 
 def parse(source):
-    from luaparser.builder import Builder
     return Builder(source).process()
 
 def get_token_stream(source):

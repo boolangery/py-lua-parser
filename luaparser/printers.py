@@ -1,3 +1,10 @@
+"""
+    ``printers`` module
+    ===================
+
+    Contains utilities to render an ast tree to text or html.
+"""
+
 from luaparser.astnodes import *
 from luaparser.utils.visitor import *
 from enum import Enum
@@ -8,15 +15,14 @@ class Style(Enum):
     PYTHON  = 1
     HTML    = 2
 
-class PythonStyleVisitor():
+
+class PythonStyleVisitor:
     def __init__(self, indent):
         self.indentValue = indent
         self.currentIndent = 0
 
     @visitor(str)
     def visit(self, node):
-        # if node.startswith('"') and node.endswith('"'):
-        #     node = node[1:-1]
         return repr(node)
 
     @visitor(float)
@@ -183,4 +189,3 @@ class HTMLStyleVisitor:
                     xml_attr.append(child_node)
 
         return xml_node
-
