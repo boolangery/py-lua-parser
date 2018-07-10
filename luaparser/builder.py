@@ -741,6 +741,7 @@ class Builder:
 
                 func_body = self.parse_func_body()
                 if func_body:
+                    self.success()
                     node = Function(names, func_body[0], func_body[1])
                     self.handle_hidden_right()
                     return node
