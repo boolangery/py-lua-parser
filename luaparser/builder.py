@@ -515,8 +515,13 @@ class Builder:
             # example:
             #   a = b + c;
             #   (print or io.write)('foo')
-            if self.has_newline_before() and not self.prev_is(Tokens.SEMCOL):
-                raise SyntaxException('Ambiguous syntax detected', self._stream.LT(-1))
+
+            # check if a newline is present before OPAR
+            tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
+            if tokens:
+                for t in tokens:
+                    if t.type == Tokens.NEWLINE and not self.prev_is(Tokens.SEMCOL):
+                        raise SyntaxException('Ambiguous syntax detected', self._stream.LT(-1))
 
         if self.next_is_rc(Tokens.OPAR, False):
             self.handle_hidden_right()

@@ -541,38 +541,3 @@ class ExpressionsTestCase(tests.TestCase):
             )]
         )]))
         self.assertEqual(exp, tree)
-
-    def test_cont_int_1(self):
-        tree = ast.parse(textwrap.dedent(r'''
-        describe("", function()
-          it(function()
-            do
-              function foo()
-              end
-            end
-          end)
-          do
-            function bar()
-            end
-          end
-        end)
-        '''))
-
-        exp = Chunk(Block([
-            Call(Name('describe'), [
-                String(''),
-                AnonymousFunction([], Block([
-                    Call(Name('it'), [
-                        AnonymousFunction([], Block([
-                            Do(Block([
-                                Function(Name('foo'), [], Block([]))
-                            ]))
-                        ]))
-                    ]),
-                    Do(Block([
-                        Function(Name('bar'), [], Block([]))
-                    ]))
-                ]))
-            ])
-        ]))
-        self.assertEqual(exp, tree)
