@@ -427,47 +427,28 @@ class Builder:
         return self.failure()
 
     def parse_var(self, is_stat=False):
-        self.save()
-        number_of_tail = 0
-        root = self.parse_callee()
-
-        # count number of tail and return callee if no tails
-        if root:
-            if self.parse_tail():
-                number_of_tail += 1
-                self.handle_hidden_right()
-                while self.parse_tail():
-                    self.handle_hidden_right()
-                    number_of_tail += 1
-            else:
-                # only a callee
-                self.success()
-                return root
-
-        # we have one callee or more
-        self.failure_save()
-
         root = self.parse_callee()
         if root:
-            for n in range(0, number_of_tail):
-                tail = self.parse_tail()
-                if isinstance(tail, Index):
+            tail = self.parse_tail()
+            while tail is not None:
+                if isinstance(tail, Call):
+                    tail.func = root
+                elif isinstance(tail, Index):
                     tail.value = root
                 elif isinstance(tail, Invoke):
                     tail.source = root
-                elif isinstance(tail, Call):
-                    tail.func = root
                 else:
                     tail = Call(root, _listify(tail))
                 root = tail
-                if n < number_of_tail:
+
+                tail = self.parse_tail()
+                if tail:
                     self.handle_hidden_right()
 
             self.handle_hidden_right()
-            self.success()
             return root
 
-        return self.failure()
+        return False
 
     def parse_tail(self):
         # do not render last hidden
