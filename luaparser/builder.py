@@ -184,7 +184,6 @@ class Builder:
         return True
 
     def failure(self):
-        #logging.debug('failure ' + inspect.stack()[1][3])
         self._stream.seek(self._index_stack.pop())
         self._right_index = self._right_index_stack.pop()
         self._hidden_handled = self._hidden_handled_stack.pop()
@@ -194,8 +193,17 @@ class Builder:
         return None
 
     def failure_save(self):
-        self.failure()
-        self.save()
+        self._stream.seek(self._index_stack.pop())
+        self._right_index = self._right_index_stack.pop()
+        self._hidden_handled = self._hidden_handled_stack.pop()
+        n_elem_to_delete = len(self.comments) - self._comments_index_stack.pop()
+        if n_elem_to_delete >= 1:
+            del self.comments[-n_elem_to_delete:]
+
+        self._index_stack.append(self._stream.index)
+        self._right_index_stack.append(self._right_index)
+        self._comments_index_stack.append(len(self.comments))
+        self._hidden_handled_stack.append(self._hidden_handled)
 
     def next_is_rc(self, type, hidden_right=True):
         token = self._stream.LT(1)
@@ -316,7 +324,6 @@ class Builder:
         raise SyntaxException("Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(token.column))
 
     def parse_chunk(self):
-        self.save()
         self._stream.LT(1)
         self.handle_hidden_left()
         block = self.parse_block()
@@ -324,12 +331,10 @@ class Builder:
             token = self._stream.LT(1)
             if token.type == -1:
                 # do not consume EOF
-                self.success()
                 return Chunk(block)
-        return self.failure()
+        return False
 
     def parse_block(self):
-        self.save()
         statements = []
 
         while True:
@@ -342,7 +347,6 @@ class Builder:
         stat = self.parse_ret_stat()
         if stat:
             statements.append(stat)
-        self.success()
         return Block(statements)
 
     def parse_stat(self):
