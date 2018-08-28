@@ -49,7 +49,7 @@ class StatementsTestCase(tests.TestCase):
     def test_set_table_index(self):
         tree = ast.parse('_ENV.x = val')
         exp = Chunk(Block([
-            Assign(targets=[Index(idx=Name('x'), value=Name('_ENV'))], values=[Name('val')])
+            Assign(targets=[Index(idx=String('x'), value=Name('_ENV'))], values=[Name('val')])
         ]))
         self.assertEqual(exp, tree)
 
@@ -88,7 +88,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=[Call(func=Index(Name('pairs'), Name('foo')), args=[Table([])])],
+                iter=[Call(func=Index(String('pairs'), Name('foo')), args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -118,7 +118,7 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
-                iter=[Invoke(source=Index(Name('foo'), Name('bar')), func=Name('pairs'), args=[Table([])])],
+                iter=[Invoke(source=Index(String('foo'), Name('bar')), func=Name('pairs'), args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
         ]))
@@ -152,7 +152,7 @@ class StatementsTestCase(tests.TestCase):
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=[Call(
-                    func=Index(idx=Name('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
+                    func=Index(idx=String('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
                     args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )

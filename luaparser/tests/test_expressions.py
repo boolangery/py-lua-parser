@@ -428,7 +428,7 @@ class ExpressionsTestCase(tests.TestCase):
     def test_index_function_call(self):
         tree = ast.parse(r'foo.print {}')
         exp = Chunk(Block([Call(
-            func=Index(Name('print'), Name('foo')),
+            func=Index(String('print'), Name('foo')),
             args=[Table([])]
         )]))
         self.assertEqual(exp, tree)
@@ -504,13 +504,13 @@ class ExpressionsTestCase(tests.TestCase):
         print(ast.toPrettyStr(tree))
         exp = Chunk(Block([Function(
             name=Index(
-                idx=Name('f'),
+                idx=String('f'),
                 value=Index(
-                    idx=Name('c'),
+                    idx=String('c'),
                     value=Index(
-                        idx=Name('b'),
+                        idx=String('b'),
                         value=Index(
-                            idx=Name('a'),
+                            idx=String('a'),
                             value=Name('t')
                         )
                     )
@@ -524,13 +524,13 @@ class ExpressionsTestCase(tests.TestCase):
         tree = ast.parse(r't.a.b.c.f = function () end')
         exp = Chunk(Block([Assign(
             targets=[Index(
-                idx=Name('f'),
+                idx=String('f'),
                 value=Index(
-                    idx=Name('c'),
+                    idx=String('c'),
                     value=Index(
-                        idx=Name('b'),
+                        idx=String('b'),
                         value=Index(
-                            idx=Name('a'),
+                            idx=String('a'),
                             value=Name('t')
                         )
                     )
