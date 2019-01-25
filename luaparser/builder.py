@@ -1245,7 +1245,7 @@ class Builder:
                     value = self.parse_expr()
                     if value:
                         self.success()
-                        return Field(key, value, comments)
+                        return Field(key, value, comments, between_brackets=True)
 
         self.failure_save()
         if self.next_is_rc(Tokens.NAME):

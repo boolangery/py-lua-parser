@@ -408,10 +408,11 @@ class Field(Expression):
         key (`Expression`): Key.
         value (`Expression`): Value.
     """
-    def __init__(self, key, value, comments=[]):
+    def __init__(self, key, value, comments=[], between_brackets=False):
         super(Field, self).__init__('Field', comments)
         self.key = key
         self.value = value
+        self.between_brackets = between_brackets
 
 
 class Dots(Expression):

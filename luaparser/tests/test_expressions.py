@@ -389,8 +389,8 @@ class ExpressionsTestCase(tests.TestCase):
                     Field(Name('options'), Table([Field(Name('radio'), TrueExpr())])),
                     Field(Number(1), String('enabled')),
                     Field(Number(2), Number(157)),
-                    Field(TrueExpr(), FalseExpr()),
-                    Field(String('true'), TrueExpr()),
+                    Field(TrueExpr(), FalseExpr(), between_brackets=True),
+                    Field(String('true'), TrueExpr(), between_brackets=True),
                 ]
             )]
         ), SemiColon()]))
