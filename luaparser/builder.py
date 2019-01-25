@@ -4,6 +4,7 @@ from luaparser.astnodes import *
 from enum import Enum
 import ast
 import re
+from typing import List
 
 
 class SyntaxException(Exception):
@@ -139,26 +140,26 @@ class Builder:
     def __init__(self, source):
         self._stream = CommonTokenStream(LuaLexer(InputStream(source)))
         # contains a list of CommonTokens
-        self._line_count = 0
-        self._right_index = 0
-        self._last_expr_type = None
+        self._line_count: int = 0
+        self._right_index: int = 0
+        self._last_expr_type: int = None
 
         # following stack are used to backup values
-        self._index_stack = []
-        self._right_index_stack = []
-        self.text = ''  # last token text
-        self.type = -1  # last token type
+        self._index_stack: List[int] = []
+        self._right_index_stack: List[int] = []
+        self.text: str = ''  # last token text
+        self.type: int = -1  # last token type
 
         # contains expected token in case of invalid input code
         self._expected = []
 
         # comments waiting to be inserted into ast nodes
-        self._comments_index_stack = []
-        self.comments = []
-        self._hidden_handled = False
-        self._hidden_handled_stack = []
+        self._comments_index_stack: List[int] = []
+        self.comments: List[Comment] = []
+        self._hidden_handled: bool = False
+        self._hidden_handled_stack: List[bool] = []
 
-    def process(self):
+    def process(self) -> Node:
         node = self.parse_chunk()
 
         if not node:
@@ -201,9 +202,9 @@ class Builder:
         self._comments_index_stack.append(len(self.comments))
         self._hidden_handled_stack.append(self._hidden_handled)
 
-    def next_is_rc(self, type_to_seek, hidden_right=True):
+    def next_is_rc(self, type_to_seek: int, hidden_right: bool = True) -> bool:
         token = self._stream.LT(1)
-        tok_type = token.type
+        tok_type: int = token.type
         self._right_index = self._stream.index
 
         if tok_type == type_to_seek:
@@ -217,9 +218,9 @@ class Builder:
         self._expected.append(type_to_seek)
         return False
 
-    def next_is_c(self, type_to_seek, hidden_right=True):
+    def next_is_c(self, type_to_seek: int, hidden_right: bool = True) -> bool:
         token = self._stream.LT(1)
-        tok_type = token.type
+        tok_type: int = token.type
         self._right_index = self._stream.index
 
         if tok_type == type_to_seek:
@@ -231,19 +232,19 @@ class Builder:
         self._expected.append(type_to_seek)
         return False
 
-    def next_is(self, type_to_seek):
+    def next_is(self, type_to_seek) -> bool:
         if self._stream.LT(1).type == type_to_seek:
             return True
         else:
             self._expected.append(type_to_seek)
             return False
 
-    def prev_is(self, type_to_seek):
+    def prev_is(self, type_to_seek) -> bool:
         return self._stream.LT(-1).type == type_to_seek
 
-    def next_in_rc(self, types, hidden_right=True):
+    def next_in_rc(self, types: List[int], hidden_right: bool = True) -> bool:
         token = self._stream.LT(1)
-        tok_type = token.type
+        tok_type: int = token.type
         self._right_index = self._stream.index
 
         if tok_type in types:
@@ -256,14 +257,14 @@ class Builder:
         self._expected.extend(types)
         return False
 
-    def next_in(self, types):
+    def next_in(self, types: List[int]) -> bool:
         if self._stream.LT(1).type in types:
             return True
         else:
             self._expected.extend(types)
             return False
 
-    def handle_hidden_left(self):
+    def handle_hidden_left(self) -> None:
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
         if tokens:
             for t in tokens:
@@ -278,7 +279,7 @@ class Builder:
 
         self._hidden_handled = True
 
-    def handle_hidden_right(self):
+    def handle_hidden_right(self) -> None:
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
@@ -293,12 +294,12 @@ class Builder:
 
         self._hidden_handled = True
 
-    def get_comments(self):
+    def get_comments(self) -> List[Comment]:
         comments = [c for c in self.comments if c is not None]
         self.comments = []
         return comments
 
-    def get_inline_comment(self):
+    def get_inline_comment(self) -> Comment or None:
         if self.comments:
             c = self.comments.pop(0)
             if c is None:
@@ -307,10 +308,10 @@ class Builder:
                 return c
         return None
 
-    def has_newline_before(self):
+    def has_newline_before(self) -> bool:
         return None in self.comments
 
-    def abort(self):
+    def abort(self) -> None:
         types_str = []
         token = self._stream.LT(2)
         expected = set(self._expected)
@@ -321,7 +322,7 @@ class Builder:
             "Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(
                 token.column))
 
-    def parse_chunk(self):
+    def parse_chunk(self) -> Chunk or None:
         self._stream.LT(1)
         self.handle_hidden_left()
         block = self.parse_block()
@@ -332,7 +333,7 @@ class Builder:
                 return Chunk(block)
         return False
 
-    def parse_block(self):
+    def parse_block(self) -> Block:
         statements = []
 
         while True:
@@ -347,7 +348,7 @@ class Builder:
             statements.append(stat)
         return Block(statements)
 
-    def parse_stat(self):
+    def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
 
         stat = \
@@ -380,7 +381,7 @@ class Builder:
 
         return None
 
-    def parse_ret_stat(self):
+    def parse_ret_stat(self) -> Return or bool:
         self.save()
         if self.next_is_rc(Tokens.RETURN):
             expr_list = self.parse_expr_list()  # optional
@@ -392,7 +393,7 @@ class Builder:
             return Return(expr_list)
         return self.failure()
 
-    def parse_assignment(self):
+    def parse_assignment(self) -> Assign or bool:
         self.save()
         targets = self.parse_var_list()
         if targets:
@@ -406,7 +407,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_var_list(self):
+    def parse_var_list(self) -> List[Expression] or bool:
         lua_vars = []
         self.save()
         var = self.parse_var()
@@ -429,7 +430,7 @@ class Builder:
             return lua_vars
         return self.failure()
 
-    def parse_var(self):
+    def parse_var(self) -> Node or bool:
         root = self.parse_callee()
         if root:
             tail = self.parse_tail()
@@ -453,7 +454,7 @@ class Builder:
 
         return False
 
-    def parse_tail(self):
+    def parse_tail(self) -> Node or bool:
         # do not render last hidden
         self.save()
         if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME, False):
@@ -528,8 +529,8 @@ class Builder:
 
         return self.failure()
 
-    def parse_expr_list(self):
-        expr_list = []
+    def parse_expr_list(self) -> List[Expression] or bool:
+        expr_list: List[Expression] = []
         self.save()
         expr = self.parse_expr()
         if expr:
@@ -554,7 +555,7 @@ class Builder:
             return expr_list
         return self.failure()
 
-    def parse_do_block(self):
+    def parse_do_block(self) -> Block or bool:
         self.save()
         if self.next_is_rc(Tokens.DO, False):
             self.handle_hidden_right()
@@ -565,7 +566,7 @@ class Builder:
                     return block
         return self.failure()
 
-    def parse_while_stat(self):
+    def parse_while_stat(self) -> While or bool:
         self.save()
         if self.next_is_rc(Tokens.WHILE):
             self._expected = []
@@ -580,7 +581,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_repeat_stat(self):
+    def parse_repeat_stat(self) -> Repeat or bool:
         self.save()
         if self.next_is_rc(Tokens.REPEAT, False):
             self.handle_hidden_right()
@@ -594,7 +595,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_local(self):
+    def parse_local(self) -> Node or bool:
         self.save()
         self._expected = []
         if self.next_is_rc(Tokens.LOCAL):

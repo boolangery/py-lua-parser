@@ -39,9 +39,9 @@ class Node:
 
 
 class Comment:
-    def __init__(self, s, is_multi_line=False):
-        self.s = s
-        self.is_multi_line = is_multi_line
+    def __init__(self, s: str, is_multi_line: bool = False):
+        self.s: str = s
+        self.is_multi_line: bool = is_multi_line
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
