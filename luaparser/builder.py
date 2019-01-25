@@ -16,16 +16,16 @@ class SyntaxException(Exception):
 
 
 class Expr(Enum):
-    OR      = 1
-    AND     = 2
-    REL     = 3
-    CONCAT  = 4
-    ADD     = 5
-    MULT    = 6
+    OR = 1
+    AND = 2
+    REL = 3
+    CONCAT = 4
+    ADD = 5
+    MULT = 6
     BITWISE = 7
-    UNARY   = 8
-    POW     = 9
-    ATOM    = 10
+    UNARY = 8
+    POW = 9
+    ATOM = 10
 
 
 class Tokens:
@@ -94,26 +94,24 @@ class Tokens:
     SHEBANG = 63
     LongBracket = 64
 
-LITERAL_NAMES = [ "<INVALID>",
-            "'and'", "'break'", "'do'", "'else'", "'elseif'", "'end'", "'false'",
-            "'for'", "'function'", "'goto'", "'if'", "'in'", "'local'",
-            "'nil'", "'not'", "'or'", "'repeat'", "'return'", "'then'",
-            "'true'", "'until'", "'while'", "'+'", "'-'", "'*'", "'/'",
-            "'//'", "'%'", "'^'", "'#'", "'=='", "'~='", "'<='", "'>='",
-            "'<'", "'>'", "'='", "'&'", "'|'", "'~'", "'>>'", "'<<'", "'('",
-            "')'", "'{'", "'}'", "'['", "']'", "'::'", "':'", "','", "'...'",
-            "'..'", "'.'", "';'", "NAME", "NUMBER", "STRING", "COMMENT", "LINE_COMMENT",
-            "SPACE", "NEWLINE", "SHEBANG", "LONG_BRACKET"]
+
+LITERAL_NAMES = ["<INVALID>",
+                 "'and'", "'break'", "'do'", "'else'", "'elseif'", "'end'", "'false'",
+                 "'for'", "'function'", "'goto'", "'if'", "'in'", "'local'",
+                 "'nil'", "'not'", "'or'", "'repeat'", "'return'", "'then'",
+                 "'true'", "'until'", "'while'", "'+'", "'-'", "'*'", "'/'",
+                 "'//'", "'%'", "'^'", "'#'", "'=='", "'~='", "'<='", "'>='",
+                 "'<'", "'>'", "'='", "'&'", "'|'", "'~'", "'>>'", "'<<'", "'('",
+                 "')'", "'{'", "'}'", "'['", "']'", "'::'", "':'", "','", "'...'",
+                 "'..'", "'.'", "';'", "NAME", "NUMBER", "STRING", "COMMENT", "LINE_COMMENT",
+                 "SPACE", "NEWLINE", "SHEBANG", "LONG_BRACKET"]
 
 
 def _listify(obj):
     if not isinstance(obj, list):
-        l = []
-        l.append(obj)
-        return l
+        return [obj]
     else:
         return obj
-
 
 
 class Builder:
@@ -138,7 +136,6 @@ class Builder:
         Tokens.NEQ,
         Tokens.EQ]
 
-
     def __init__(self, source):
         self._stream = CommonTokenStream(LuaLexer(InputStream(source)))
         # contains a list of CommonTokens
@@ -161,7 +158,6 @@ class Builder:
         self._hidden_handled = False
         self._hidden_handled_stack = []
 
-
     def process(self):
         node = self.parse_chunk()
 
@@ -170,7 +166,7 @@ class Builder:
         return node
 
     def save(self):
-        #logging.debug('trying ' + inspect.stack()[1][3])
+        # logging.debug('trying ' + inspect.stack()[1][3])
         self._index_stack.append(self._stream.index)
         self._right_index_stack.append(self._right_index)
         self._comments_index_stack.append(len(self.comments))
@@ -205,12 +201,12 @@ class Builder:
         self._comments_index_stack.append(len(self.comments))
         self._hidden_handled_stack.append(self._hidden_handled)
 
-    def next_is_rc(self, type, hidden_right=True):
+    def next_is_rc(self, type_to_seek, hidden_right=True):
         token = self._stream.LT(1)
         tok_type = token.type
         self._right_index = self._stream.index
 
-        if tok_type == type:
+        if tok_type == type_to_seek:
             self.text = token.text
             self.type = tok_type
             self._stream.consume()
@@ -218,32 +214,32 @@ class Builder:
             if hidden_right:
                 self.handle_hidden_right()
             return True
-        self._expected.append(type)
+        self._expected.append(type_to_seek)
         return False
 
-    def next_is_c(self, type, hidden_right=True):
+    def next_is_c(self, type_to_seek, hidden_right=True):
         token = self._stream.LT(1)
         tok_type = token.type
         self._right_index = self._stream.index
 
-        if tok_type == type:
+        if tok_type == type_to_seek:
             self._stream.consume()
             self._hidden_handled = False
             if hidden_right:
                 self.handle_hidden_right()
             return True
-        self._expected.append(type)
+        self._expected.append(type_to_seek)
         return False
 
-    def next_is(self, type):
-        if self._stream.LT(1).type == type:
+    def next_is(self, type_to_seek):
+        if self._stream.LT(1).type == type_to_seek:
             return True
         else:
-            self._expected.append(type)
+            self._expected.append(type_to_seek)
             return False
 
-    def prev_is(self, type):
-        return self._stream.LT(-1).type == type
+    def prev_is(self, type_to_seek):
+        return self._stream.LT(-1).type == type_to_seek
 
     def next_in_rc(self, types, hidden_right=True):
         token = self._stream.LT(1)
@@ -282,7 +278,7 @@ class Builder:
 
         self._hidden_handled = True
 
-    def handle_hidden_right(self, is_newline=False):
+    def handle_hidden_right(self):
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
@@ -318,10 +314,12 @@ class Builder:
         types_str = []
         token = self._stream.LT(2)
         expected = set(self._expected)
-        for type in expected:
-            types_str.append(LITERAL_NAMES[type])
+        for type_to_seek in expected:
+            types_str.append(LITERAL_NAMES[type_to_seek])
 
-        raise SyntaxException("Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(token.column))
+        raise SyntaxException(
+            "Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(
+                token.column))
 
     def parse_chunk(self):
         self._stream.LT(1)
@@ -352,16 +350,17 @@ class Builder:
     def parse_stat(self):
         comments = self.get_comments()
 
-        stat = self.parse_assignment() or \
-               self.parse_var(True) or \
-               self.parse_while_stat() or \
-               self.parse_repeat_stat() or \
-               self.parse_local() or \
-               self.parse_goto_stat() or \
-               self.parse_if_stat() or \
-               self.parse_for_stat() or \
-               self.parse_function() or \
-               self.parse_label()
+        stat = \
+            self.parse_assignment() or \
+            self.parse_var() or \
+            self.parse_while_stat() or \
+            self.parse_repeat_stat() or \
+            self.parse_local() or \
+            self.parse_goto_stat() or \
+            self.parse_if_stat() or \
+            self.parse_for_stat() or \
+            self.parse_function() or \
+            self.parse_label()
 
         if stat:
             stat.comments = comments
@@ -408,17 +407,17 @@ class Builder:
         return self.failure()
 
     def parse_var_list(self):
-        vars = []
+        lua_vars = []
         self.save()
         var = self.parse_var()
         if var:
-            vars.append(var)
+            lua_vars.append(var)
             while True:
                 self.save()
                 if self.next_is_rc(Tokens.COMMA):
                     var = self.parse_var()
                     if var:
-                        vars.append(var)
+                        lua_vars.append(var)
                         self.success()
                     else:
                         self.failure()
@@ -427,10 +426,10 @@ class Builder:
                     self.failure()
                     break
             self.success()
-            return vars
+            return lua_vars
         return self.failure()
 
-    def parse_var(self, is_stat=False):
+    def parse_var(self):
         root = self.parse_callee()
         if root:
             tail = self.parse_tail()
@@ -720,13 +719,13 @@ class Builder:
             self.failure_save()
             target = self.parse_name_list()
             if target and self.next_is_rc(Tokens.IN):
-                iter = self.parse_expr_list()
-                if iter:
+                iter_expr = self.parse_expr_list()
+                if iter_expr:
                     body = self.parse_do_block()
                     if body:
                         self.success()
                         self.success()
-                        return Forin(body, iter, target)
+                        return Forin(body, iter_expr, target)
             self.failure()
 
         return self.failure()
@@ -759,8 +758,6 @@ class Builder:
             self.abort()
 
         return self.failure()
-
-
 
     def parse_names(self):
         self.save()
@@ -999,9 +996,9 @@ class Builder:
             while True:
                 self.save()
                 if self.next_in_rc([Tokens.MULT,
-                                   Tokens.DIV,
-                                   Tokens.MOD,
-                                   Tokens.FLOOR]):
+                                    Tokens.DIV,
+                                    Tokens.MOD,
+                                    Tokens.FLOOR]):
                     op = self.type
                     right = self.parse_bitwise_expr()
                     if right:
@@ -1156,7 +1153,8 @@ class Builder:
             return FalseExpr()
         return None
 
-    def parse_lua_str(self, lua_str):
+    @staticmethod
+    def parse_lua_str(lua_str):
         p = re.compile(r'^\[=+\[(.*)\]=+\]')  # nested quote pattern
         # try remove double quote:
         if lua_str.startswith('"') and lua_str.endswith('"'):

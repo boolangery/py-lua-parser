@@ -180,13 +180,13 @@ class StatementsTestCase(tests.TestCase):
               local foo = 'bar'
             end
             """))
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             Do(
                 body=Block([LocalAssign(targets=[Name('foo')],values=[String('bar')])])
             )
         ]))
-        print(ast.toPrettyStr(exp))
+        print(ast.to_pretty_str(exp))
         self.assertEqual(exp, tree)
 
     def test_while(self):

@@ -1,7 +1,8 @@
-from luaparser.utils  import tests
+from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
 import textwrap
+
 
 class TokensTestCase(tests.TestCase):
 
@@ -29,6 +30,7 @@ class TokensTestCase(tests.TestCase):
             """)
 
         called = False
+
         class NumberVisitor(ast.ASTVisitor):
             def visit_Number(self, node):
                 nonlocal called
@@ -44,5 +46,3 @@ class TokensTestCase(tests.TestCase):
             """)
 
         self.assertRaises(Exception, ast.parse, src)
-
-

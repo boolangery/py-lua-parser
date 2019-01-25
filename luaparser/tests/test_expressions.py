@@ -1,4 +1,4 @@
-from luaparser.utils  import tests
+from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
 import textwrap
@@ -10,6 +10,7 @@ class ExpressionsTestCase(tests.TestCase):
     """
     3.4.1 – Arithmetic Operators
     """
+
     def test_addition(self):
         tree = ast.parse(r'a = 1 + 0.2')
         exp = Chunk(Block([Assign(
@@ -112,6 +113,7 @@ class ExpressionsTestCase(tests.TestCase):
     """
     3.4.2 – Bitwise Operators
     """
+
     def test_bitwise_and(self):
         tree = ast.parse(r'a = 3&5')
         exp = Chunk(Block([Assign(
@@ -178,6 +180,7 @@ class ExpressionsTestCase(tests.TestCase):
     """
     3.4.4 – Relational Operators
     """
+
     def test_less_than(self):
         tree = ast.parse(r'res = (1 < 2)')
         exp = Chunk(Block([Assign(
@@ -244,10 +247,10 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-
     """
     3.4.5 – Logical Operators
     """
+
     def test_logic_and(self):
         tree = ast.parse(r'res = 4 and 5')
         exp = Chunk(Block([Assign(
@@ -281,9 +284,10 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.6 – Concatenation                                                   '''
     ''' ----------------------------------------------------------------------- '''
+
     def test_concatenation(self):
         tree = ast.parse(r'str = "begin".."end"')
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('str')],
             values=[Concat(
@@ -296,6 +300,7 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.7 – The Length Operator                                             '''
     ''' ----------------------------------------------------------------------- '''
+
     def test_length_op(self):
         tree = ast.parse(r'len = #t')
         exp = Chunk(Block([Assign(
@@ -304,10 +309,10 @@ class ExpressionsTestCase(tests.TestCase):
         )]))
         self.assertEqual(exp, tree)
 
-
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.9 – Table Constructors                                              '''
     ''' ----------------------------------------------------------------------- '''
+
     def test_dict(self):
         tree = ast.parse(r'a = {foo = "bar", bar = "foo"}')
         exp = Chunk(Block([Assign(
@@ -317,7 +322,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Field(Name('foo'), String('bar')),
                     Field(Name('bar'), String('foo'))
                 ]
-            )]
+                )]
         )]))
         self.assertEqual(exp, tree)
 
@@ -337,7 +342,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Field(Name('car'), Table([Field(Name('name'), String('bmw'))])),
                     Field(Name('options'), Table([Field(Name('radio'), TrueExpr())]))
                 ]
-            )]
+                )]
         ), SemiColon(), SemiColon(), SemiColon()]))
         self.assertEqual(exp, tree)
 
@@ -350,25 +355,25 @@ class ExpressionsTestCase(tests.TestCase):
           512,  1024,   2048
         }
         '''))
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
             values=[
                 Table([
-                    Field(Number(1),    Number(1)),
-                    Field(Number(2),    Number(2)),
-                    Field(Number(3),    Number(4)),
-                    Field(Number(4),    Number(8)),
-                    Field(Number(5),    Number(16)),
-                    Field(Number(6),    Number(32)),
-                    Field(Number(7),    Number(64)),
-                    Field(Number(8),    Number(128)),
-                    Field(Number(9),    Number(256)),
-                    Field(Number(10),   Number(512)),
-                    Field(Number(11),   Number(1024)),
-                    Field(Number(12),   Number(2048))
+                    Field(Number(1), Number(1)),
+                    Field(Number(2), Number(2)),
+                    Field(Number(3), Number(4)),
+                    Field(Number(4), Number(8)),
+                    Field(Number(5), Number(16)),
+                    Field(Number(6), Number(32)),
+                    Field(Number(7), Number(64)),
+                    Field(Number(8), Number(128)),
+                    Field(Number(9), Number(256)),
+                    Field(Number(10), Number(512)),
+                    Field(Number(11), Number(1024)),
+                    Field(Number(12), Number(2048))
                 ]
-            )]
+                )]
         )]))
         self.assertEqual(exp, tree)
 
@@ -392,13 +397,14 @@ class ExpressionsTestCase(tests.TestCase):
                     Field(TrueExpr(), FalseExpr(), between_brackets=True),
                     Field(String('true'), TrueExpr(), between_brackets=True),
                 ]
-            )]
+                )]
         ), SemiColon()]))
         self.assertEqual(exp, tree)
 
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.10 – Function Calls                                                 '''
     ''' ----------------------------------------------------------------------- '''
+
     def test_function_call_simple(self):
         tree = ast.parse(r'print("hello")')
         exp = Chunk(Block([Call(
@@ -409,12 +415,12 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_call_no_par_string(self):
         tree = ast.parse(r'print "hello"')
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Call(
             func=Name('print'),
             args=[String('hello')]
         )]))
-        print(ast.toPrettyStr(exp))
+        print(ast.to_pretty_str(exp))
         self.assertEqual(exp, tree)
 
     def test_function_call_no_par_table(self):
@@ -466,6 +472,7 @@ class ExpressionsTestCase(tests.TestCase):
     ''' ----------------------------------------------------------------------- '''
     ''' 3.4.11 – Function Definitions                                           '''
     ''' ----------------------------------------------------------------------- '''
+
     def test_function_def_anonymous(self):
         tree = ast.parse(r'f = function() local a end')
         exp = Chunk(Block([Assign(
@@ -491,7 +498,7 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_def_local(self):
         tree = ast.parse(r'local function _process() end')
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([LocalFunction(
             name=Name('_process'),
             args=[],
@@ -501,7 +508,7 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_def_indexed_name_global(self):
         tree = ast.parse(r'function t.a.b.c.f() end')
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Function(
             name=Index(
                 idx=String('f'),

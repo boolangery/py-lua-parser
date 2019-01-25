@@ -11,9 +11,10 @@ from enum import Enum
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
 
+
 class Style(Enum):
-    PYTHON  = 1
-    HTML    = 2
+    PYTHON = 1
+    HTML = 2
 
 
 class PythonStyleVisitor:
@@ -33,7 +34,7 @@ class PythonStyleVisitor:
     def visit(self, node):
         return str(node)
 
-    def indentStr(self, newLine=True):
+    def indent_str(self, newLine=True):
         res = ' ' * self.currentIndent
         if newLine:
             res = '\n' + res
@@ -45,96 +46,104 @@ class PythonStyleVisitor:
     def dedent(self):
         self.currentIndent -= self.indentValue
 
-    def prettyCount(self, object, isList=False):
+    @staticmethod
+    def pretty_count(node, is_list=False):
         res = ''
-        if isinstance(object, list):
-            itemCount = len(object)
-            res += '[] ' + str(itemCount) + ' '
-            if itemCount > 1 : res += 'items'
-            else             : res += 'item'
-        elif isinstance(object, Node):
-            if isList:
+        if isinstance(node, list):
+            item_count = len(node)
+            res += '[] ' + str(item_count) + ' '
+            if item_count > 1:
+                res += 'items'
+            else:
+                res += 'item'
+        elif isinstance(node, Node):
+            if is_list:
                 return '{} 1 key'
-            keyCount = len([attr for attr in object.__dict__.keys() if not attr.startswith("_")])
-            res += '{} ' + str(keyCount) + ' '
-            if keyCount > 1 : res += 'keys'
-            else            : res += 'key'
+            key_count = len([attr for attr in node.__dict__.keys() if not attr.startswith("_")])
+            res += '{} ' + str(key_count) + ' '
+            if key_count > 1:
+                res += 'keys'
+            else:
+                res += 'key'
         else:
             res += '[unknow]'
         return res
-
-
 
     @visitor(list)
     def visit(self, obj):
         res = ''
         k = 0
         for itemValue in obj:
-            res += self.indentStr() + str(k) + ': ' + self.prettyCount(itemValue, True)
+            res += self.indent_str() + str(k) + ': ' + self.pretty_count(itemValue, True)
             self.indent()
-            res += self.indentStr(False) + self.visit(itemValue)
+            res += self.indent_str(False) + self.visit(itemValue)
             self.dedent()
             k += 1
         return res
 
     @visitor(Node)
     def visit(self, node):
-        res = self.indentStr() + node.displayName + ': ' + self.prettyCount(node)
+        res = self.indent_str() + node.display_name + ': ' + self.pretty_count(node)
 
         self.indent()
 
         # comments
         comments = node.comments
         if comments:
-            res += self.indentStr() + 'comments' + ': ' + self.prettyCount(comments)
+            res += self.indent_str() + 'comments' + ': ' + self.pretty_count(comments)
             k = 0
             self.indent()
             for c in comments:
-                res += self.indentStr() + str(k) + ': ' + self.visit(c.s)
+                res += self.indent_str() + str(k) + ': ' + self.visit(c.s)
                 k += 1
             self.dedent()
 
         for attr, attrValue in node.__dict__.items():
             if not attr.startswith(('_', 'comments')):
                 if isinstance(attrValue, Node) or isinstance(attrValue, list):
-                    res += self.indentStr() + attr + ': ' + self.prettyCount(attrValue)
+                    res += self.indent_str() + attr + ': ' + self.pretty_count(attrValue)
                     self.indent()
                     res += self.visit(attrValue)
                     self.dedent()
                 else:
                     if attrValue is not None:
-                        res += self.indentStr() + attr + ': ' + self.visit(attrValue)
+                        res += self.indent_str() + attr + ': ' + self.visit(attrValue)
         self.dedent()
         return res
 
 
-escape_dict={'\a':r'\a',
-           '\b':r'\b',
-           '\c':r'\c',
-           '\f':r'\f',
-           '\n':r'\n',
-           '\r':r'\r',
-           '\t':r'\t',
-           '\v':r'\v',
-           '\'':r'\'',
-           '\"':r'\"',
-           '\0':r'\0',
-           '\1':r'\1',
-           '\2':r'\2',
-           '\3':r'\3',
-           '\4':r'\4',
-           '\5':r'\5',
-           '\6':r'\6',
-           '\7':r'\7',
-           '\8':r'\8',
-           '\9':r'\9'}
+escape_dict = {
+    '\a': r'\a',
+    '\b': r'\b',
+    '\c': r'\c',
+    '\f': r'\f',
+    '\n': r'\n',
+    '\r': r'\r',
+    '\t': r'\t',
+    '\v': r'\v',
+    '\'': r'\'',
+    '\"': r'\"',
+    '\0': r'\0',
+    '\1': r'\1',
+    '\2': r'\2',
+    '\3': r'\3',
+    '\4': r'\4',
+    '\5': r'\5',
+    '\6': r'\6',
+    '\7': r'\7',
+    '\8': r'\8',
+    '\9': r'\9'
+}
+
 
 def raw(text):
     """Returns a raw string representation of text"""
-    new_string=''
+    new_string = ''
     for char in text:
-        try: new_string+=escape_dict[char]
-        except KeyError: new_string+=char
+        try:
+            new_string += escape_dict[char]
+        except KeyError:
+            new_string += char
     return new_string
 
 
@@ -145,7 +154,7 @@ class HTMLStyleVisitor:
     def get_xml_string(self, tree):
         xml = self.visit(tree)
 
-        ast= ET.Element("ast")
+        ast = ET.Element("ast")
         doc = ET.SubElement(ast, "doc")
         doc.append(xml)
 
@@ -174,7 +183,7 @@ class HTMLStyleVisitor:
 
     @visitor(Node)
     def visit(self, node):
-        xml_node = ET.Element(node.displayName)
+        xml_node = ET.Element(node.display_name)
 
         # attributes
         for attr, attrValue in node.__dict__.items():

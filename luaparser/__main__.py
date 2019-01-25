@@ -22,10 +22,10 @@ def main():
                          dest='source',
                          help='source passed in a string')
     cli_group.add_option('-x', '--xml',
-                     action='store_true',
-                     dest='xml',
-                     help='set output format to xml',
-                     default=False)
+                         action='store_true',
+                         dest='xml',
+                         help='set output format to xml',
+                         default=False)
     cli_group.add_option('-o', '--output',
                          metavar='F', type='string',
                          dest='output',
@@ -48,9 +48,9 @@ def main():
 
         # output format
         if options.xml:
-            output = ast.toXmlStr(tree)
+            output = ast.to_xml_str(tree)
         else:
-            output = ast.toPrettyStr(tree)
+            output = ast.to_pretty_str(tree)
 
         # output
         if options.output:

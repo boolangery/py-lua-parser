@@ -1,10 +1,11 @@
-from luaparser.utils  import tests
+from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
 import textwrap
 import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
+
 
 class CommentsTestCase(tests.TestCase):
     def test_comment_before_local_assign(self):
@@ -34,7 +35,7 @@ class CommentsTestCase(tests.TestCase):
             -- rate limit
             rate_limit = 192
             """))
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             Assign(
                 [Name('rate_limit')],
@@ -51,7 +52,7 @@ class CommentsTestCase(tests.TestCase):
             function Class:print(arg)
             end
             """))
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             Method(
                 source=Name('Class'),
@@ -79,22 +80,20 @@ class CommentsTestCase(tests.TestCase):
               Model = true -- model
             }
             """))
-        print(ast.toPrettyStr(tree))
+        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             LocalAssign(
                 [Name('limits')],
                 [Table([
-                    Field(Name('HIGH'),  Number(127),   [Comment('-- pre field 1'), Comment('-- max rate limit')]),
-                    Field(Name('LOW'),   Number(42),    [Comment('-- pre field 2'), Comment('-- min rate limit')]),
-                    Field(TrueExpr(),    FalseExpr(),   [Comment('-- test')], between_brackets=True),
-                    Field(Number(1),     String('foo'), [Comment('-- just a value')]),
-                    Field(Number(2),     Name('toto'), [Comment('-- last'), Comment('-- toto value')]),
+                    Field(Name('HIGH'), Number(127), [Comment('-- pre field 1'), Comment('-- max rate limit')]),
+                    Field(Name('LOW'), Number(42), [Comment('-- pre field 2'), Comment('-- min rate limit')]),
+                    Field(TrueExpr(), FalseExpr(), [Comment('-- test')], between_brackets=True),
+                    Field(Number(1), String('foo'), [Comment('-- just a value')]),
+                    Field(Number(2), Name('toto'), [Comment('-- last'), Comment('-- toto value')]),
                     Field(Name('Model'), TrueExpr(), [Comment('-- model')])
                 ])],
                 [Comment('--- @table a table of constants')]
             )
         ]))
-        #print(ast.toPrettyStr(exp))
+        # print(ast.toPrettyStr(exp))
         self.assertEqual(exp, tree)
-
-

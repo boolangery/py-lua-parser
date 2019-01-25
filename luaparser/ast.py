@@ -10,27 +10,31 @@ from antlr4.error.ErrorListener import ErrorListener
 def parse(source):
     return Builder(source).process()
 
+
 def get_token_stream(source):
     lexer = LuaLexer(InputStream(source))
     stream = CommonTokenStream(lexer)
     return stream
+
 
 def walk(root):
     # base case:
     if root is None:
         return
 
-    visitor = WalkVisitor()
-    visitor.visit(root)
-    for n in visitor.nodes:
+    tree_visitor = WalkVisitor()
+    tree_visitor.visit(root)
+    for n in tree_visitor.nodes:
         yield n
 
-def toPrettyStr(tree, indent=2):
+
+def to_pretty_str(tree, indent=2):
     return printers.PythonStyleVisitor(indent).visit(tree)
 
-def toXmlStr(tree):
-    visitor = printers.HTMLStyleVisitor()
-    return visitor.get_xml_string(tree)
+
+def to_xml_str(tree):
+    tree_visitor = printers.HTMLStyleVisitor()
+    return tree_visitor.get_xml_string(tree)
 
 
 class ASTVisitor:
@@ -38,27 +42,26 @@ class ASTVisitor:
         # base case:
         if root is None:
             return
-        nodeStack = []
-        nodeStack.append(root)
+        node_stack = [root]
 
-        while(len(nodeStack) > 0):
-            node = nodeStack.pop()
+        while len(node_stack) > 0:
+            node = node_stack.pop()
             # push childs to the stack:
             if isinstance(node, Node):
                 # call visit method
                 name = 'visit_' + node.__class__.__name__
-                visitor = getattr(self, name, None)
-                if visitor:
-                    visitor(node)
+                tree_visitor = getattr(self, name, None)
+                if tree_visitor:
+                    tree_visitor(node)
 
                 # add childs
-                childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
-                for child in childs:
-                    nodeStack.append(node.__dict__[child])
+                children = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+                for child in children:
+                    node_stack.append(node.__dict__[child])
             elif isinstance(node, list):
                 # append node list in reversal order
                 for n in reversed(node):
-                    nodeStack.append(n)
+                    node_stack.append(n)
 
 
 class ASTRecursiveVisitor:
@@ -67,33 +70,33 @@ class ASTRecursiveVisitor:
             # call enter node method
             # if no visitor method found for this arg type,
             # search in parent arg type:
-            parentType = node.__class__
-            while parentType != object:
-                name = 'enter_' + parentType.__name__
-                visitor = getattr(self, name, None)
-                if visitor:
-                    visitor(node)
+            parent_type = node.__class__
+            while parent_type != object:
+                name = 'enter_' + parent_type.__name__
+                tree_visitor = getattr(self, name, None)
+                if tree_visitor:
+                    tree_visitor(node)
                     break
                 else:
-                    parentType = parentType.__bases__[0]
+                    parent_type = parent_type.__bases__[0]
 
             # visit all object public attributes:
-            childs = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
-            for child in childs:
+            children = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+            for child in children:
                 self.visit(node.__dict__[child])
 
             # call exit node method
             # if no visitor method found for this arg type,
             # search in parent arg type:
-            parentType = node.__class__
-            while parentType != object:
-                name = 'exit_' + parentType.__name__
-                visitor = getattr(self, name, None)
-                if visitor:
-                    visitor(node)
+            parent_type = node.__class__
+            while parent_type != object:
+                name = 'exit_' + parent_type.__name__
+                tree_visitor = getattr(self, name, None)
+                if tree_visitor:
+                    tree_visitor(node)
                     break
                 else:
-                    parentType = parentType.__bases__[0]
+                    parent_type = parent_type.__bases__[0]
         elif isinstance(node, list):
             for n in node:
                 self.visit(n)
@@ -295,15 +298,16 @@ class WalkVisitor:
 class SyntaxException(Exception):
     pass
 
+
 class ParserErrorListener(ErrorListener):
-    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+    def syntaxError(self, recognizer, offending_symbol, line, column, msg, e):
         raise SyntaxException(str(line) + ":" + str(column) + ': ' + str(msg))
 
-    def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs):
+    def reportAmbiguity(self, recognizer, dfa, start_index, stop_index, exact, ambig_alts, configs):
         pass
 
-    def reportAttemptingFullContext(self, recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs):
+    def reportAttemptingFullContext(self, recognizer, dfa, start_index, stop_index, conflicting_alts, configs):
         pass
 
-    def reportContextSensitivity(self, recognizer, dfa, startIndex, stopIndex, prediction, configs):
+    def reportContextSensitivity(self, recognizer, dfa, start_index, stop_index, prediction, configs):
         pass
