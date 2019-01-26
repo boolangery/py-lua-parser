@@ -127,6 +127,10 @@ class WalkVisitor:
         for n in node:
             self.visit(n)
 
+    @visitor(type(None))
+    def visit(self, node):
+        pass
+
     @visitor(Chunk)
     def visit(self, node):
         self._nodes.append(node)
@@ -257,11 +261,16 @@ class WalkVisitor:
         self._nodes.append(node)
 
     @visitor(Table)
-    def visit(self, node):
+    def visit(self, node: Table):
         self._nodes.append(node)
-        for key, value in zip(node.keys, node.values):
-            self.visit(key)
-            self.visit(value)
+        for field in node.fields:
+            self.visit(field)
+
+    @visitor(Field)
+    def visit(self, node: Field):
+        self._nodes.append(node)
+        self.visit(node.key)
+        self.visit(node.value)
 
     @visitor(Dots)
     def visit(self, node):
