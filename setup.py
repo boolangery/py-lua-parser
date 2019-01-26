@@ -18,15 +18,14 @@ setup(
     packages=['luaparser', 'luaparser.parser', 'luaparser.utils', 'luaparser.tests'],
     zip_safe=False,
     classifiers=[
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
     install_requires=[
-        'antlr4-python3-runtime<=4.7.1',
+        'antlr4-python3-runtime<=4.7.2',
     ],
     entry_points={
         'console_scripts': [
