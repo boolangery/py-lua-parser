@@ -159,7 +159,7 @@ class Builder:
         self._hidden_handled: bool = False
         self._hidden_handled_stack: List[bool] = []
 
-    def process(self) -> Node:
+    def process(self) -> Chunk:
         node = self.parse_chunk()
 
         if not node:
@@ -187,7 +187,7 @@ class Builder:
         n_elem_to_delete = len(self.comments) - self._comments_index_stack.pop()
         if n_elem_to_delete >= 1:
             del self.comments[-n_elem_to_delete:]
-        return None
+        return False
 
     def failure_save(self):
         self._stream.seek(self._index_stack.pop())
@@ -434,7 +434,7 @@ class Builder:
         root = self.parse_callee()
         if root:
             tail = self.parse_tail()
-            while tail is not None:
+            while tail:
                 if isinstance(tail, Call):
                     tail.func = root
                 elif isinstance(tail, Index):
@@ -475,6 +475,7 @@ class Builder:
                 expr_list = self.parse_expr_list() or []
                 if self.next_is_rc(Tokens.CPAR, False):
                     self.success()
+                    # noinspection PyTypeChecker
                     return Invoke(None, name, expr_list)
 
         self.failure_save()
@@ -483,6 +484,7 @@ class Builder:
             table = self.parse_table_constructor(False)
             if table:
                 self.success()
+                # noinspection PyTypeChecker
                 return Invoke(None, name, [table])
 
         self.failure_save()
@@ -491,6 +493,7 @@ class Builder:
             if self.next_is_rc(Tokens.STRING, False):
                 string = self.parse_lua_str(self.text)
                 self.success()
+                # noinspection PyTypeChecker
                 return Invoke(None, name, [string])
 
         self.failure_save()
@@ -513,6 +516,7 @@ class Builder:
             expr_list = self.parse_expr_list() or []
             if self.next_is_rc(Tokens.CPAR, False):
                 self.success()
+                # noinspection PyTypeChecker
                 return Call(None, expr_list)
 
         self.failure_save()
@@ -634,14 +638,14 @@ class Builder:
 
         return self.failure()
 
-    def parse_goto_stat(self):
+    def parse_goto_stat(self) -> Goto or bool:
         self.save()
         if self.next_is_rc(Tokens.GOTO) and self.next_is_rc(Tokens.NAME):
             self.success()
             return Goto(Name(self.text))
         return self.failure()
 
-    def parse_if_stat(self):
+    def parse_if_stat(self) -> If or bool:
         self.save()
         if self.next_is_rc(Tokens.IFTOK):
             self._expected = []
@@ -662,14 +666,15 @@ class Builder:
                                 root = orelse
 
                         else_exp = self.parse_else_stat()  # optional
-                        root.orelse = else_exp
+                        if else_exp:
+                            root.orelse = else_exp
                         if self.next_is_rc(Tokens.END):
                             self.success()
                             return main
             self.abort()
         return self.failure()
 
-    def parse_elseif_stat(self):
+    def parse_elseif_stat(self) -> ElseIf or bool:
         self.save()
         if self.next_is_rc(Tokens.ELSEIF):
             test = self.parse_expr()
@@ -682,7 +687,7 @@ class Builder:
                         return ElseIf(test, body, None)  # orelse will be set in parent
         return self.failure()
 
-    def parse_else_stat(self):
+    def parse_else_stat(self) -> Block or bool:
         self.save()
         if self.next_is(Tokens.ELSETOK):
             if self.next_is_rc(Tokens.ELSETOK, False):
@@ -693,7 +698,7 @@ class Builder:
                     return body
         return self.failure()
 
-    def parse_for_stat(self):
+    def parse_for_stat(self) -> Fornum or Forin or bool:
         self.save()
         if self.next_is_rc(Tokens.FOR):
             self.save()
@@ -731,7 +736,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_function(self):
+    def parse_function(self) -> Method or Function or bool:
         self.save()
         self._expected = []
         if self.next_is_rc(Tokens.FUNCTION):
@@ -760,7 +765,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_names(self):
+    def parse_names(self) -> Name or Index or bool:
         self.save()
         if self.next_is_rc(Tokens.NAME):
             child = Name(self.text)
@@ -798,8 +803,8 @@ class Builder:
                     self.abort()
         return self.failure()
 
-    def parse_param_list(self):
-        param_list = self.parse_name_list()
+    def parse_param_list(self) -> List[Expression] or bool:
+        param_list: List[Expression] = self.parse_name_list()
         if param_list:
             self.save()
             if self.next_is_rc(Tokens.COMMA) and \
@@ -819,9 +824,9 @@ class Builder:
         self.success()
         return []
 
-    def parse_name_list(self):
+    def parse_name_list(self) -> List[Name] or bool:
         self.save()
-        names = []
+        names: List[Name] = []
         if self.next_is_rc(Tokens.NAME):
             names.append(Name(self.text))
             while True:
@@ -836,7 +841,7 @@ class Builder:
             return names
         return self.failure()
 
-    def parse_label(self):
+    def parse_label(self) -> Label or bool:
         self.save()
         if self.next_is_rc(Tokens.COLCOL) and self.next_is_rc(Tokens.NAME):
             name = Name(self.text)
@@ -846,7 +851,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_callee(self):
+    def parse_callee(self) -> Expression or bool:
         self.save()
         if self.next_is_rc(Tokens.OPAR):
             expr = self.parse_expr()
@@ -862,10 +867,10 @@ class Builder:
             return Name(self.text)
         return self.failure()
 
-    def parse_expr(self):
+    def parse_expr(self) -> Expression or bool:
         return self.parse_or_expr()
 
-    def parse_or_expr(self):
+    def parse_or_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_and_expr()
         if left:
@@ -887,7 +892,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_and_expr(self):
+    def parse_and_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_rel_expr()
         if left:
@@ -909,7 +914,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_rel_expr(self):
+    def parse_rel_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_concat_expr()
         if left:
@@ -940,7 +945,7 @@ class Builder:
             return left
         return self.failure()
 
-    def parse_concat_expr(self):
+    def parse_concat_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_add_expr()
         if left:
@@ -964,7 +969,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_add_expr(self):
+    def parse_add_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_mult_expr()
         if left:
@@ -990,7 +995,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_mult_expr(self):
+    def parse_mult_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_bitwise_expr()
         if left:
@@ -1023,7 +1028,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_bitwise_expr(self):
+    def parse_bitwise_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_unary_expr()
         if left:
@@ -1059,7 +1064,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_unary_expr(self):
+    def parse_unary_expr(self) -> Expression or bool:
         self.save()
         if self.next_is_rc(Tokens.MINUS):
             expr = self.parse_unary_expr()
@@ -1096,7 +1101,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_pow_expr(self):
+    def parse_pow_expr(self) -> Expression or bool:
         self.save()
         left = self.parse_atom()
         if left:
@@ -1118,7 +1123,7 @@ class Builder:
 
         self.failure()
 
-    def parse_atom(self):
+    def parse_atom(self) -> Expression or bool:
         atom = self.parse_var()
         if atom:
             return atom
@@ -1155,7 +1160,7 @@ class Builder:
         return None
 
     @staticmethod
-    def parse_lua_str(lua_str):
+    def parse_lua_str(lua_str) -> String:
         p = re.compile(r'^\[=+\[(.*)\]=+\]')  # nested quote pattern
         # try remove double quote:
         if lua_str.startswith('"') and lua_str.endswith('"'):
@@ -1171,7 +1176,7 @@ class Builder:
             lua_str = p.search(lua_str).group(1)
         return String(lua_str)
 
-    def parse_function_literal(self):
+    def parse_function_literal(self) -> AnonymousFunction or bool:
         self.save()
         if self.next_is_rc(Tokens.FUNCTION):
             func_body = self.parse_func_body()
@@ -1183,7 +1188,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_table_constructor(self, render_last_hidden=True):
+    def parse_table_constructor(self, render_last_hidden=True) -> Table or bool:
         self.save()
         if self.next_is_rc(Tokens.OBRACE, False):  # do not render right hidden
             self.handle_hidden_right()  # render hidden after new level
@@ -1203,7 +1208,7 @@ class Builder:
 
         return self.failure()
 
-    def parse_field_list(self):
+    def parse_field_list(self) -> List[Field] or bool:
         field_list = []
         self.save()
         field = self.parse_field()
@@ -1233,7 +1238,7 @@ class Builder:
             return field_list
         return self.failure()
 
-    def parse_field(self):
+    def parse_field(self) -> Field or bool:
         self.save()
 
         if self.next_is_rc(Tokens.OBRACK):
@@ -1261,11 +1266,12 @@ class Builder:
         value = self.parse_expr()
         if value:
             self.success()
+            # noinspection PyTypeChecker
             return Field(None, value, comments)  # Key will be set in parse_table_constructor
 
         return self.failure()
 
-    def parse_field_sep(self):
+    def parse_field_sep(self) -> bool:
         self.save()
         if self.next_in_rc([Tokens.COMMA, Tokens.SEMCOL]):
             return self.success()

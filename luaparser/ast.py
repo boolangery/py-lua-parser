@@ -7,17 +7,17 @@ from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
 
 
-def parse(source):
+def parse(source: str) -> Chunk:
     return Builder(source).process()
 
 
-def get_token_stream(source):
+def get_token_stream(source: str) -> CommonTokenStream:
     lexer = LuaLexer(InputStream(source))
     stream = CommonTokenStream(lexer)
     return stream
 
 
-def walk(root):
+def walk(root: Node) -> None:
     # base case:
     if root is None:
         return
@@ -28,8 +28,8 @@ def walk(root):
         yield n
 
 
-def to_pretty_str(tree, indent=2):
-    return printers.PythonStyleVisitor(indent).visit(tree)
+def to_pretty_str(root: Node, indent=2) -> str:
+    return printers.PythonStyleVisitor(indent).visit(root)
 
 
 def to_xml_str(tree):
