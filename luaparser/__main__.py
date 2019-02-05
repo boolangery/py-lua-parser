@@ -26,6 +26,11 @@ def main():
                          dest='xml',
                          help='set output format to xml',
                          default=False)
+    cli_group.add_option('--pretty',
+                         action='store_true',
+                         dest='pretty',
+                         help='set output format to python ast pretty print style',
+                         default=False)
     cli_group.add_option('-o', '--output',
                          metavar='F', type='string',
                          dest='output',
@@ -47,10 +52,12 @@ def main():
             tree = ast.parse(content)
 
         # output format
-        if options.xml:
+        if options.pretty:
+            output = ast.to_pretty_str(tree)
+        elif options.xml:
             output = ast.to_xml_str(tree)
         else:
-            output = ast.to_pretty_str(tree)
+            output = ast.to_pretty_json(tree)
 
         # output
         if options.output:

@@ -5,6 +5,7 @@
     Contains all Ast Node definitions.
 """
 from typing import List
+import json
 
 
 def _equal_dicts(d1, d2, ignore_keys):
@@ -39,6 +40,9 @@ class Node:
         if isinstance(self, other.__class__):
             return _equal_dicts(self.__dict__, other.__dict__, [])
         return False
+
+    def to_json(self):
+        return {self._name: {k: v for k, v in self.__dict__.items() if not k.startswith('_') and v}}
 
 
 class Comment(Node):

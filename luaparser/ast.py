@@ -5,6 +5,7 @@ from luaparser import printers
 from luaparser.builder import Builder
 from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
+import json
 
 
 def parse(source: str) -> Chunk:
@@ -35,6 +36,21 @@ def to_pretty_str(root: Node, indent=2) -> str:
 def to_xml_str(tree):
     tree_visitor = printers.HTMLStyleVisitor()
     return tree_visitor.get_xml_string(tree)
+
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        try:
+            to_json = getattr(o, "to_json")
+            if callable(to_json):
+                return to_json()
+
+        except AttributeError:
+            return {k: v for k, v in o.__dict__.items() if not k.startswith('_')}
+
+
+def to_pretty_json(root: Node) -> str:
+    return json.dumps(root, cls=JSONEncoder, indent=4)
 
 
 class ASTVisitor:
