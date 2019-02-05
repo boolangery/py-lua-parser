@@ -10,6 +10,8 @@ py-lua-parser
 
 A Lua parser and AST builder written in Python.
 
+It's both a development library and a command line tool.
+
 
 Installation:
 ------------------------------------------------------------------------------
@@ -123,3 +125,92 @@ Alternatively, you can use a node visitor:
 
     tree = ast.parse(src)
     NumberVisitor().visit(tree)
+
+
+Command line
+==============================================================================
+
+Given:
+
+.. code-block:: lua
+
+    local function log(msg)
+      print(msg)
+    end
+
+    log("hello world !")
+
+
+.. code-block:: bash
+
+    $ luaparser source.lua
+
+
+Will output:
+
+.. code-block:: json
+
+    {
+        "Chunk": {
+            "body": {
+                "Block": {
+                    "body": [
+                        {
+                            "LocalFunction": {
+                                "name": {
+                                    "Name": {
+                                        "id": "log"
+                                    }
+                                },
+                                "args": [
+                                    {
+                                        "Name": {
+                                            "id": "msg"
+                                        }
+                                    }
+                                ],
+                                "body": {
+                                    "Block": {
+                                        "body": [
+                                            {
+                                                "Call": {
+                                                    "func": {
+                                                        "Name": {
+                                                            "id": "print"
+                                                        }
+                                                    },
+                                                    "args": [
+                                                        {
+                                                            "Name": {
+                                                                "id": "msg"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "Call": {
+                                "func": {
+                                    "Name": {
+                                        "id": "log"
+                                    }
+                                },
+                                "args": [
+                                    {
+                                        "String": {
+                                            "s": "hello world !"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
