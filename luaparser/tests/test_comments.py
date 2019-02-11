@@ -35,7 +35,6 @@ class CommentsTestCase(tests.TestCase):
             -- rate limit
             rate_limit = 192
             """))
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             Assign(
                 [Name('rate_limit')],
@@ -52,7 +51,6 @@ class CommentsTestCase(tests.TestCase):
             function Class:print(arg)
             end
             """))
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             Method(
                 source=Name('Class'),
@@ -80,7 +78,6 @@ class CommentsTestCase(tests.TestCase):
               Model = true -- model
             }
             """))
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             LocalAssign(
                 [Name('limits')],
@@ -95,5 +92,23 @@ class CommentsTestCase(tests.TestCase):
                 [Comment('--- @table a table of constants')]
             )
         ]))
-        # print(ast.toPrettyStr(exp))
+        self.assertEqual(exp, tree)
+
+    def test_comment_in_table_2(self):
+        tree = ast.parse(textwrap.dedent("""
+            return {
+                --- @export
+                BAR = 4,
+                --- test
+                FOO = 5
+            }
+            """))
+        exp = Chunk(Block([
+            Return(values=[
+                Table([
+                    Field(Name('BAR'), Number(4), [Comment('--- @export')]),
+                    Field(Name('FOO'), Number(5), [Comment('--- test')])
+                ])]
+            )
+        ]))
         self.assertEqual(exp, tree)

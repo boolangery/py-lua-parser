@@ -1230,7 +1230,7 @@ class Builder:
                         return field_list
                 else:
 
-                    field.comments = self.get_comments()
+                    field.comments.extend(self.get_comments())
                     self.failure()
                     break
             self.parse_field_sep()
