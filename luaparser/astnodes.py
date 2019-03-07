@@ -31,6 +31,8 @@ class Node:
             comments = []
         self._name = name
         self.comments = comments
+        self.start_char: int = None  # start character offset
+        self.stop_char: int = None  # stop character offset
 
     @property
     def display_name(self):
@@ -38,7 +40,7 @@ class Node:
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
-            return _equal_dicts(self.__dict__, other.__dict__, [])
+            return _equal_dicts(self.__dict__, other.__dict__, ["start_char", "stop_char"])
         return False
 
     def to_json(self):

@@ -214,7 +214,7 @@ class Builder:
             self._hidden_handled = False
             if hidden_right:
                 self.handle_hidden_right()
-            return True
+            return token
         self._expected.append(type_to_seek)
         return False
 
@@ -602,8 +602,8 @@ class Builder:
     def parse_local(self) -> Node or bool:
         self.save()
         self._expected = []
-        if self.next_is_rc(Tokens.LOCAL):
-
+        start_token = self.next_is_rc(Tokens.LOCAL)
+        if start_token:
             targets = self.parse_name_list()
             if targets:
                 values = []
@@ -632,6 +632,8 @@ class Builder:
                     self.success()
                     node = LocalFunction(name, body[0], body[1])
                     self.handle_hidden_right()
+                    node.start_char = start_token.start
+                    node.stop_char = body[1].stop_char
                     return node
             self.failure()
             self.abort()
@@ -739,7 +741,8 @@ class Builder:
     def parse_function(self) -> Method or Function or bool:
         self.save()
         self._expected = []
-        if self.next_is_rc(Tokens.FUNCTION):
+        start_token = self.next_is_rc(Tokens.FUNCTION)
+        if start_token:
             names = self.parse_names()
             if names:
                 self.save()
@@ -751,6 +754,8 @@ class Builder:
                         self.success()
                         node = Method(names, name, func_body[0], func_body[1])
                         self.handle_hidden_right()
+                        node.start_char = start_token.start
+                        node.stop_char = func_body[1].stop_char
                         return node
 
                 self.failure()
@@ -760,6 +765,8 @@ class Builder:
                     self.success()
                     node = Function(names, func_body[0], func_body[1])
                     self.handle_hidden_right()
+                    node.start_char = start_token.start
+                    node.stop_char = func_body[1].stop_char
                     return node
             self.abort()
 
@@ -794,7 +801,9 @@ class Builder:
                     body = self.parse_block()
                     if body:
                         self._expected = []
-                        if self.next_is_rc(Tokens.END, False):
+                        token = self.next_is_rc(Tokens.END, False)
+                        if token:
+                            body.stop_char = token.stop
                             self.success()
                             return args, body
                         else:
