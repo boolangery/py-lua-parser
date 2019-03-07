@@ -180,13 +180,11 @@ class StatementsTestCase(tests.TestCase):
               local foo = 'bar'
             end
             """))
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([
             Do(
                 body=Block([LocalAssign(targets=[Name('foo')],values=[String('bar')])])
             )
         ]))
-        print(ast.to_pretty_str(exp))
         self.assertEqual(exp, tree)
 
     def test_while(self):
@@ -353,3 +351,12 @@ class StatementsTestCase(tests.TestCase):
             (print)('foo')
             """)
         self.assertRaises(SyntaxException, ast.parse, src)
+
+    def test_index(self):
+        tree = ast.parse(textwrap.dedent("""
+            foo.bar = 'bar'
+            """))
+        exp = Chunk(Block([
+            Assign(targets=[Index(idx=String('bar'), value=Name('foo'))], values=[String('bar')])
+        ]))
+        self.assertEqual(exp, tree)
