@@ -4,8 +4,10 @@
 
     Contains all Ast Node definitions.
 """
-from typing import List
-import json
+from typing import List, Optional
+
+
+Comments = Optional[List[str]]
 
 
 def _equal_dicts(d1, d2, ignore_keys):
@@ -21,29 +23,25 @@ def _equal_dicts(d1, d2, ignore_keys):
 
 class Node:
     """Base class for AST node.
-
-    Attributes:
-        display_name (`str`): Node display name (to pretty print).
     """
-
-    def __init__(self, name, comments=None):
+    def __init__(self, name: str, comments: Comments = None):
         if comments is None:
             comments = []
-        self._name = name
-        self.comments = comments
+        self._name: str = name
+        self.comments: List[str] = comments
         self.start_char: int = None  # start character offset
         self.stop_char: int = None  # stop character offset
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         return self._name
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
             return _equal_dicts(self.__dict__, other.__dict__, ["start_char", "stop_char"])
         return False
 
-    def to_json(self):
+    def to_json(self) -> any:
         return {self._name: {k: v for k, v in self.__dict__.items() if not k.startswith('_') and v}}
 
 
@@ -87,7 +85,7 @@ class Chunk(Node):
         body (`Block`): Chunk body.
     """
 
-    def __init__(self, body: Block, comments: List[Comment] = []):
+    def __init__(self, body: Block, comments: Comments = None):
         super(Chunk, self).__init__('Chunk', comments)
         self.body = body
 
@@ -110,9 +108,9 @@ class Name(Lhs):
         id (`string`): Id.
     """
 
-    def __init__(self, id):
+    def __init__(self, identifier: str):
         super(Name, self).__init__('Name')
-        self.id = id
+        self.id: str = identifier
 
 
 class Index(Lhs):
@@ -123,10 +121,10 @@ class Index(Lhs):
         value (`string`): Id.
     """
 
-    def __init__(self, idx, value):
+    def __init__(self, idx: Expression, value: Name):
         super(Index, self).__init__('Index')
-        self.idx = idx
-        self.value = value
+        self.idx: Name = idx
+        self.value: Expression = value
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -142,8 +140,7 @@ class Assign(Statement):
         values (`list<Node>`): List of values.
 
     """
-
-    def __init__(self, targets: List[Node], values: List[Node], comments: List[Comment] = []):
+    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
         super(Assign, self).__init__('Assign', comments)
         self.targets: List[Node] = targets
         self.values: List[Node] = values
@@ -157,9 +154,9 @@ class LocalAssign(Assign):
         values (`list<Node>`): List of values.
     """
 
-    def __init__(self, targets: List[Node], values: List[Node], comments: List[Comment] = []):
+    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
         super(LocalAssign, self).__init__(targets, values, comments)
-        self._name = 'LocalAssign'
+        self._name: str = 'LocalAssign'
 
 
 class While(Statement):
@@ -185,7 +182,7 @@ class Do(Statement):
 
     def __init__(self, body: Block):
         super(Do, self).__init__('Do')
-        self.body = body
+        self.body: Block = body
 
 
 class Repeat(Statement):
@@ -196,7 +193,7 @@ class Repeat(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, body: Block, test: Expression, comments: List[Comment] = []):
+    def __init__(self, body: Block, test: Expression, comments: Comments = None):
         super(Repeat, self).__init__('Repeat', comments)
         self.body: Block = body
         self.test: Expression = test
@@ -211,10 +208,10 @@ class ElseIf(Statement):
         orelse (`list<Statement> or ElseIf`): List of statements or ElseIf if test if false.
     """
 
-    def __init__(self, test, body: Block, orelse):
+    def __init__(self, test: Node, body: Block, orelse):
         super(ElseIf, self).__init__('ElseIf')
-        self.test = test
-        self.body = body
+        self.test: Node = test
+        self.body: Block = body
         self.orelse = orelse
 
 
@@ -228,7 +225,7 @@ class If(Statement):
     """
 
     def __init__(self, test: Expression, body: Block, orelse: List[Statement] or ElseIf,
-                 comments: List[Comment] = []):
+                 comments: Comments = None):
         super(If, self).__init__('If', comments)
         self.test: Expression = test
         self.body: Block = body
@@ -244,7 +241,7 @@ class Label(Statement):
 
     def __init__(self, label_id: Name):
         super(Label, self).__init__('Label')
-        self.id = label_id
+        self.id: Name = label_id
 
 
 class Goto(Statement):
@@ -254,9 +251,9 @@ class Goto(Statement):
         label (`Name`): Label node.
     """
 
-    def __init__(self, label: Name, comments: List[Comment] = []):
+    def __init__(self, label: Name, comments: Comments = None):
         super(Goto, self).__init__('Goto', comments)
-        self.label = label
+        self.label: Name = label
 
 
 class SemiColon(Statement):
@@ -300,13 +297,13 @@ class Fornum(Statement):
     """
 
     def __init__(self, target: Name, start: Expression, stop: Expression, step: Expression, body: Block,
-                 comments: List[Comment] = []):
+                 comments: Comments = None):
         super(Fornum, self).__init__('Fornum', comments)
-        self.target = target
-        self.start = start
-        self.stop = stop
-        self.step = step
-        self.body = body
+        self.target: Name = target
+        self.start: Expression = start
+        self.stop: Expression = stop
+        self.step: Expression = step
+        self.body: Block = body
 
 
 class Forin(Statement):
@@ -318,11 +315,11 @@ class Forin(Statement):
         targets (`list<Name>`): Start index value.
     """
 
-    def __init__(self, body: Block, iter: List[Expression], targets, comments: List[Comment] = []):
+    def __init__(self, body: Block, iter: List[Expression], targets: List[Name], comments: Comments = None):
         super(Forin, self).__init__('Forin', comments)
-        self.body = body
-        self.iter = iter
-        self.targets = targets
+        self.body: Block = body
+        self.iter: List[Expression] = iter
+        self.targets: List[Name] = targets
 
 
 class Call(Statement):
@@ -333,10 +330,10 @@ class Call(Statement):
         args (`list<Expression>`): Function call arguments.
     """
 
-    def __init__(self, func: Expression, args: List[Expression], comments: List[Comment] = []):
+    def __init__(self, func: Expression, args: List[Expression], comments: Comments = None):
         super(Call, self).__init__('Call', comments)
-        self.func = func
-        self.args = args
+        self.func: Expression = func
+        self.args: List[Expression] = args
 
 
 class Invoke(Statement):
@@ -350,9 +347,9 @@ class Invoke(Statement):
 
     def __init__(self, source: Expression, func: Expression, args: List[Expression]):
         super(Invoke, self).__init__('Invoke')
-        self.source = source
-        self.func = func
-        self.args = args
+        self.source: Expression = source
+        self.func: Expression = func
+        self.args: List[Expression] = args
 
 
 class Function(Statement):
@@ -366,9 +363,9 @@ class Function(Statement):
 
     def __init__(self, name: Expression, args: List[Expression], body: Block):
         super(Function, self).__init__('Function')
-        self.name = name
-        self.args = args
-        self.body = body
+        self.name: Expression = name
+        self.args: List[Expression] = args
+        self.body: Block = body
 
 
 class LocalFunction(Statement):
@@ -382,9 +379,9 @@ class LocalFunction(Statement):
 
     def __init__(self, name: Expression, args: List[Expression], body: Block):
         super(LocalFunction, self).__init__('LocalFunction')
-        self.name = name
-        self.args = args
-        self.body = body
+        self.name: Expression = name
+        self.args: List[Expression] = args
+        self.body: Block = body
 
 
 class Method(Statement):
@@ -398,12 +395,12 @@ class Method(Statement):
     """
 
     def __init__(self, source: Expression, name: Expression, args: List[Expression], body: Block,
-                 comments: List[Comment] = []):
+                 comments: Comments = None):
         super(Method, self).__init__('Method', comments)
-        self.source = source
-        self.name = name
-        self.args = args
-        self.body = body
+        self.source: Expression = source
+        self.name: Expression = name
+        self.args: List[Expression] = args
+        self.body: Block = body
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -439,16 +436,18 @@ class FalseExpr(Expression):
         super(FalseExpr, self).__init__('False')
 
 
+NumberType = int or float
+
+
 class Number(Expression):
     """Define the Lua number expression.
 
     Attributes:
         n (`int|float`): Numeric value.
     """
-
-    def __init__(self, n: int or float):
+    def __init__(self, n: NumberType):
         super(Number, self).__init__('Number')
-        self.n = n
+        self.n: NumberType = n
 
 
 class Varargs(Expression):
@@ -469,7 +468,7 @@ class String(Expression):
 
     def __init__(self, s: str):
         super(String, self).__init__('String')
-        self.s = s
+        self.s: str = s
 
 
 class Field(Expression):
@@ -480,12 +479,12 @@ class Field(Expression):
         value (`Expression`): Value.
     """
 
-    def __init__(self, key: Expression, value: Expression, comments: List[Comment] = [],
+    def __init__(self, key: Expression, value: Expression, comments: Comments = None,
                  between_brackets: bool = False):
         super(Field, self).__init__('Field', comments)
-        self.key = key
-        self.value = value
-        self.between_brackets = between_brackets
+        self.key: Expression = key
+        self.value: Expression = value
+        self.between_brackets: bool = between_brackets
 
 
 class Table(Expression):
@@ -497,7 +496,7 @@ class Table(Expression):
 
     def __init__(self, fields: List[Field]):
         super(Table, self).__init__('Table')
-        self.fields = fields
+        self.fields: List[Field] = fields
 
 
 class Dots(Expression):
@@ -518,8 +517,8 @@ class AnonymousFunction(Expression):
 
     def __init__(self, args: List[Expression], body: Block):
         super(AnonymousFunction, self).__init__('AnonymousFunction')
-        self.args = args
-        self.body = body
+        self.args: List[Expression] = args
+        self.body: Block = body
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -543,8 +542,8 @@ class BinaryOp(Op):
 
     def __init__(self, name, left: Expression, right: Expression):
         super(BinaryOp, self).__init__(name)
-        self.left = left
-        self.right = right
+        self.left: Expression = left
+        self.right: Expression = right
 
 
 ''' ----------------------------------------------------------------------- '''

@@ -8,7 +8,7 @@
 from luaparser.astnodes import *
 from luaparser.utils.visitor import *
 from enum import Enum
-import xml.etree.cElementTree as ET
+import xml.etree.cElementTree as ElementTree
 from xml.dom import minidom
 
 
@@ -154,11 +154,11 @@ class HTMLStyleVisitor:
     def get_xml_string(self, tree):
         xml = self.visit(tree)
 
-        ast = ET.Element("ast")
-        doc = ET.SubElement(ast, "doc")
+        ast = ElementTree.Element("ast")
+        doc = ElementTree.SubElement(ast, "doc")
         doc.append(xml)
 
-        return minidom.parseString(ET.tostring(doc)).toprettyxml(indent="   ")
+        return minidom.parseString(ElementTree.tostring(doc)).toprettyxml(indent="   ")
 
     @visitor(str)
     def visit(self, node):
@@ -183,12 +183,12 @@ class HTMLStyleVisitor:
 
     @visitor(Node)
     def visit(self, node):
-        xml_node = ET.Element(node.display_name)
+        xml_node = ElementTree.Element(node.display_name)
 
         # attributes
         for attr, attrValue in node.__dict__.items():
             if not attr.startswith('_') and attrValue is not None:
-                xml_attr = ET.SubElement(xml_node, attr)
+                xml_attr = ElementTree.SubElement(xml_node, attr)
                 child_node = self.visit(attrValue)
                 if type(child_node) is str:
                     xml_attr.text = child_node

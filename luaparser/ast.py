@@ -6,19 +6,24 @@ from luaparser.builder import Builder
 from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
 import json
+from typing import Generator
 
 
 def parse(source: str) -> Chunk:
+    """ Parse Lua source to a Chunk.
+    """
     return Builder(source).process()
 
 
 def get_token_stream(source: str) -> CommonTokenStream:
+    """ Get the antlr token stream.
+    """
     lexer = LuaLexer(InputStream(source))
     stream = CommonTokenStream(lexer)
     return stream
 
 
-def walk(root: Node) -> None:
+def walk(root: Node) -> Generator[None, Node, None]:
     # base case:
     if root is None:
         return

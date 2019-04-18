@@ -5,6 +5,7 @@ from enum import Enum
 import ast
 import re
 from typing import List
+from antlr4.Token import Token
 
 
 class SyntaxException(Exception):
@@ -202,7 +203,7 @@ class Builder:
         self._comments_index_stack.append(len(self.comments))
         self._hidden_handled_stack.append(self._hidden_handled)
 
-    def next_is_rc(self, type_to_seek: int, hidden_right: bool = True) -> bool:
+    def next_is_rc(self, type_to_seek: int, hidden_right: bool = True) -> Optional[Token]:
         token = self._stream.LT(1)
         tok_type: int = token.type
         self._right_index = self._stream.index
@@ -216,7 +217,7 @@ class Builder:
                 self.handle_hidden_right()
             return token
         self._expected.append(type_to_seek)
-        return False
+        return None
 
     def next_is_c(self, type_to_seek: int, hidden_right: bool = True) -> bool:
         token = self._stream.LT(1)
@@ -294,7 +295,7 @@ class Builder:
 
         self._hidden_handled = True
 
-    def get_comments(self) -> List[Comment]:
+    def get_comments(self) -> Comments:
         comments = [c for c in self.comments if c is not None]
         self.comments = []
         return comments
@@ -459,14 +460,14 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME, False):
             self.success()
-            return Index(String(self.text), None)  # value must be set in parent
+            return Index(String(self.text), Name(""))  # value must be set in parent
 
         self.failure_save()
         if self.next_is_rc(Tokens.OBRACK):
             expr = self.parse_expr()
             if expr and self.next_is_rc(Tokens.CBRACK, False):
                 self.success()
-                return Index(expr, None)  # value must be set in parent
+                return Index(expr, Name(""))  # value must be set in parent
 
         self.failure_save()
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
@@ -775,17 +776,18 @@ class Builder:
     def parse_names(self) -> Name or Index or bool:
         self.save()
         if self.next_is_rc(Tokens.NAME):
-            child = Name(self.text)
+            root = Name(self.text)
             while True:
                 self.save()
                 if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME):
                     self.success()
-                    child = Index(String(self.text), child)
+                    child = Index(String(self.text), root)
+                    root = child
                 else:
                     self.failure()
                     break
             self.success()
-            return child
+            return root
         self.failure()
 
     def parse_func_body(self):

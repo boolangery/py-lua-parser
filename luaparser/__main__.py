@@ -1,6 +1,4 @@
 import sys
-import os
-import logging
 from optparse import OptionParser, OptionGroup
 import luaparser
 from luaparser import ast
