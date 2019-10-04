@@ -62,7 +62,7 @@ Minimal exemple:
         """
 
     tree = ast.parse(src)
-    print(ast.toPrettyStr(tree))
+    print(ast.to_pretty_str(tree))
 
 will display:
 
