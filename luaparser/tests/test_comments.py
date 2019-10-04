@@ -96,6 +96,8 @@ class CommentsTestCase(tests.TestCase):
 
     def test_comment_in_table_2(self):
         tree = ast.parse(textwrap.dedent("""
+            --- @module utils
+
             return {
                 --- @export
                 BAR = 4,
@@ -110,5 +112,7 @@ class CommentsTestCase(tests.TestCase):
                     Field(Name('FOO'), Number(5), [Comment('--- test')])
                 ])]
             )
-        ]))
+        ]), comments=[
+            Comment('--- @module utils')
+        ])
         self.assertEqual(exp, tree)

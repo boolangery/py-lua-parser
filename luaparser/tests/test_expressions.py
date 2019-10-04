@@ -287,7 +287,6 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_concatenation(self):
         tree = ast.parse(r'str = "begin".."end"')
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('str')],
             values=[Concat(
@@ -355,7 +354,6 @@ class ExpressionsTestCase(tests.TestCase):
           512,  1024,   2048
         }
         '''))
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Assign(
             targets=[Name('foo')],
             values=[
@@ -415,12 +413,10 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_call_no_par_string(self):
         tree = ast.parse(r'print "hello"')
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Call(
             func=Name('print'),
             args=[String('hello')]
         )]))
-        print(ast.to_pretty_str(exp))
         self.assertEqual(exp, tree)
 
     def test_function_call_no_par_table(self):
@@ -498,7 +494,6 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_def_local(self):
         tree = ast.parse(r'local function _process() end')
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([LocalFunction(
             name=Name('_process'),
             args=[],
@@ -508,7 +503,6 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_def_indexed_name_global(self):
         tree = ast.parse(r'function t.a.b.c.f() end')
-        print(ast.to_pretty_str(tree))
         exp = Chunk(Block([Function(
             name=Index(
                 idx=String('f'),

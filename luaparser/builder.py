@@ -300,6 +300,30 @@ class Builder:
         self.comments = []
         return comments
 
+    def get_comments_followed_by_blank_line(self) -> Comments:
+        """ Returns comments followed by a blank line.
+        """
+        if not self.comments:
+            return []
+
+        idx = 0
+        comments: List[Comment] = []
+
+        # search first comment
+        while idx < len(self.comments) and self.comments[idx] is None:
+            idx = idx + 1
+        # get comments starting from this index
+        while idx < len(self.comments) and self.comments[idx] is not None:
+            comments.append(self.comments[idx])
+            idx = idx + 1
+        # check if followed by a blank line
+        if idx + 1 < len(self.comments):
+            if self.comments[idx] is None and self.comments[idx + 1] is None:
+                # clean list
+                self.comments = self.comments[idx + 2:]
+                return comments
+        return []
+
     def get_inline_comment(self) -> Comment or None:
         if self.comments:
             c = self.comments.pop(0)
@@ -326,12 +350,13 @@ class Builder:
     def parse_chunk(self) -> Chunk or None:
         self._stream.LT(1)
         self.handle_hidden_left()
+        comments = self.get_comments_followed_by_blank_line()
         block = self.parse_block()
         if block:
             token = self._stream.LT(1)
             if token.type == -1:
                 # do not consume EOF
-                return Chunk(block)
+                return Chunk(block, comments)
         return False
 
     def parse_block(self) -> Block:
