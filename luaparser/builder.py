@@ -164,7 +164,7 @@ class Builder:
         node = self.parse_chunk()
 
         if not node:
-            raise Exception("Expecting a chunk")
+            raise SyntaxException("Expecting a chunk")
         return node
 
     def save(self):
