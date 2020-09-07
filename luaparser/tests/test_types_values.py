@@ -95,7 +95,7 @@ class TypesValuesTestCase(tests.TestCase):
         tree = ast.parse(r'a = "a line"')
         exp = Chunk(Block([Assign(
             targets=[Name('a')],
-            values=[String('a line')]
+            values=[String('a line', StringDelimiter.DOUBLE_QUOTE)]
         )]))
         self.assertEqual(exp, tree)
 
@@ -111,7 +111,7 @@ class TypesValuesTestCase(tests.TestCase):
         tree = ast.parse(r'''b = "one line\nnext line\n\"in quotes\", 'in quotes'"''')
         exp = Chunk(Block([Assign(
             targets=[Name('b')],
-            values=[String(r"one line\nnext line\n\"in quotes\", 'in quotes'")]
+            values=[String(r"one line\nnext line\n\"in quotes\", 'in quotes'", StringDelimiter.DOUBLE_QUOTE)]
         )]))
         self.assertEqual(exp, tree)
 
@@ -119,7 +119,7 @@ class TypesValuesTestCase(tests.TestCase):
         tree = ast.parse(r'b = [[hello]]')
         exp = Chunk(Block([Assign(
             targets=[Name('b')],
-            values=[String('hello')]
+            values=[String('hello', StringDelimiter.DOUBLE_SQUARE)]
         )]))
         self.assertEqual(exp, tree)
 
@@ -130,7 +130,7 @@ class TypesValuesTestCase(tests.TestCase):
             '''))
         exp = Chunk(Block([Assign(
             targets=[Name('b')],
-            values=[String('Multiple lines of text\ncan be enclosed in double square\nbrackets.')]
+            values=[String('Multiple lines of text\ncan be enclosed in double square\nbrackets.', StringDelimiter.DOUBLE_SQUARE)]
         )]))
         self.assertEqual(exp, tree)
 

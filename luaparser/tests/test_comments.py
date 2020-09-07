@@ -85,7 +85,7 @@ class CommentsTestCase(tests.TestCase):
                     Field(Name('HIGH'), Number(127), [Comment('-- pre field 1'), Comment('-- max rate limit')]),
                     Field(Name('LOW'), Number(42), [Comment('-- pre field 2'), Comment('-- min rate limit')]),
                     Field(TrueExpr(), FalseExpr(), [Comment('-- test')], between_brackets=True),
-                    Field(Number(1), String('foo'), [Comment('-- just a value')]),
+                    Field(Number(1), String('foo', StringDelimiter.DOUBLE_QUOTE), [Comment('-- just a value')]),
                     Field(Number(2), Name('toto'), [Comment('-- last'), Comment('-- toto value')]),
                     Field(Name('Model'), TrueExpr(), [Comment('-- model')])
                 ])],

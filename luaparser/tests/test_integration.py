@@ -23,7 +23,7 @@ class IntegrationTestCase(tests.TestCase):
 
         exp = Chunk(Block([
             Call(Name('describe'), [
-                String(''),
+                String('', StringDelimiter.DOUBLE_QUOTE),
                 AnonymousFunction([], Block([
                     Call(Name('it'), [
                         AnonymousFunction([], Block([

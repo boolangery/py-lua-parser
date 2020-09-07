@@ -4,8 +4,8 @@
 
     Contains all Ast Node definitions.
 """
+from enum import Enum
 from typing import List, Optional
-
 
 Comments = Optional[List[str]]
 
@@ -24,6 +24,7 @@ def _equal_dicts(d1, d2, ignore_keys):
 class Node:
     """Base class for AST node.
     """
+
     def __init__(self, name: str, comments: Comments = None):
         if comments is None:
             comments = []
@@ -140,6 +141,7 @@ class Assign(Statement):
         values (`list<Node>`): List of values.
 
     """
+
     def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
         super(Assign, self).__init__('Assign', comments)
         self.targets: List[Node] = targets
@@ -445,6 +447,7 @@ class Number(Expression):
     Attributes:
         n (`int|float`): Numeric value.
     """
+
     def __init__(self, n: NumberType):
         super(Number, self).__init__('Number')
         self.n: NumberType = n
@@ -459,16 +462,23 @@ class Varargs(Expression):
         super(Varargs, self).__init__('Varargs')
 
 
+class StringDelimiter(Enum):
+    SINGLE_QUOTE = 0  # 'foo'
+    DOUBLE_QUOTE = 1  # "foo"
+    DOUBLE_SQUARE = 2  # [[foo]]
+
+
 class String(Expression):
     """Define the Lua string expression.
 
     Attributes:
         s (`string`): String value.
+        delimiter (`StringDelimiter`): The string delimiter
     """
-
-    def __init__(self, s: str):
+    def __init__(self, s: str, delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE):
         super(String, self).__init__('String')
         self.s: str = s
+        self.delimiter: StringDelimiter = delimiter
 
 
 class Field(Expression):

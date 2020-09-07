@@ -35,7 +35,7 @@ class StatementsTestCase(tests.TestCase):
     def test_set_string(self):
         tree = ast.parse('i="foo bar"')
         exp = Chunk(Block([
-            Assign(targets=[Name('i')],values=[String('foo bar')])
+            Assign(targets=[Name('i')],values=[String('foo bar', StringDelimiter.DOUBLE_QUOTE)])
         ]))
         self.assertEqual(exp, tree)
 
@@ -341,7 +341,7 @@ class StatementsTestCase(tests.TestCase):
     def test_return_multiple(self):
         tree = ast.parse(r'return nil, "error", 42; ')
         exp = Chunk(Block([Return([
-            Nil(), String('error'), Number(42)
+            Nil(), String('error', StringDelimiter.DOUBLE_QUOTE), Number(42)
         ])]))
         self.assertEqual(exp, tree)
 
