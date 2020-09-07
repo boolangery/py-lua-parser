@@ -38,6 +38,9 @@ def to_pretty_str(root: Node, indent=2) -> str:
     return printers.PythonStyleVisitor(indent).visit(root)
 
 
+def to_lua_source(root: Node, indent=4) -> str:
+    return printers.LuaOutputVisitor(indent_size=indent).visit(root)
+
 def to_xml_str(tree):
     tree_visitor = printers.HTMLStyleVisitor()
     return tree_visitor.get_xml_string(tree)
