@@ -127,6 +127,40 @@ Alternatively, you can use a node visitor:
     NumberVisitor().visit(tree)
 
 
+Rendering lua code
+------------------------------------------------------------------------------
+
+.. code-block:: python
+
+    exp = Chunk(Block([
+        Forin(
+            targets=[Name('k'), Name('v')],
+            iter=[
+                Invoke(
+                    source=Name('bar'),
+                    func=Name('foo'),
+                    args=[Number(42)]
+                )
+            ],
+            body=Block([
+                Call(func=Name('print'), args=[Name('k'), Name('v')])
+            ]),
+
+        )
+    ]))
+
+    print(ast.to_lua_source(exp))
+
+
+Will render:
+
+.. code-block:: lua
+
+    for k, v in bar:foo(42) do
+        print(k, v)
+    end
+
+
 Command line
 ==============================================================================
 
