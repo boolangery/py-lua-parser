@@ -7,7 +7,7 @@
 from enum import Enum
 from typing import List, Optional
 
-Comments = Optional[List[str]]
+Comments = Optional[List['Comment']]
 
 
 def _equal_dicts(d1, d2, ignore_keys):
