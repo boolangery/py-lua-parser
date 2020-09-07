@@ -42,7 +42,7 @@ class StatementsTestCase(tests.TestCase):
     def test_set_array_index(self):
         tree = ast.parse('a[i] = 42')
         exp = Chunk(Block([
-            Assign(targets=[Index(idx=Name('i'), value=Name('a'))], values=[Number(42)])
+            Assign(targets=[Index(idx=Name('i'), value=Name('a'), notation=IndexNotation.SQUARE)], values=[Number(42)])
         ]))
         self.assertEqual(exp, tree)
 

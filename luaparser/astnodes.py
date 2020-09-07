@@ -114,6 +114,11 @@ class Name(Lhs):
         self.id: str = identifier
 
 
+class IndexNotation(Enum):
+    DOT = 0  # obj.foo
+    SQUARE = 1  # obj[foo]
+
+
 class Index(Lhs):
     """Define a Lua index expression.
 
@@ -122,10 +127,11 @@ class Index(Lhs):
         value (`string`): Id.
     """
 
-    def __init__(self, idx: Expression, value: Name):
+    def __init__(self, idx: Expression, value: Name, notation: IndexNotation = IndexNotation.DOT):
         super(Index, self).__init__('Index')
         self.idx: Name = idx
         self.value: Expression = value
+        self.notation: IndexNotation = notation
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -475,6 +481,7 @@ class String(Expression):
         s (`string`): String value.
         delimiter (`StringDelimiter`): The string delimiter
     """
+
     def __init__(self, s: str, delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE):
         super(String, self).__init__('String')
         self.s: str = s

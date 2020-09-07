@@ -63,11 +63,11 @@ class IntegrationTestCase(tests.TestCase):
     # Unable to tell apart true indexing vs. syntactic sugar indexing #1
     def test_cont_int_3(self):
         tree = ast.parse(textwrap.dedent(r'x[a]'))
-        exp = Chunk(Block([Index(idx=Name('a'), value=Name('x'))]))
+        exp = Chunk(Block([Index(idx=Name('a'), value=Name('x'), notation=IndexNotation.SQUARE)]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(textwrap.dedent(r'''x['a']'''))
-        exp = Chunk(Block([Index(idx=String('a'), value=Name('x'))]))
+        exp = Chunk(Block([Index(idx=String('a'), value=Name('x'), notation=IndexNotation.SQUARE)]))
         self.assertEqual(exp, tree)
 
         tree = ast.parse(textwrap.dedent(r'x.a'))

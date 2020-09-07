@@ -492,7 +492,7 @@ class Builder:
             expr = self.parse_expr()
             if expr and self.next_is_rc(Tokens.CBRACK, False):
                 self.success()
-                return Index(expr, Name(""))  # value must be set in parent
+                return Index(expr, Name(""), notation=IndexNotation.SQUARE)  # value must be set in parent
 
         self.failure_save()
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
