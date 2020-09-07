@@ -64,7 +64,7 @@ class AstTestCase(tests.TestCase):
             Function,
             Index,
             Name,
-            String,
+            Name,
             Varargs,
             Block,
             Repeat,

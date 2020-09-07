@@ -485,7 +485,7 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME, False):
             self.success()
-            return Index(String(self.text), Name(""))  # value must be set in parent
+            return Index(Name(self.text), Name(""))  # value must be set in parent
 
         self.failure_save()
         if self.next_is_rc(Tokens.OBRACK):
@@ -806,7 +806,7 @@ class Builder:
                 self.save()
                 if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME):
                     self.success()
-                    child = Index(String(self.text), root)
+                    child = Index(Name(self.text), root)
                     root = child
                 else:
                     self.failure()
