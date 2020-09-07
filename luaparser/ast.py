@@ -324,6 +324,20 @@ class WalkVisitor:
         self.visit(node.value)
         self.visit(node.idx)
 
+    @visitor(Varargs)
+    def visit(self, node):
+        self._nodes.append(node)
+
+    @visitor(Repeat)
+    def visit(self, node):
+        self._nodes.append(node)
+        self.visit(node.body)
+        self.visit(node.test)
+
+    @visitor(SemiColon)
+    def visit(self, node):
+        self._nodes.append(node)
+
 
 class SyntaxException(Exception):
     pass
