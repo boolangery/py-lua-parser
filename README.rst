@@ -130,6 +130,8 @@ Alternatively, you can use a node visitor:
 Rendering lua code
 ------------------------------------------------------------------------------
 
+.. warning:: Experimental feature
+
 .. code-block:: python
 
     exp = Chunk(Block([
