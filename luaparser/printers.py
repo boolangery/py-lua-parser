@@ -35,6 +35,10 @@ class PythonStyleVisitor:
     def visit(self, node):
         return str(node)
 
+    @visitor(Enum)
+    def visit(self, node):
+        return str(node.name)
+
     def indent_str(self, newLine=True):
         res = ' ' * self.currentIndent
         if newLine:
