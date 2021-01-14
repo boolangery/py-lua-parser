@@ -117,3 +117,42 @@ class IntegrationTestCase(tests.TestCase):
                         id: 'sayHello'
                     args: [] 0 item''')
         self.assertEqual(exp, pretty_str)
+
+    # Cant walk the ast tree if lua file has semicolon(;) or repeat until loop and multiple args(...) #9
+    def test_cont_int_5(self):
+        tree = ast.parse(textwrap.dedent("""
+            function table.pack(...)
+                repeat
+                   print("value of a:", a)
+                   a = a + 1;
+                until( a > 15 )
+            end
+            """))
+        nodes = ast.walk(tree)
+        expected_cls = [
+            Chunk,
+            Block,
+            Function,
+            Index,
+            Name,
+            Name,
+            Varargs,
+            Block,
+            Repeat,
+            Block,
+            Call,
+            Name,
+            String,
+            Name,
+            Assign,
+            Name,
+            AddOp,
+            Name,
+            Number,
+            SemiColon,
+            GreaterThanOp,
+            Name,
+            Number,
+        ]
+        for node, exp in zip(nodes, expected_cls):
+            self.assertIsInstance(node, exp)
