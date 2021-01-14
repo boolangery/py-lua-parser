@@ -84,36 +84,63 @@ class IntegrationTestCase(tests.TestCase):
         '''))
         pretty_str = ast.to_pretty_str(tree)
         exp = textwrap.dedent(r'''
-        Chunk: {} 4 keys
-          body: {} 4 keys
-            Block: {} 4 keys
+        Chunk: {} 5 keys
+          start_char: 67
+          stop_char: 67
+          line: 5
+          body: {} 5 keys
+            Block: {} 5 keys
+              start_char: 67
+              stop_char: 67
+              line: 5
               body: [] 2 items
-                0: {} 1 key          
-                  LocalFunction: {} 6 keys
+                0: {} 1 key
+                  LocalFunction: {} 7 keys
                     start_char: 1
                     stop_char: 56
-                    name: {} 4 keys
-                      Name: {} 4 keys
+                    line: 4
+                    name: {} 5 keys
+                      Name: {} 5 keys
+                        start_char: 16
+                        stop_char: 23
+                        line: 2
                         id: 'sayHello'
                     args: [] 0 item
-                    body: {} 4 keys
-                      Block: {} 4 keys
+                    body: {} 5 keys
+                      Block: {} 5 keys
+                        start_char: 52
                         stop_char: 56
+                        line: 3
                         body: [] 1 item
-                          0: {} 1 key                    
-                            Call: {} 5 keys
-                              func: {} 4 keys
-                                Name: {} 4 keys
+                          0: {} 1 key
+                            Call: {} 6 keys
+                              start_char: 52
+                              stop_char: 52
+                              line: 3
+                              func: {} 5 keys
+                                Name: {} 5 keys
+                                  start_char: 31
+                                  stop_char: 35
+                                  line: 3
                                   id: 'print'
                               args: [] 1 item
-                                0: {} 1 key                          
-                                  String: {} 5 keys
+                                0: {} 1 key
+                                  String: {} 6 keys
+                                    start_char: 37
+                                    stop_char: 51
+                                    line: 3
                                     s: 'hello world !'
                                     delimiter: SINGLE_QUOTE
-                1: {} 1 key          
-                  Call: {} 5 keys
-                    func: {} 4 keys
-                      Name: {} 4 keys
+                1: {} 1 key
+                  Call: {} 6 keys
+                    start_char: 67
+                    stop_char: 67
+                    line: 5
+                    func: {} 5 keys
+                      Name: {} 5 keys
+                        start_char: 58
+                        stop_char: 65
+                        line: 5
                         id: 'sayHello'
                     args: [] 0 item''')
         self.assertEqual(exp, pretty_str)

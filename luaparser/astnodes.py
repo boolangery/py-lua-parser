@@ -42,7 +42,7 @@ class Node:
 
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
-            return _equal_dicts(self.__dict__, other.__dict__, ["start_char", "stop_char"])
+            return _equal_dicts(self.__dict__, other.__dict__, ["start_char", "stop_char", "line"])
         return False
 
     def _enrich_info(self) -> None:
@@ -74,11 +74,6 @@ class Comment(Node):
         super(Comment, self).__init__('Comment')
         self.s: str = s
         self.is_multi_line: bool = is_multi_line
-
-    def __eq__(self, other):
-        if isinstance(self, other.__class__):
-            return _equal_dicts(self.__dict__, other.__dict__, [])
-        return False
 
 
 class Statement(Node):
