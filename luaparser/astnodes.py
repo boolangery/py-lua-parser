@@ -4,6 +4,7 @@
 
     Contains all Ast Node definitions.
 """
+import inspect
 from enum import Enum
 from typing import List, Optional
 
