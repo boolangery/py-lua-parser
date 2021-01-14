@@ -25,13 +25,15 @@ class Node:
     """Base class for AST node.
     """
 
-    def __init__(self, name: str, comments: Comments = None):
+    def __init__(self, name: str, comments: Comments = None, start_char: int = None, stop_char: int = None,
+                 start_line: int = None):
         if comments is None:
             comments = []
         self._name: str = name
         self.comments: List[str] = comments
-        self.start_char: int = None  # start character offset
-        self.stop_char: int = None  # stop character offset
+        self.start_char: int = start_char  # start character offset
+        self.stop_char: int = stop_char  # stop character offset
+        self.start_line: int = start_line  # line number in source code
 
     @property
     def display_name(self) -> str:
@@ -39,16 +41,21 @@ class Node:
 
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
-            return _equal_dicts(self.__dict__, other.__dict__, ["start_char", "stop_char"])
+            return _equal_dicts(self.__dict__, other.__dict__, [])
         return False
 
     def to_json(self) -> any:
         return {self._name: {k: v for k, v in self.__dict__.items() if not k.startswith('_') and v}}
 
+    def __repr__(self):
+        """ Used by unit tests to show differences. """
+        from .ast import to_pretty_str
+        return to_pretty_str(self)
+
 
 class Comment(Node):
-    def __init__(self, s: str, is_multi_line: bool = False):
-        super(Comment, self).__init__('Comment')
+    def __init__(self, s: str, is_multi_line: bool = False, **kwargs):
+        super(Comment, self).__init__('Comment', **kwargs)
         self.s: str = s
         self.is_multi_line: bool = is_multi_line
 
@@ -74,8 +81,8 @@ class Block(Node):
     """Define a Lua Block.
     """
 
-    def __init__(self, body: List[Statement]):
-        super(Block, self).__init__('Block')
+    def __init__(self, body: List[Statement], **kwargs):
+        super(Block, self).__init__('Block', **kwargs)
         self.body: List[Statement] = body
 
 
@@ -86,8 +93,8 @@ class Chunk(Node):
         body (`Block`): Chunk body.
     """
 
-    def __init__(self, body: Block, comments: Comments = None):
-        super(Chunk, self).__init__('Chunk', comments)
+    def __init__(self, body: Block, comments: Comments = None, **kwargs):
+        super(Chunk, self).__init__('Chunk', comments, **kwargs)
         self.body = body
 
 
@@ -109,8 +116,8 @@ class Name(Lhs):
         id (`string`): Id.
     """
 
-    def __init__(self, identifier: str):
-        super(Name, self).__init__('Name')
+    def __init__(self, identifier: str, **kwargs):
+        super(Name, self).__init__('Name', **kwargs)
         self.id: str = identifier
 
 
@@ -127,8 +134,8 @@ class Index(Lhs):
         value (`string`): Id.
     """
 
-    def __init__(self, idx: Expression, value: Name, notation: IndexNotation = IndexNotation.DOT):
-        super(Index, self).__init__('Index')
+    def __init__(self, idx: Expression, value: Name, notation: IndexNotation = IndexNotation.DOT, **kwargs):
+        super(Index, self).__init__('Index', **kwargs)
         self.idx: Name = idx
         self.value: Expression = value
         self.notation: IndexNotation = notation
@@ -148,10 +155,13 @@ class Assign(Statement):
 
     """
 
-    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
-        super(Assign, self).__init__('Assign', comments)
+    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None, **kwargs):
+        super(Assign, self).__init__('Assign', comments, **kwargs)
         self.targets: List[Node] = targets
         self.values: List[Node] = values
+        self.start_char = targets[0].start_char
+        self.start_line = targets[0].start_line
+        self.stop_char = values[-1].stop_char if values else targets[-1].start_char
 
 
 class LocalAssign(Assign):
@@ -162,8 +172,8 @@ class LocalAssign(Assign):
         values (`list<Node>`): List of values.
     """
 
-    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
-        super(LocalAssign, self).__init__(targets, values, comments)
+    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None, **kwargs):
+        super(LocalAssign, self).__init__(targets, values, comments, **kwargs)
         self._name: str = 'LocalAssign'
 
 
@@ -175,8 +185,8 @@ class While(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, test: Expression, body: Block):
-        super(While, self).__init__('While')
+    def __init__(self, test: Expression, body: Block, **kwargs):
+        super(While, self).__init__('While', **kwargs)
         self.test: Expression = test
         self.body: Block = body
 
@@ -188,8 +198,8 @@ class Do(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, body: Block):
-        super(Do, self).__init__('Do')
+    def __init__(self, body: Block, **kwargs):
+        super(Do, self).__init__('Do', **kwargs)
         self.body: Block = body
 
 
@@ -201,8 +211,8 @@ class Repeat(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, body: Block, test: Expression, comments: Comments = None):
-        super(Repeat, self).__init__('Repeat', comments)
+    def __init__(self, body: Block, test: Expression, comments: Comments = None, **kwargs):
+        super(Repeat, self).__init__('Repeat', comments, **kwargs)
         self.body: Block = body
         self.test: Expression = test
 
@@ -216,8 +226,8 @@ class ElseIf(Statement):
         orelse (`list<Statement> or ElseIf`): List of statements or ElseIf if test if false.
     """
 
-    def __init__(self, test: Node, body: Block, orelse):
-        super(ElseIf, self).__init__('ElseIf')
+    def __init__(self, test: Node, body: Block, orelse, **kwargs):
+        super(ElseIf, self).__init__('ElseIf', **kwargs)
         self.test: Node = test
         self.body: Block = body
         self.orelse = orelse
@@ -233,8 +243,8 @@ class If(Statement):
     """
 
     def __init__(self, test: Expression, body: Block, orelse: List[Statement] or ElseIf,
-                 comments: Comments = None):
-        super(If, self).__init__('If', comments)
+                 comments: Comments = None, **kwargs):
+        super(If, self).__init__('If', comments, **kwargs)
         self.test: Expression = test
         self.body: Block = body
         self.orelse = orelse
@@ -247,8 +257,8 @@ class Label(Statement):
         id (`Name`): Label name.
     """
 
-    def __init__(self, label_id: Name):
-        super(Label, self).__init__('Label')
+    def __init__(self, label_id: Name, **kwargs):
+        super(Label, self).__init__('Label', **kwargs)
         self.id: Name = label_id
 
 
@@ -259,8 +269,8 @@ class Goto(Statement):
         label (`Name`): Label node.
     """
 
-    def __init__(self, label: Name, comments: Comments = None):
-        super(Goto, self).__init__('Goto', comments)
+    def __init__(self, label: Name, comments: Comments = None, **kwargs):
+        super(Goto, self).__init__('Goto', comments, **kwargs)
         self.label: Name = label
 
 
@@ -268,8 +278,8 @@ class SemiColon(Statement):
     """Define the semi-colon lua statement.
     """
 
-    def __init__(self):
-        super(SemiColon, self).__init__('SemiColon')
+    def __init__(self, **kwargs):
+        super(SemiColon, self).__init__('SemiColon', **kwargs)
 
 
 class Break(Statement):
@@ -277,8 +287,8 @@ class Break(Statement):
 
     """
 
-    def __init__(self):
-        super(Break, self).__init__('Break')
+    def __init__(self, **kwargs):
+        super(Break, self).__init__('Break', **kwargs)
 
 
 class Return(Statement):
@@ -288,8 +298,8 @@ class Return(Statement):
         values (`list<Expression>`): Values to return.
     """
 
-    def __init__(self, values):
-        super(Return, self).__init__('Return')
+    def __init__(self, values, **kwargs):
+        super(Return, self).__init__('Return', **kwargs)
         self.values = values
 
 
@@ -305,8 +315,8 @@ class Fornum(Statement):
     """
 
     def __init__(self, target: Name, start: Expression, stop: Expression, step: Expression, body: Block,
-                 comments: Comments = None):
-        super(Fornum, self).__init__('Fornum', comments)
+                 comments: Comments = None, **kwargs):
+        super(Fornum, self).__init__('Fornum', comments, **kwargs)
         self.target: Name = target
         self.start: Expression = start
         self.stop: Expression = stop
@@ -323,8 +333,8 @@ class Forin(Statement):
         targets (`list<Name>`): Start index value.
     """
 
-    def __init__(self, body: Block, iter: List[Expression], targets: List[Name], comments: Comments = None):
-        super(Forin, self).__init__('Forin', comments)
+    def __init__(self, body: Block, iter: List[Expression], targets: List[Name], comments: Comments = None, **kwargs):
+        super(Forin, self).__init__('Forin', comments, **kwargs)
         self.body: Block = body
         self.iter: List[Expression] = iter
         self.targets: List[Name] = targets
@@ -338,8 +348,8 @@ class Call(Statement):
         args (`list<Expression>`): Function call arguments.
     """
 
-    def __init__(self, func: Expression, args: List[Expression], comments: Comments = None):
-        super(Call, self).__init__('Call', comments)
+    def __init__(self, func: Expression, args: List[Expression], comments: Comments = None, **kwargs):
+        super(Call, self).__init__('Call', comments, **kwargs)
         self.func: Expression = func
         self.args: List[Expression] = args
 
@@ -353,8 +363,8 @@ class Invoke(Statement):
         args (`list<Expression>`): Function call arguments.
     """
 
-    def __init__(self, source: Expression, func: Expression, args: List[Expression]):
-        super(Invoke, self).__init__('Invoke')
+    def __init__(self, source: Expression, func: Expression, args: List[Expression], **kwargs):
+        super(Invoke, self).__init__('Invoke', **kwargs)
         self.source: Expression = source
         self.func: Expression = func
         self.args: List[Expression] = args
@@ -369,8 +379,8 @@ class Function(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, name: Expression, args: List[Expression], body: Block):
-        super(Function, self).__init__('Function')
+    def __init__(self, name: Expression, args: List[Expression], body: Block, **kwargs):
+        super(Function, self).__init__('Function', **kwargs)
         self.name: Expression = name
         self.args: List[Expression] = args
         self.body: Block = body
@@ -385,8 +395,8 @@ class LocalFunction(Statement):
         body (`list<Statement>`): List of statements to execute.
     """
 
-    def __init__(self, name: Expression, args: List[Expression], body: Block):
-        super(LocalFunction, self).__init__('LocalFunction')
+    def __init__(self, name: Expression, args: List[Expression], body: Block, **kwargs):
+        super(LocalFunction, self).__init__('LocalFunction', **kwargs)
         self.name: Expression = name
         self.args: List[Expression] = args
         self.body: Block = body
@@ -403,8 +413,8 @@ class Method(Statement):
     """
 
     def __init__(self, source: Expression, name: Expression, args: List[Expression], body: Block,
-                 comments: Comments = None):
-        super(Method, self).__init__('Method', comments)
+                 comments: Comments = None, **kwargs):
+        super(Method, self).__init__('Method', comments, **kwargs)
         self.source: Expression = source
         self.name: Expression = name
         self.args: List[Expression] = args
@@ -424,24 +434,24 @@ class Nil(Expression):
     """Define the Lua nil expression.
     """
 
-    def __init__(self):
-        super(Nil, self).__init__('Nil')
+    def __init__(self, **kwargs):
+        super(Nil, self).__init__('Nil', **kwargs)
 
 
 class TrueExpr(Expression):
     """Define the Lua true expression.
     """
 
-    def __init__(self):
-        super(TrueExpr, self).__init__('True')
+    def __init__(self, **kwargs):
+        super(TrueExpr, self).__init__('True', **kwargs)
 
 
 class FalseExpr(Expression):
     """Define the Lua false expression.
     """
 
-    def __init__(self):
-        super(FalseExpr, self).__init__('False')
+    def __init__(self, **kwargs):
+        super(FalseExpr, self).__init__('False', **kwargs)
 
 
 NumberType = int or float
@@ -454,8 +464,8 @@ class Number(Expression):
         n (`int|float`): Numeric value.
     """
 
-    def __init__(self, n: NumberType):
-        super(Number, self).__init__('Number')
+    def __init__(self, n: NumberType, **kwargs):
+        super(Number, self).__init__('Number', **kwargs)
         self.n: NumberType = n
 
 
@@ -464,8 +474,8 @@ class Varargs(Expression):
 
     """
 
-    def __init__(self):
-        super(Varargs, self).__init__('Varargs')
+    def __init__(self, **kwargs):
+        super(Varargs, self).__init__('Varargs', **kwargs)
 
 
 class StringDelimiter(Enum):
@@ -482,8 +492,8 @@ class String(Expression):
         delimiter (`StringDelimiter`): The string delimiter
     """
 
-    def __init__(self, s: str, delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE):
-        super(String, self).__init__('String')
+    def __init__(self, s: str, delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE, **kwargs):
+        super(String, self).__init__('String', **kwargs)
         self.s: str = s
         self.delimiter: StringDelimiter = delimiter
 
@@ -497,8 +507,8 @@ class Field(Expression):
     """
 
     def __init__(self, key: Expression, value: Expression, comments: Comments = None,
-                 between_brackets: bool = False):
-        super(Field, self).__init__('Field', comments)
+                 between_brackets: bool = False, **kwargs):
+        super(Field, self).__init__('Field', comments, **kwargs)
         self.key: Expression = key
         self.value: Expression = value
         self.between_brackets: bool = between_brackets
@@ -511,8 +521,8 @@ class Table(Expression):
         fields (`list<Field>`): Table fields.
     """
 
-    def __init__(self, fields: List[Field]):
-        super(Table, self).__init__('Table')
+    def __init__(self, fields: List[Field], **kwargs):
+        super(Table, self).__init__('Table', **kwargs)
         self.fields: List[Field] = fields
 
 
@@ -520,8 +530,8 @@ class Dots(Expression):
     """Define the Lua dots (...) expression.
     """
 
-    def __init__(self):
-        super(Dots, self).__init__('Dots')
+    def __init__(self, **kwargs):
+        super(Dots, self).__init__('Dots', **kwargs)
 
 
 class AnonymousFunction(Expression):
@@ -532,8 +542,8 @@ class AnonymousFunction(Expression):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, args: List[Expression], body: Block):
-        super(AnonymousFunction, self).__init__('AnonymousFunction')
+    def __init__(self, args: List[Expression], body: Block, **kwargs):
+        super(AnonymousFunction, self).__init__('AnonymousFunction', **kwargs)
         self.args: List[Expression] = args
         self.body: Block = body
 
@@ -557,10 +567,13 @@ class BinaryOp(Op):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, name, left: Expression, right: Expression):
-        super(BinaryOp, self).__init__(name)
+    def __init__(self, name, left: Expression, right: Expression, **kwargs):
+        super(BinaryOp, self).__init__(name, **kwargs)
         self.left: Expression = left
         self.right: Expression = right
+        self.start_char = left.start_char
+        self.start_line = left.start_line
+        self.stop_char = right.stop_char
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -581,8 +594,8 @@ class AddOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(AddOp, self).__init__('AddOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(AddOp, self).__init__('AddOp', left, right, **kwargs)
 
 
 class SubOp(AriOp):
@@ -593,8 +606,8 @@ class SubOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(SubOp, self).__init__('SubOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(SubOp, self).__init__('SubOp', left, right, **kwargs)
 
 
 class MultOp(AriOp):
@@ -605,8 +618,8 @@ class MultOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(MultOp, self).__init__('MultOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(MultOp, self).__init__('MultOp', left, right, **kwargs)
 
 
 class FloatDivOp(AriOp):
@@ -617,8 +630,8 @@ class FloatDivOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(FloatDivOp, self).__init__('FloatDivOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(FloatDivOp, self).__init__('FloatDivOp', left, right, **kwargs)
 
 
 class FloorDivOp(AriOp):
@@ -629,8 +642,8 @@ class FloorDivOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(FloorDivOp, self).__init__('FloorDivOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(FloorDivOp, self).__init__('FloorDivOp', left, right, **kwargs)
 
 
 class ModOp(AriOp):
@@ -641,8 +654,8 @@ class ModOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(ModOp, self).__init__('ModOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(ModOp, self).__init__('ModOp', left, right, **kwargs)
 
 
 class ExpoOp(AriOp):
@@ -653,8 +666,8 @@ class ExpoOp(AriOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(ExpoOp, self).__init__('ExpoOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(ExpoOp, self).__init__('ExpoOp', left, right, **kwargs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -676,8 +689,8 @@ class BAndOp(BitOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(BAndOp, self).__init__('BAndOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(BAndOp, self).__init__('BAndOp', left, right, **kwargs)
 
 
 class BOrOp(BitOp):
@@ -688,8 +701,8 @@ class BOrOp(BitOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(BOrOp, self).__init__('BOrOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(BOrOp, self).__init__('BOrOp', left, right, **kwargs)
 
 
 class BXorOp(BitOp):
@@ -700,8 +713,8 @@ class BXorOp(BitOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(BXorOp, self).__init__('BXorOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(BXorOp, self).__init__('BXorOp', left, right, **kwargs)
 
 
 class BShiftROp(BitOp):
@@ -712,8 +725,8 @@ class BShiftROp(BitOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(BShiftROp, self).__init__('BShiftROp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(BShiftROp, self).__init__('BShiftROp', left, right, **kwargs)
 
 
 class BShiftLOp(BitOp):
@@ -724,8 +737,8 @@ class BShiftLOp(BitOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(BShiftLOp, self).__init__('BShiftLOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(BShiftLOp, self).__init__('BShiftLOp', left, right, **kwargs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -747,8 +760,8 @@ class LessThanOp(RelOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(LessThanOp, self).__init__('RLtOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(LessThanOp, self).__init__('RLtOp', left, right, **kwargs)
 
 
 class GreaterThanOp(RelOp):
@@ -759,8 +772,8 @@ class GreaterThanOp(RelOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(GreaterThanOp, self).__init__('RGtOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(GreaterThanOp, self).__init__('RGtOp', left, right, **kwargs)
 
 
 class LessOrEqThanOp(RelOp):
@@ -771,8 +784,8 @@ class LessOrEqThanOp(RelOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right, **kwargs)
 
 
 class GreaterOrEqThanOp(RelOp):
@@ -783,8 +796,8 @@ class GreaterOrEqThanOp(RelOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right, **kwargs)
 
 
 class EqToOp(RelOp):
@@ -795,8 +808,8 @@ class EqToOp(RelOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(EqToOp, self).__init__('REqOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(EqToOp, self).__init__('REqOp', left, right, **kwargs)
 
 
 class NotEqToOp(RelOp):
@@ -807,8 +820,8 @@ class NotEqToOp(RelOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(NotEqToOp, self).__init__('RNotEqOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(NotEqToOp, self).__init__('RNotEqOp', left, right, **kwargs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -830,8 +843,8 @@ class AndLoOp(LoOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(AndLoOp, self).__init__('LAndOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(AndLoOp, self).__init__('LAndOp', left, right, **kwargs)
 
 
 class OrLoOp(LoOp):
@@ -842,8 +855,8 @@ class OrLoOp(LoOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(OrLoOp, self).__init__('LOrOp', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(OrLoOp, self).__init__('LOrOp', left, right, **kwargs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -859,8 +872,8 @@ class Concat(BinaryOp):
         right (`Expression`): Right expression.
     """
 
-    def __init__(self, left: Expression, right: Expression):
-        super(Concat, self).__init__('Concat', left, right)
+    def __init__(self, left: Expression, right: Expression, **kwargs):
+        super(Concat, self).__init__('Concat', left, right, **kwargs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -875,8 +888,8 @@ class UnaryOp(Expression):
         operand (`Expression`): Operand.
     """
 
-    def __init__(self, name: str, operand: Expression):
-        super(UnaryOp, self).__init__(name)
+    def __init__(self, name: str, operand: Expression, **kwargs):
+        super(UnaryOp, self).__init__(name, **kwargs)
         self.operand = operand
 
 
@@ -887,8 +900,8 @@ class UMinusOp(UnaryOp):
         operand (`Expression`): Operand.
     """
 
-    def __init__(self, operand: Expression):
-        super(UMinusOp, self).__init__('UMinusOp', operand)
+    def __init__(self, operand: Expression, **kwargs):
+        super(UMinusOp, self).__init__('UMinusOp', operand, **kwargs)
 
 
 class UBNotOp(UnaryOp):
@@ -898,8 +911,8 @@ class UBNotOp(UnaryOp):
         operand (`Expression`): Operand.
     """
 
-    def __init__(self, operand: Expression):
-        super(UBNotOp, self).__init__('UBNotOp', operand)
+    def __init__(self, operand: Expression, **kwargs):
+        super(UBNotOp, self).__init__('UBNotOp', operand, **kwargs)
 
 
 class ULNotOp(UnaryOp):
@@ -909,8 +922,8 @@ class ULNotOp(UnaryOp):
         operand (`Expression`): Operand.
     """
 
-    def __init__(self, operand: Expression):
-        super(ULNotOp, self).__init__('ULNotOp', operand)
+    def __init__(self, operand: Expression, **kwargs):
+        super(ULNotOp, self).__init__('ULNotOp', operand, **kwargs)
 
 
 ''' ----------------------------------------------------------------------- '''
@@ -922,5 +935,5 @@ class ULengthOP(UnaryOp):
     """Length operator.
     """
 
-    def __init__(self, operand: Expression):
-        super(ULengthOP, self).__init__('ULengthOp', operand)
+    def __init__(self, operand: Expression, **kwargs):
+        super(ULengthOP, self).__init__('ULengthOp', operand, **kwargs)

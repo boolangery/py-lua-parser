@@ -13,15 +13,20 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_addition(self):
         tree = ast.parse(r'a = 1 + 0.2')
-        exp = Chunk(Block([Assign(
-            targets=[Name('a')],
-            values=[
-                AddOp(
-                    left=Number(1),
-                    right=Number(0.2)
-                )
-            ]
-        )]))
+        exp = Chunk(
+            Block([Assign(
+                targets=[Name('a', start_char=0, stop_char=0, start_line=1)],
+                values=[
+                    AddOp(
+                        left=Number(1, start_char=4, stop_char=4, start_line=1),
+                        right=Number(0.2, start_char=8, stop_char=10, start_line=1),
+                        start_char=4, stop_char=10, start_line=1
+                    )
+                ],
+                start_char=0, stop_char=10, start_line=1
+            )], start_char=0, stop_char=10, start_line=1),
+            start_char=0, stop_char=10, start_line=1
+        )
         self.assertEqual(exp, tree)
 
     def test_substraction(self):
@@ -40,7 +45,7 @@ class ExpressionsTestCase(tests.TestCase):
     def test_multiplication(self):
         tree = ast.parse(r'a = 1 * 0.2')
         exp = Chunk(Block([Assign(
-            targets=[Name('a')],
+            targets=[Name('a', start_char=0, stop_char=0)],
             values=[
                 MultOp(
                     left=Number(1),

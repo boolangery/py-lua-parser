@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -5,6 +6,9 @@ import textwrap
 
 
 class LuaOutputTestCase(tests.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
+
     def test_assign(self):
         source = textwrap.dedent('''\
             a = 42

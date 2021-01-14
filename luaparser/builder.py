@@ -204,6 +204,8 @@ class Builder:
         self._hidden_handled_stack.append(self._hidden_handled)
 
     def next_is_rc(self, type_to_seek: int, hidden_right: bool = True) -> Optional[Token]:
+        """ 'rc' is for render and consume.
+        """
         token = self._stream.LT(1)
         tok_type: int = token.type
         self._right_index = self._stream.index
@@ -347,6 +349,28 @@ class Builder:
             "Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(
                 token.column))
 
+    def enrich(self, node: Node, token: Token) -> Node:
+        """"Add additional information to node such as line numbers from passed token. """
+        node.start_char = token.start
+        node.stop_char = token.stop
+        node.start_line = token.line
+        return node
+
+    def enrich_pt(self, node: Node) -> Node:
+        """"Add additional information to node such as line numbers from Previous Token (pt). """
+        prev_token = self._stream.LT(-1)
+        node.start_char = prev_token.start
+        node.stop_char = prev_token.stop
+        node.start_line = prev_token.line
+        return node
+
+    def enrich_cp(self, node: Node, node_to_cp: Node) -> Node:
+        """"Copy additional information from node to node such as line numbers. """
+        node.start_char = node_to_cp.start_char
+        node.stop_char = node_to_cp.stop_char
+        node.start_line = node_to_cp.start_line
+        return node
+
     def parse_chunk(self) -> Chunk or None:
         self._stream.LT(1)
         self.handle_hidden_left()
@@ -356,7 +380,7 @@ class Builder:
             token = self._stream.LT(1)
             if token.type == -1:
                 # do not consume EOF
-                return Chunk(block, comments)
+                return self.enrich_cp(Chunk(block, comments), block)
         return False
 
     def parse_block(self) -> Block:
@@ -372,7 +396,14 @@ class Builder:
         stat = self.parse_ret_stat()
         if stat:
             statements.append(stat)
-        return Block(statements)
+        block = Block(statements)
+
+        if statements:
+            block.start_char = statements[0].start_char
+            block.start_line = statements[0].start_line
+            block.stop_char = statements[-1].stop_char
+
+        return block
 
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
@@ -900,7 +931,7 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.NAME):
             self.success()
-            return Name(self.text)
+            return self.enrich_pt(Name(self.text))
         return self.failure()
 
     def parse_expr(self) -> Expression or bool:
@@ -1180,7 +1211,7 @@ class Builder:
             except:
                 # exception occurs with leading zero number: 002
                 number = float(self.text)
-            return Number(number)
+            return self.enrich_pt(Number(number))
 
         if self.next_is(Tokens.STRING) and self.next_is_rc(Tokens.STRING):
             return self.parse_lua_str(self.text)

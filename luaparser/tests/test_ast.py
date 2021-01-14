@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -5,6 +6,8 @@ import textwrap
 
 
 class AstTestCase(tests.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
 
     def test_walk_1(self):
         src = textwrap.dedent("""
@@ -46,4 +49,3 @@ class AstTestCase(tests.TestCase):
             """)
 
         self.assertRaises(Exception, ast.parse, src)
-

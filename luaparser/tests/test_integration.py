@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -5,6 +6,9 @@ import textwrap
 
 
 class IntegrationTestCase(tests.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
+
     def test_cont_int_1(self):
         tree = ast.parse(textwrap.dedent(r'''
         describe("", function()
@@ -84,36 +88,44 @@ class IntegrationTestCase(tests.TestCase):
         '''))
         pretty_str = ast.to_pretty_str(tree)
         exp = textwrap.dedent(r'''
-        Chunk: {} 4 keys
-          body: {} 4 keys
-            Block: {} 4 keys
+        Chunk: {} 5 keys
+          start_char: 1
+          body: {} 5 keys
+            Block: {} 5 keys
+              start_char: 1
               body: [] 2 items
                 0: {} 1 key          
-                  LocalFunction: {} 6 keys
+                  LocalFunction: {} 7 keys
                     start_char: 1
                     stop_char: 56
-                    name: {} 4 keys
-                      Name: {} 4 keys
+                    name: {} 5 keys
+                      Name: {} 5 keys
                         id: 'sayHello'
                     args: [] 0 item
-                    body: {} 4 keys
-                      Block: {} 4 keys
+                    body: {} 5 keys
+                      Block: {} 5 keys
                         stop_char: 56
                         body: [] 1 item
                           0: {} 1 key                    
-                            Call: {} 5 keys
-                              func: {} 4 keys
-                                Name: {} 4 keys
+                            Call: {} 6 keys
+                              func: {} 5 keys
+                                Name: {} 5 keys
+                                  start_char: 31
+                                  stop_char: 35
+                                  start_line: 3
                                   id: 'print'
                               args: [] 1 item
                                 0: {} 1 key                          
-                                  String: {} 5 keys
+                                  String: {} 6 keys
                                     s: 'hello world !'
                                     delimiter: SINGLE_QUOTE
                 1: {} 1 key          
-                  Call: {} 5 keys
-                    func: {} 4 keys
-                      Name: {} 4 keys
+                  Call: {} 6 keys
+                    func: {} 5 keys
+                      Name: {} 5 keys
+                        start_char: 58
+                        stop_char: 65
+                        start_line: 5
                         id: 'sayHello'
                     args: [] 0 item''')
         self.assertEqual(exp, pretty_str)

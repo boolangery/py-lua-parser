@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -9,6 +10,9 @@ class StatementsTestCase(tests.TestCase):
     """
     3.3.1 – Blocks
     """
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
+
     def test_empty_block(self):
         tree = ast.parse(";;;;")
         exp = Chunk(Block([SemiColon(), SemiColon(), SemiColon(), SemiColon()]))
@@ -17,25 +21,26 @@ class StatementsTestCase(tests.TestCase):
     def test_2_block(self):
         tree = ast.parse("local a;local b;")
         exp = Chunk(Block([
-            LocalAssign(targets=[Name('a')],values=[]),SemiColon(),
-            LocalAssign(targets=[Name('b')],values=[]),SemiColon(),
+            LocalAssign(targets=[Name('a')], values=[]), SemiColon(),
+            LocalAssign(targets=[Name('b')], values=[]), SemiColon(),
         ]))
         self.assertEqual(exp, tree)
 
         """
     3.3.3 – Assignment
     """
+
     def test_set_number(self):
         tree = ast.parse("i=3")
         exp = Chunk(Block([
-            Assign(targets=[Name('i')],values=[Number(3)])
+            Assign(targets=[Name('i')], values=[Number(3)])
         ]))
         self.assertEqual(exp, tree)
 
     def test_set_string(self):
         tree = ast.parse('i="foo bar"')
         exp = Chunk(Block([
-            Assign(targets=[Name('i')],values=[String('foo bar', StringDelimiter.DOUBLE_QUOTE)])
+            Assign(targets=[Name('i')], values=[String('foo bar', StringDelimiter.DOUBLE_QUOTE)])
         ]))
         self.assertEqual(exp, tree)
 
@@ -57,13 +62,14 @@ class StatementsTestCase(tests.TestCase):
         tree = ast.parse('x, y = y, x')
 
         exp = Chunk(Block([
-            Assign(targets=[Name('x'), Name('y')],values=[Name('y'), Name('x')])
+            Assign(targets=[Name('x'), Name('y')], values=[Name('y'), Name('x')])
         ]))
         self.assertEqual(exp, tree)
 
     '''
     3.3.4 – Control Structures
     '''
+
     def test_for_in_1(self):
         tree = ast.parse(textwrap.dedent("""
             for k, v in pairs({}) do
@@ -152,7 +158,8 @@ class StatementsTestCase(tests.TestCase):
             Forin(
                 body=Block([Call(func=Name('print'), args=[Name('k'), Name('v')])]),
                 iter=[Call(
-                    func=Index(idx=Name('pairs'), value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
+                    func=Index(idx=Name('pairs'),
+                               value=Invoke(source=Name('bar'), func=Name('foo'), args=[Number(42)])),
                     args=[Table([])])],
                 targets=[Name('k'), Name('v')]
             )
@@ -182,7 +189,7 @@ class StatementsTestCase(tests.TestCase):
             """))
         exp = Chunk(Block([
             Do(
-                body=Block([LocalAssign(targets=[Name('foo')],values=[String('bar')])])
+                body=Block([LocalAssign(targets=[Name('foo')], values=[String('bar')])])
             )
         ]))
         self.assertEqual(exp, tree)

@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -8,6 +9,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:\t%(message)s')
 
 
 class CommentsTestCase(tests.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
+
     def test_comment_before_local_assign(self):
         tree = ast.parse(textwrap.dedent("""
             -- rate limit

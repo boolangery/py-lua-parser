@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -5,6 +6,9 @@ import textwrap
 
 
 class TypesValuesTestCase(tests.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
+
     def test_nil(self):
         tree = ast.parse(r'foo = nil')
         exp = Chunk(Block([Assign(

@@ -1,9 +1,13 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
 
 
 class VariablesTestCase(tests.TestCase):
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
+
     def test_global_var(self):
         tree = ast.parse("foo = 42")
         exp = Chunk(Block([Assign(
