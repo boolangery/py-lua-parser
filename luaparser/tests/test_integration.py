@@ -94,7 +94,7 @@ class IntegrationTestCase(tests.TestCase):
               stop_char: 67
               line: 5
               body: [] 2 items
-                0: {} 1 key
+                0: {} 1 key          
                   LocalFunction: {} 7 keys
                     start_char: 1
                     stop_char: 56
@@ -112,7 +112,7 @@ class IntegrationTestCase(tests.TestCase):
                         stop_char: 56
                         line: 3
                         body: [] 1 item
-                          0: {} 1 key
+                          0: {} 1 key                    
                             Call: {} 6 keys
                               start_char: 52
                               stop_char: 52
@@ -124,14 +124,14 @@ class IntegrationTestCase(tests.TestCase):
                                   line: 3
                                   id: 'print'
                               args: [] 1 item
-                                0: {} 1 key
+                                0: {} 1 key                          
                                   String: {} 6 keys
                                     start_char: 37
                                     stop_char: 51
                                     line: 3
                                     s: 'hello world !'
                                     delimiter: SINGLE_QUOTE
-                1: {} 1 key
+                1: {} 1 key          
                   Call: {} 6 keys
                     start_char: 67
                     stop_char: 67
