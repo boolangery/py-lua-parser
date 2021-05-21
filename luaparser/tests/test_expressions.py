@@ -1,3 +1,4 @@
+from luaparser.tests.comparators import node_compare_without_char
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -10,6 +11,8 @@ class ExpressionsTestCase(tests.TestCase):
     """
     3.4.1 – Arithmetic Operators
     """
+    def setUp(self):
+        self.addTypeEqualityFunc(Chunk, node_compare_without_char)
 
     def test_addition(self):
         tree = ast.parse(r'a = 1 + 0.2')
