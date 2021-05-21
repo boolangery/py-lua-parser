@@ -19,9 +19,9 @@ class Style(Enum):
 
 
 class PythonStyleVisitor:
-    def __init__(self, indent):
-        self.indentValue = indent
-        self.currentIndent = 0
+    def __init__(self, indent_size):
+        self.indent_value = indent_size
+        self.current_indent = 0
 
     @visitor(str)
     def visit(self, node):
@@ -39,17 +39,17 @@ class PythonStyleVisitor:
     def visit(self, node):
         return str(node.name)
 
-    def indent_str(self, newLine=True):
-        res = ' ' * self.currentIndent
-        if newLine:
+    def indent_str(self, new_line=True):
+        res = ' ' * self.current_indent
+        if new_line:
             res = '\n' + res
         return res
 
     def indent(self):
-        self.currentIndent += self.indentValue
+        self.current_indent += self.indent_value
 
     def dedent(self):
-        self.currentIndent -= self.indentValue
+        self.current_indent -= self.indent_value
 
     @staticmethod
     def pretty_count(node, is_list=False):
