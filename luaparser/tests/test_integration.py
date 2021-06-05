@@ -74,7 +74,9 @@ class IntegrationTestCase(tests.TestCase):
         exp = Chunk(Block([Index(idx=Name('a'), value=Name('x'))]))
         self.assertEqual(exp, tree)
 
-    # luaparser.utils.visitor.VisitorException: No visitor found for class <enum 'StringDelimiter'> #11
+    # luaparser.utils.visitor.VisitorException: No visitor found for class <enum 'StringDelimiter'>
+    # #11
+    # #14
     def test_cont_int_4(self):
         tree = ast.parse(textwrap.dedent(r'''
         local function sayHello()
@@ -117,6 +119,7 @@ class IntegrationTestCase(tests.TestCase):
                         id: 'sayHello'
                     args: [] 0 item''')
         self.assertEqual(exp, pretty_str)
+        ast.to_xml_str(tree)
 
     # Cant walk the ast tree if lua file has semicolon(;) or repeat until loop and multiple args(...) #9
     def test_cont_int_5(self):
