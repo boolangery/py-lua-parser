@@ -186,6 +186,10 @@ class HTMLStyleVisitor:
             xml_nodes.append(self.visit(itemValue))
         return xml_nodes
 
+    @visitor(Enum)
+    def visit(self, node):
+        return str(node)
+
     @visitor(Node)
     def visit(self, node):
         xml_node = ElementTree.Element(node.display_name)
