@@ -11,9 +11,11 @@ from antlr4.Token import Token
 class SyntaxException(Exception):
     def __init__(self, user_msg, token=None):
         if token:
-            message = '(' + str(token.line) + ',' + str(token.start) + '): Error: ' + user_msg
+            message = (
+                "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
+            )
         else:
-            message = 'Error: ' + user_msg
+            message = "Error: " + user_msg
         super().__init__(message)
 
 
@@ -97,16 +99,73 @@ class Tokens:
     LongBracket = 64
 
 
-LITERAL_NAMES = ["<INVALID>",
-                 "'and'", "'break'", "'do'", "'else'", "'elseif'", "'end'", "'false'",
-                 "'for'", "'function'", "'goto'", "'if'", "'in'", "'local'",
-                 "'nil'", "'not'", "'or'", "'repeat'", "'return'", "'then'",
-                 "'true'", "'until'", "'while'", "'+'", "'-'", "'*'", "'/'",
-                 "'//'", "'%'", "'^'", "'#'", "'=='", "'~='", "'<='", "'>='",
-                 "'<'", "'>'", "'='", "'&'", "'|'", "'~'", "'>>'", "'<<'", "'('",
-                 "')'", "'{'", "'}'", "'['", "']'", "'::'", "':'", "','", "'...'",
-                 "'..'", "'.'", "';'", "NAME", "NUMBER", "STRING", "COMMENT", "LINE_COMMENT",
-                 "SPACE", "NEWLINE", "SHEBANG", "LONG_BRACKET"]
+LITERAL_NAMES = [
+    "<INVALID>",
+    "'and'",
+    "'break'",
+    "'do'",
+    "'else'",
+    "'elseif'",
+    "'end'",
+    "'false'",
+    "'for'",
+    "'function'",
+    "'goto'",
+    "'if'",
+    "'in'",
+    "'local'",
+    "'nil'",
+    "'not'",
+    "'or'",
+    "'repeat'",
+    "'return'",
+    "'then'",
+    "'true'",
+    "'until'",
+    "'while'",
+    "'+'",
+    "'-'",
+    "'*'",
+    "'/'",
+    "'//'",
+    "'%'",
+    "'^'",
+    "'#'",
+    "'=='",
+    "'~='",
+    "'<='",
+    "'>='",
+    "'<'",
+    "'>'",
+    "'='",
+    "'&'",
+    "'|'",
+    "'~'",
+    "'>>'",
+    "'<<'",
+    "'('",
+    "')'",
+    "'{'",
+    "'}'",
+    "'['",
+    "']'",
+    "'::'",
+    "':'",
+    "','",
+    "'...'",
+    "'..'",
+    "'.'",
+    "';'",
+    "NAME",
+    "NUMBER",
+    "STRING",
+    "COMMENT",
+    "LINE_COMMENT",
+    "SPACE",
+    "NEWLINE",
+    "SHEBANG",
+    "LONG_BRACKET",
+]
 
 
 def _listify(obj):
@@ -117,10 +176,7 @@ def _listify(obj):
 
 
 class Builder:
-    CLOSING_TOKEN = [
-        Tokens.END,
-        Tokens.CBRACE,
-        Tokens.CPAR]
+    CLOSING_TOKEN = [Tokens.END, Tokens.CBRACE, Tokens.CPAR]
 
     HIDDEN_TOKEN = [
         Tokens.SHEBANG,
@@ -128,7 +184,8 @@ class Builder:
         Tokens.COMMENT,
         Tokens.NEWLINE,
         Tokens.SPACE,
-        -2]
+        -2,
+    ]
 
     REL_OPERATORS = [
         Tokens.LT,
@@ -136,7 +193,8 @@ class Builder:
         Tokens.LTEQ,
         Tokens.GTEQ,
         Tokens.NEQ,
-        Tokens.EQ]
+        Tokens.EQ,
+    ]
 
     def __init__(self, source):
         self._stream = CommonTokenStream(LuaLexer(InputStream(source)))
@@ -148,7 +206,7 @@ class Builder:
         # following stack are used to backup values
         self._index_stack: List[int] = []
         self._right_index_stack: List[int] = []
-        self.text: str = ''  # last token text
+        self.text: str = ""  # last token text
         self.type: int = -1  # last token type
 
         # contains expected token in case of invalid input code
@@ -203,7 +261,9 @@ class Builder:
         self._comments_index_stack.append(len(self.comments))
         self._hidden_handled_stack.append(self._hidden_handled)
 
-    def next_is_rc(self, type_to_seek: int, hidden_right: bool = True) -> Optional[Token]:
+    def next_is_rc(
+        self, type_to_seek: int, hidden_right: bool = True
+    ) -> Optional[Token]:
         token = self._stream.LT(1)
         tok_type: int = token.type
         self._right_index = self._stream.index
@@ -276,7 +336,7 @@ class Builder:
                         self.comments.append(Comment(t.text, True))
                     elif t.type == Tokens.NEWLINE:
                         # append n time a None value (indicate newline)
-                        self.comments += t.text.count('\n') * [None]
+                        self.comments += t.text.count("\n") * [None]
 
         self._hidden_handled = True
 
@@ -291,7 +351,7 @@ class Builder:
                         self.comments.append(Comment(t.text, True))
                     elif t.type == Tokens.NEWLINE:
                         # append n time a None value (indicate newline)
-                        self.comments += t.text.count('\n') * [None]
+                        self.comments += t.text.count("\n") * [None]
 
         self._hidden_handled = True
 
@@ -301,8 +361,7 @@ class Builder:
         return comments
 
     def get_comments_followed_by_blank_line(self) -> Comments:
-        """ Returns comments followed by a blank line.
-        """
+        """Returns comments followed by a blank line."""
         if not self.comments:
             return []
 
@@ -320,7 +379,7 @@ class Builder:
         if idx + 1 < len(self.comments):
             if self.comments[idx] is None and self.comments[idx + 1] is None:
                 # clean list
-                self.comments = self.comments[idx + 2:]
+                self.comments = self.comments[idx + 2 :]
                 return comments
         return []
 
@@ -344,8 +403,13 @@ class Builder:
             types_str.append(LITERAL_NAMES[type_to_seek])
 
         raise SyntaxException(
-            "Expecting one of " + ', '.join(types_str) + ' at line ' + str(token.line) + ', column ' + str(
-                token.column))
+            "Expecting one of "
+            + ", ".join(types_str)
+            + " at line "
+            + str(token.line)
+            + ", column "
+            + str(token.column)
+        )
 
     def parse_chunk(self) -> Chunk or None:
         self._stream.LT(1)
@@ -377,17 +441,18 @@ class Builder:
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
 
-        stat = \
-            self.parse_assignment() or \
-            self.parse_var() or \
-            self.parse_while_stat() or \
-            self.parse_repeat_stat() or \
-            self.parse_local() or \
-            self.parse_goto_stat() or \
-            self.parse_if_stat() or \
-            self.parse_for_stat() or \
-            self.parse_function() or \
-            self.parse_label()
+        stat = (
+            self.parse_assignment()
+            or self.parse_var()
+            or self.parse_while_stat()
+            or self.parse_repeat_stat()
+            or self.parse_local()
+            or self.parse_goto_stat()
+            or self.parse_if_stat()
+            or self.parse_for_stat()
+            or self.parse_function()
+            or self.parse_label()
+        )
 
         if stat:
             stat.comments = comments
@@ -492,7 +557,9 @@ class Builder:
             expr = self.parse_expr()
             if expr and self.next_is_rc(Tokens.CBRACK, False):
                 self.success()
-                return Index(expr, Name(""), notation=IndexNotation.SQUARE)  # value must be set in parent
+                return Index(
+                    expr, Name(""), notation=IndexNotation.SQUARE
+                )  # value must be set in parent
 
         self.failure_save()
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
@@ -535,7 +602,9 @@ class Builder:
             if tokens:
                 for t in tokens:
                     if t.type == Tokens.NEWLINE and not self.prev_is(Tokens.SEMCOL):
-                        raise SyntaxException('Ambiguous syntax detected', self._stream.LT(-1))
+                        raise SyntaxException(
+                            "Ambiguous syntax detected", self._stream.LT(-1)
+                        )
 
         if self.next_is_rc(Tokens.OPAR, False):
             self.handle_hidden_right()
@@ -739,7 +808,9 @@ class Builder:
                         if stop:
                             step = 1
                             # optional step
-                            if self.next_is(Tokens.COMMA) and self.next_is_rc(Tokens.COMMA):
+                            if self.next_is(Tokens.COMMA) and self.next_is_rc(
+                                Tokens.COMMA
+                            ):
                                 step = self.parse_expr()
 
                             body = self.parse_do_block()
@@ -843,8 +914,7 @@ class Builder:
         param_list: List[Expression] = self.parse_name_list()
         if param_list:
             self.save()
-            if self.next_is_rc(Tokens.COMMA) and \
-                    self.next_is_rc(Tokens.VARARGS):
+            if self.next_is_rc(Tokens.COMMA) and self.next_is_rc(Tokens.VARARGS):
                 self.success()
                 param_list.append(Varargs())
                 return param_list
@@ -1037,10 +1107,7 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_in_rc([Tokens.MULT,
-                                    Tokens.DIV,
-                                    Tokens.MOD,
-                                    Tokens.FLOOR]):
+                if self.next_in_rc([Tokens.MULT, Tokens.DIV, Tokens.MOD, Tokens.FLOOR]):
                     op = self.type
                     right = self.parse_bitwise_expr()
                     if right:
@@ -1070,11 +1137,15 @@ class Builder:
         if left:
             while True:
                 self.save()
-                if self.next_in_rc([Tokens.BITAND,
-                                    Tokens.BITOR,
-                                    Tokens.BITNOT,
-                                    Tokens.BITRSHIFT,
-                                    Tokens.BITRLEFT]):
+                if self.next_in_rc(
+                    [
+                        Tokens.BITAND,
+                        Tokens.BITOR,
+                        Tokens.BITNOT,
+                        Tokens.BITRSHIFT,
+                        Tokens.BITRLEFT,
+                    ]
+                ):
                     op = self.type
                     right = self.parse_unary_expr()
                     if right:
@@ -1198,7 +1269,7 @@ class Builder:
     @staticmethod
     def parse_lua_str(lua_str) -> String:
         delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
-        p = re.compile(r'^\[=+\[(.*)\]=+\]')  # nested quote pattern
+        p = re.compile(r"^\[=+\[(.*)\]=+\]")  # nested quote pattern
         # try remove double quote:
         if lua_str.startswith('"') and lua_str.endswith('"'):
             lua_str = lua_str[1:-1]
@@ -1307,7 +1378,9 @@ class Builder:
         if value:
             self.success()
             # noinspection PyTypeChecker
-            return Field(None, value, comments)  # Key will be set in parse_table_constructor
+            return Field(
+                None, value, comments
+            )  # Key will be set in parse_table_constructor
 
         return self.failure()
 

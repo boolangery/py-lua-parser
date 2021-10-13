@@ -8,7 +8,7 @@ import inspect
 from enum import Enum
 from typing import List, Optional
 
-Comments = Optional[List['Comment']]
+Comments = Optional[List["Comment"]]
 
 
 def _equal_dicts(d1, d2, ignore_keys):
@@ -23,8 +23,7 @@ def _equal_dicts(d1, d2, ignore_keys):
 
 
 class Node:
-    """Base class for AST node.
-    """
+    """Base class for AST node."""
 
     def __init__(self, name: str, comments: Comments = None):
         if comments is None:
@@ -42,22 +41,24 @@ class Node:
 
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
-            return _equal_dicts(self.__dict__, other.__dict__, ["start_char", "stop_char", "line"])
+            return _equal_dicts(
+                self.__dict__, other.__dict__, ["start_char", "stop_char", "line"]
+            )
         return False
 
     def _enrich_info(self) -> None:
         """"Add additional information to node such as line numbers."""
+
         def is_builder_frame(frame_info) -> bool:
             return hasattr(frame_info.frame.f_locals.get("self", None), "_stream")
 
         token = next(
             (
                 frame_info.frame.f_locals["self"]._stream.LT(-1)
-                for frame_info
-                in inspect.stack()
+                for frame_info in inspect.stack()
                 if is_builder_frame(frame_info)
             ),
-            None
+            None,
         )
 
         if token:
@@ -66,34 +67,33 @@ class Node:
             self.stop_char = token.stop
 
     def to_json(self) -> any:
-        return {self._name: {k: v for k, v in self.__dict__.items() if not k.startswith('_') and v}}
+        return {
+            self._name: {
+                k: v for k, v in self.__dict__.items() if not k.startswith("_") and v
+            }
+        }
 
 
 class Comment(Node):
     def __init__(self, s: str, is_multi_line: bool = False):
-        super(Comment, self).__init__('Comment')
+        super(Comment, self).__init__("Comment")
         self.s: str = s
         self.is_multi_line: bool = is_multi_line
 
 
 class Statement(Node):
-    """Base class for Lua statement.
-    """
-    pass
+    """Base class for Lua statement."""
 
 
 class Expression(Node):
-    """Define a Lua expression.
-    """
-    pass
+    """Define a Lua expression."""
 
 
 class Block(Node):
-    """Define a Lua Block.
-    """
+    """Define a Lua Block."""
 
     def __init__(self, body: List[Statement]):
-        super(Block, self).__init__('Block')
+        super(Block, self).__init__("Block")
         self.body: List[Statement] = body
 
 
@@ -105,19 +105,17 @@ class Chunk(Node):
     """
 
     def __init__(self, body: Block, comments: Comments = None):
-        super(Chunk, self).__init__('Chunk', comments)
+        super(Chunk, self).__init__("Chunk", comments)
         self.body = body
 
 
-'''
+"""
 Left Hand Side expression.
-'''
+"""
 
 
 class Lhs(Expression):
-    """Define a Lua Left Hand Side expression.
-    """
-    pass
+    """Define a Lua Left Hand Side expression."""
 
 
 class Name(Lhs):
@@ -128,7 +126,7 @@ class Name(Lhs):
     """
 
     def __init__(self, identifier: str):
-        super(Name, self).__init__('Name')
+        super(Name, self).__init__("Name")
         self.id: str = identifier
 
 
@@ -145,16 +143,18 @@ class Index(Lhs):
         value (`string`): Id.
     """
 
-    def __init__(self, idx: Expression, value: Name, notation: IndexNotation = IndexNotation.DOT):
-        super(Index, self).__init__('Index')
+    def __init__(
+        self, idx: Expression, value: Name, notation: IndexNotation = IndexNotation.DOT
+    ):
+        super(Index, self).__init__("Index")
         self.idx: Name = idx
         self.value: Expression = value
         self.notation: IndexNotation = notation
 
 
-''' ----------------------------------------------------------------------- '''
-''' Statements                                                              '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" Statements                                                              """
+""" ----------------------------------------------------------------------- """
 
 
 class Assign(Statement):
@@ -166,8 +166,10 @@ class Assign(Statement):
 
     """
 
-    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
-        super(Assign, self).__init__('Assign', comments)
+    def __init__(
+        self, targets: List[Node], values: List[Node], comments: Comments = None
+    ):
+        super(Assign, self).__init__("Assign", comments)
         self.targets: List[Node] = targets
         self.values: List[Node] = values
 
@@ -180,9 +182,11 @@ class LocalAssign(Assign):
         values (`list<Node>`): List of values.
     """
 
-    def __init__(self, targets: List[Node], values: List[Node], comments: Comments = None):
+    def __init__(
+        self, targets: List[Node], values: List[Node], comments: Comments = None
+    ):
         super(LocalAssign, self).__init__(targets, values, comments)
-        self._name: str = 'LocalAssign'
+        self._name: str = "LocalAssign"
 
 
 class While(Statement):
@@ -194,7 +198,7 @@ class While(Statement):
     """
 
     def __init__(self, test: Expression, body: Block):
-        super(While, self).__init__('While')
+        super(While, self).__init__("While")
         self.test: Expression = test
         self.body: Block = body
 
@@ -207,7 +211,7 @@ class Do(Statement):
     """
 
     def __init__(self, body: Block):
-        super(Do, self).__init__('Do')
+        super(Do, self).__init__("Do")
         self.body: Block = body
 
 
@@ -220,7 +224,7 @@ class Repeat(Statement):
     """
 
     def __init__(self, body: Block, test: Expression, comments: Comments = None):
-        super(Repeat, self).__init__('Repeat', comments)
+        super(Repeat, self).__init__("Repeat", comments)
         self.body: Block = body
         self.test: Expression = test
 
@@ -235,7 +239,7 @@ class ElseIf(Statement):
     """
 
     def __init__(self, test: Node, body: Block, orelse):
-        super(ElseIf, self).__init__('ElseIf')
+        super(ElseIf, self).__init__("ElseIf")
         self.test: Node = test
         self.body: Block = body
         self.orelse = orelse
@@ -250,9 +254,14 @@ class If(Statement):
         orelse (`list<Statement> or ElseIf`): List of statements or ElseIf if test if false.
     """
 
-    def __init__(self, test: Expression, body: Block, orelse: List[Statement] or ElseIf,
-                 comments: Comments = None):
-        super(If, self).__init__('If', comments)
+    def __init__(
+        self,
+        test: Expression,
+        body: Block,
+        orelse: List[Statement] or ElseIf,
+        comments: Comments = None,
+    ):
+        super(If, self).__init__("If", comments)
         self.test: Expression = test
         self.body: Block = body
         self.orelse = orelse
@@ -266,7 +275,7 @@ class Label(Statement):
     """
 
     def __init__(self, label_id: Name):
-        super(Label, self).__init__('Label')
+        super(Label, self).__init__("Label")
         self.id: Name = label_id
 
 
@@ -278,25 +287,22 @@ class Goto(Statement):
     """
 
     def __init__(self, label: Name, comments: Comments = None):
-        super(Goto, self).__init__('Goto', comments)
+        super(Goto, self).__init__("Goto", comments)
         self.label: Name = label
 
 
 class SemiColon(Statement):
-    """Define the semi-colon lua statement.
-    """
+    """Define the semi-colon lua statement."""
 
     def __init__(self):
-        super(SemiColon, self).__init__('SemiColon')
+        super(SemiColon, self).__init__("SemiColon")
 
 
 class Break(Statement):
-    """Define the break lua statement.
-
-    """
+    """Define the break lua statement."""
 
     def __init__(self):
-        super(Break, self).__init__('Break')
+        super(Break, self).__init__("Break")
 
 
 class Return(Statement):
@@ -307,7 +313,7 @@ class Return(Statement):
     """
 
     def __init__(self, values):
-        super(Return, self).__init__('Return')
+        super(Return, self).__init__("Return")
         self.values = values
 
 
@@ -322,9 +328,16 @@ class Fornum(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, target: Name, start: Expression, stop: Expression, step: Expression, body: Block,
-                 comments: Comments = None):
-        super(Fornum, self).__init__('Fornum', comments)
+    def __init__(
+        self,
+        target: Name,
+        start: Expression,
+        stop: Expression,
+        step: Expression,
+        body: Block,
+        comments: Comments = None,
+    ):
+        super(Fornum, self).__init__("Fornum", comments)
         self.target: Name = target
         self.start: Expression = start
         self.stop: Expression = stop
@@ -341,8 +354,14 @@ class Forin(Statement):
         targets (`list<Name>`): Start index value.
     """
 
-    def __init__(self, body: Block, iter: List[Expression], targets: List[Name], comments: Comments = None):
-        super(Forin, self).__init__('Forin', comments)
+    def __init__(
+        self,
+        body: Block,
+        iter: List[Expression],
+        targets: List[Name],
+        comments: Comments = None,
+    ):
+        super(Forin, self).__init__("Forin", comments)
         self.body: Block = body
         self.iter: List[Expression] = iter
         self.targets: List[Name] = targets
@@ -356,8 +375,10 @@ class Call(Statement):
         args (`list<Expression>`): Function call arguments.
     """
 
-    def __init__(self, func: Expression, args: List[Expression], comments: Comments = None):
-        super(Call, self).__init__('Call', comments)
+    def __init__(
+        self, func: Expression, args: List[Expression], comments: Comments = None
+    ):
+        super(Call, self).__init__("Call", comments)
         self.func: Expression = func
         self.args: List[Expression] = args
 
@@ -372,7 +393,7 @@ class Invoke(Statement):
     """
 
     def __init__(self, source: Expression, func: Expression, args: List[Expression]):
-        super(Invoke, self).__init__('Invoke')
+        super(Invoke, self).__init__("Invoke")
         self.source: Expression = source
         self.func: Expression = func
         self.args: List[Expression] = args
@@ -388,7 +409,7 @@ class Function(Statement):
     """
 
     def __init__(self, name: Expression, args: List[Expression], body: Block):
-        super(Function, self).__init__('Function')
+        super(Function, self).__init__("Function")
         self.name: Expression = name
         self.args: List[Expression] = args
         self.body: Block = body
@@ -404,7 +425,7 @@ class LocalFunction(Statement):
     """
 
     def __init__(self, name: Expression, args: List[Expression], body: Block):
-        super(LocalFunction, self).__init__('LocalFunction')
+        super(LocalFunction, self).__init__("LocalFunction")
         self.name: Expression = name
         self.args: List[Expression] = args
         self.body: Block = body
@@ -420,46 +441,49 @@ class Method(Statement):
         body (`Block`): List of statements to execute.
     """
 
-    def __init__(self, source: Expression, name: Expression, args: List[Expression], body: Block,
-                 comments: Comments = None):
-        super(Method, self).__init__('Method', comments)
+    def __init__(
+        self,
+        source: Expression,
+        name: Expression,
+        args: List[Expression],
+        body: Block,
+        comments: Comments = None,
+    ):
+        super(Method, self).__init__("Method", comments)
         self.source: Expression = source
         self.name: Expression = name
         self.args: List[Expression] = args
         self.body: Block = body
 
 
-''' ----------------------------------------------------------------------- '''
-''' Lua Expression                                                          '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" Lua Expression                                                          """
+""" ----------------------------------------------------------------------- """
 
-''' ----------------------------------------------------------------------- '''
-''' Types and values                                                        '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" Types and values                                                        """
+""" ----------------------------------------------------------------------- """
 
 
 class Nil(Expression):
-    """Define the Lua nil expression.
-    """
+    """Define the Lua nil expression."""
 
     def __init__(self):
-        super(Nil, self).__init__('Nil')
+        super(Nil, self).__init__("Nil")
 
 
 class TrueExpr(Expression):
-    """Define the Lua true expression.
-    """
+    """Define the Lua true expression."""
 
     def __init__(self):
-        super(TrueExpr, self).__init__('True')
+        super(TrueExpr, self).__init__("True")
 
 
 class FalseExpr(Expression):
-    """Define the Lua false expression.
-    """
+    """Define the Lua false expression."""
 
     def __init__(self):
-        super(FalseExpr, self).__init__('False')
+        super(FalseExpr, self).__init__("False")
 
 
 NumberType = int or float
@@ -473,17 +497,15 @@ class Number(Expression):
     """
 
     def __init__(self, n: NumberType):
-        super(Number, self).__init__('Number')
+        super(Number, self).__init__("Number")
         self.n: NumberType = n
 
 
 class Varargs(Expression):
-    """Define the Lua Varargs expression (...).
-
-    """
+    """Define the Lua Varargs expression (...)."""
 
     def __init__(self):
-        super(Varargs, self).__init__('Varargs')
+        super(Varargs, self).__init__("Varargs")
 
 
 class StringDelimiter(Enum):
@@ -500,8 +522,10 @@ class String(Expression):
         delimiter (`StringDelimiter`): The string delimiter
     """
 
-    def __init__(self, s: str, delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE):
-        super(String, self).__init__('String')
+    def __init__(
+        self, s: str, delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
+    ):
+        super(String, self).__init__("String")
         self.s: str = s
         self.delimiter: StringDelimiter = delimiter
 
@@ -514,9 +538,14 @@ class Field(Expression):
         value (`Expression`): Value.
     """
 
-    def __init__(self, key: Expression, value: Expression, comments: Comments = None,
-                 between_brackets: bool = False):
-        super(Field, self).__init__('Field', comments)
+    def __init__(
+        self,
+        key: Expression,
+        value: Expression,
+        comments: Comments = None,
+        between_brackets: bool = False,
+    ):
+        super(Field, self).__init__("Field", comments)
         self.key: Expression = key
         self.value: Expression = value
         self.between_brackets: bool = between_brackets
@@ -530,16 +559,15 @@ class Table(Expression):
     """
 
     def __init__(self, fields: List[Field]):
-        super(Table, self).__init__('Table')
+        super(Table, self).__init__("Table")
         self.fields: List[Field] = fields
 
 
 class Dots(Expression):
-    """Define the Lua dots (...) expression.
-    """
+    """Define the Lua dots (...) expression."""
 
     def __init__(self):
-        super(Dots, self).__init__('Dots')
+        super(Dots, self).__init__("Dots")
 
 
 class AnonymousFunction(Expression):
@@ -551,20 +579,18 @@ class AnonymousFunction(Expression):
     """
 
     def __init__(self, args: List[Expression], body: Block):
-        super(AnonymousFunction, self).__init__('AnonymousFunction')
+        super(AnonymousFunction, self).__init__("AnonymousFunction")
         self.args: List[Expression] = args
         self.body: Block = body
 
 
-''' ----------------------------------------------------------------------- '''
-''' Operators                                                               '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" Operators                                                               """
+""" ----------------------------------------------------------------------- """
 
 
 class Op(Expression):
-    """Base class for Lua operators.
-    """
-    pass
+    """Base class for Lua operators."""
 
 
 class BinaryOp(Op):
@@ -581,14 +607,13 @@ class BinaryOp(Op):
         self.right: Expression = right
 
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.1 – Arithmetic Operators                                            '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" 3.4.1 – Arithmetic Operators                                            """
+""" ----------------------------------------------------------------------- """
 
 
 class AriOp(BinaryOp):
     """Base class for Arithmetic Operators"""
-    pass
 
 
 class AddOp(AriOp):
@@ -600,7 +625,7 @@ class AddOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(AddOp, self).__init__('AddOp', left, right)
+        super(AddOp, self).__init__("AddOp", left, right)
 
 
 class SubOp(AriOp):
@@ -612,7 +637,7 @@ class SubOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(SubOp, self).__init__('SubOp', left, right)
+        super(SubOp, self).__init__("SubOp", left, right)
 
 
 class MultOp(AriOp):
@@ -624,7 +649,7 @@ class MultOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(MultOp, self).__init__('MultOp', left, right)
+        super(MultOp, self).__init__("MultOp", left, right)
 
 
 class FloatDivOp(AriOp):
@@ -636,7 +661,7 @@ class FloatDivOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(FloatDivOp, self).__init__('FloatDivOp', left, right)
+        super(FloatDivOp, self).__init__("FloatDivOp", left, right)
 
 
 class FloorDivOp(AriOp):
@@ -648,7 +673,7 @@ class FloorDivOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(FloorDivOp, self).__init__('FloorDivOp', left, right)
+        super(FloorDivOp, self).__init__("FloorDivOp", left, right)
 
 
 class ModOp(AriOp):
@@ -660,7 +685,7 @@ class ModOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(ModOp, self).__init__('ModOp', left, right)
+        super(ModOp, self).__init__("ModOp", left, right)
 
 
 class ExpoOp(AriOp):
@@ -672,18 +697,16 @@ class ExpoOp(AriOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(ExpoOp, self).__init__('ExpoOp', left, right)
+        super(ExpoOp, self).__init__("ExpoOp", left, right)
 
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.2 – Bitwise Operators                                               '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" 3.4.2 – Bitwise Operators                                               """
+""" ----------------------------------------------------------------------- """
 
 
 class BitOp(BinaryOp):
-    """Base class for bitwise Operators.
-    """
-    pass
+    """Base class for bitwise Operators."""
 
 
 class BAndOp(BitOp):
@@ -695,7 +718,7 @@ class BAndOp(BitOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(BAndOp, self).__init__('BAndOp', left, right)
+        super(BAndOp, self).__init__("BAndOp", left, right)
 
 
 class BOrOp(BitOp):
@@ -707,7 +730,7 @@ class BOrOp(BitOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(BOrOp, self).__init__('BOrOp', left, right)
+        super(BOrOp, self).__init__("BOrOp", left, right)
 
 
 class BXorOp(BitOp):
@@ -719,7 +742,7 @@ class BXorOp(BitOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(BXorOp, self).__init__('BXorOp', left, right)
+        super(BXorOp, self).__init__("BXorOp", left, right)
 
 
 class BShiftROp(BitOp):
@@ -731,7 +754,7 @@ class BShiftROp(BitOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(BShiftROp, self).__init__('BShiftROp', left, right)
+        super(BShiftROp, self).__init__("BShiftROp", left, right)
 
 
 class BShiftLOp(BitOp):
@@ -743,18 +766,16 @@ class BShiftLOp(BitOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(BShiftLOp, self).__init__('BShiftLOp', left, right)
+        super(BShiftLOp, self).__init__("BShiftLOp", left, right)
 
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.4 – Relational Operators                                            '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" 3.4.4 – Relational Operators                                            """
+""" ----------------------------------------------------------------------- """
 
 
 class RelOp(BinaryOp):
-    """Base class for Lua relational operators.
-    """
-    pass
+    """Base class for Lua relational operators."""
 
 
 class LessThanOp(RelOp):
@@ -766,7 +787,7 @@ class LessThanOp(RelOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(LessThanOp, self).__init__('RLtOp', left, right)
+        super(LessThanOp, self).__init__("RLtOp", left, right)
 
 
 class GreaterThanOp(RelOp):
@@ -778,7 +799,7 @@ class GreaterThanOp(RelOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(GreaterThanOp, self).__init__('RGtOp', left, right)
+        super(GreaterThanOp, self).__init__("RGtOp", left, right)
 
 
 class LessOrEqThanOp(RelOp):
@@ -790,7 +811,7 @@ class LessOrEqThanOp(RelOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(LessOrEqThanOp, self).__init__('RLtEqOp', left, right)
+        super(LessOrEqThanOp, self).__init__("RLtEqOp", left, right)
 
 
 class GreaterOrEqThanOp(RelOp):
@@ -802,7 +823,7 @@ class GreaterOrEqThanOp(RelOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(GreaterOrEqThanOp, self).__init__('RGtEqOp', left, right)
+        super(GreaterOrEqThanOp, self).__init__("RGtEqOp", left, right)
 
 
 class EqToOp(RelOp):
@@ -814,7 +835,7 @@ class EqToOp(RelOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(EqToOp, self).__init__('REqOp', left, right)
+        super(EqToOp, self).__init__("REqOp", left, right)
 
 
 class NotEqToOp(RelOp):
@@ -826,18 +847,16 @@ class NotEqToOp(RelOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(NotEqToOp, self).__init__('RNotEqOp', left, right)
+        super(NotEqToOp, self).__init__("RNotEqOp", left, right)
 
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.5 – Logical Operators                                               '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" 3.4.5 – Logical Operators                                               """
+""" ----------------------------------------------------------------------- """
 
 
 class LoOp(BinaryOp):
-    """Base class for logical operators.
-    """
-    pass
+    """Base class for logical operators."""
 
 
 class AndLoOp(LoOp):
@@ -849,7 +868,7 @@ class AndLoOp(LoOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(AndLoOp, self).__init__('LAndOp', left, right)
+        super(AndLoOp, self).__init__("LAndOp", left, right)
 
 
 class OrLoOp(LoOp):
@@ -861,12 +880,12 @@ class OrLoOp(LoOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(OrLoOp, self).__init__('LOrOp', left, right)
+        super(OrLoOp, self).__init__("LOrOp", left, right)
 
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.6 Concat operators                                                  '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" 3.4.6 Concat operators                                                  """
+""" ----------------------------------------------------------------------- """
 
 
 class Concat(BinaryOp):
@@ -878,12 +897,12 @@ class Concat(BinaryOp):
     """
 
     def __init__(self, left: Expression, right: Expression):
-        super(Concat, self).__init__('Concat', left, right)
+        super(Concat, self).__init__("Concat", left, right)
 
 
-''' ----------------------------------------------------------------------- '''
-''' Unary operators                                                         '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" Unary operators                                                         """
+""" ----------------------------------------------------------------------- """
 
 
 class UnaryOp(Expression):
@@ -906,7 +925,7 @@ class UMinusOp(UnaryOp):
     """
 
     def __init__(self, operand: Expression):
-        super(UMinusOp, self).__init__('UMinusOp', operand)
+        super(UMinusOp, self).__init__("UMinusOp", operand)
 
 
 class UBNotOp(UnaryOp):
@@ -917,7 +936,7 @@ class UBNotOp(UnaryOp):
     """
 
     def __init__(self, operand: Expression):
-        super(UBNotOp, self).__init__('UBNotOp', operand)
+        super(UBNotOp, self).__init__("UBNotOp", operand)
 
 
 class ULNotOp(UnaryOp):
@@ -928,17 +947,16 @@ class ULNotOp(UnaryOp):
     """
 
     def __init__(self, operand: Expression):
-        super(ULNotOp, self).__init__('ULNotOp', operand)
+        super(ULNotOp, self).__init__("ULNotOp", operand)
 
 
-''' ----------------------------------------------------------------------- '''
-''' 3.4.7 – The Length Operator                                             '''
-''' ----------------------------------------------------------------------- '''
+""" ----------------------------------------------------------------------- """
+""" 3.4.7 – The Length Operator                                             """
+""" ----------------------------------------------------------------------- """
 
 
 class ULengthOP(UnaryOp):
-    """Length operator.
-    """
+    """Length operator."""
 
     def __init__(self, operand: Expression):
-        super(ULengthOP, self).__init__('ULengthOp', operand)
+        super(ULengthOP, self).__init__("ULengthOp", operand)
