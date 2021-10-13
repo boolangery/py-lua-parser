@@ -218,6 +218,11 @@ class Builder:
         self._hidden_handled: bool = False
         self._hidden_handled_stack: List[bool] = []
 
+    @property
+    def _LT(self) -> Token:
+        """Last token that was consumed in next_i*_* method."""
+        return self._stream.LT(-1)
+
     def process(self) -> Chunk:
         node = self.parse_chunk()
 
@@ -331,9 +336,24 @@ class Builder:
             for t in tokens:
                 if not self._hidden_handled:
                     if t.type == Tokens.LINE_COMMENT:
-                        self.comments.append(Comment(t.text))
+                        self.comments.append(
+                            Comment(
+                                t.text,
+                                start_char=t.start,
+                                stop_char=t.stop,
+                                lineno=t.line,
+                            )
+                        )
                     elif t.type == Tokens.COMMENT:
-                        self.comments.append(Comment(t.text, True))
+                        self.comments.append(
+                            Comment(
+                                t.text,
+                                True,
+                                start_char=t.start,
+                                stop_char=t.stop,
+                                lineno=t.line,
+                            )
+                        )
                     elif t.type == Tokens.NEWLINE:
                         # append n time a None value (indicate newline)
                         self.comments += t.text.count("\n") * [None]
@@ -346,9 +366,24 @@ class Builder:
             for t in tokens:
                 if not self._hidden_handled:
                     if t.type == Tokens.LINE_COMMENT:
-                        self.comments.append(Comment(t.text))
+                        self.comments.append(
+                            Comment(
+                                t.text,
+                                start_char=t.start,
+                                stop_char=t.stop,
+                                lineno=t.line,
+                            )
+                        )
                     elif t.type == Tokens.COMMENT:
-                        self.comments.append(Comment(t.text, True))
+                        self.comments.append(
+                            Comment(
+                                t.text,
+                                True,
+                                start_char=t.start,
+                                stop_char=t.stop,
+                                lineno=t.line,
+                            )
+                        )
                     elif t.type == Tokens.NEWLINE:
                         # append n time a None value (indicate newline)
                         self.comments += t.text.count("\n") * [None]
@@ -412,7 +447,7 @@ class Builder:
         )
 
     def parse_chunk(self) -> Chunk or None:
-        self._stream.LT(1)
+        first_token: Token = self._stream.LT(1)
         self.handle_hidden_left()
         comments = self.get_comments_followed_by_blank_line()
         block = self.parse_block()
@@ -420,10 +455,15 @@ class Builder:
             token = self._stream.LT(1)
             if token.type == -1:
                 # do not consume EOF
-                return Chunk(block, comments)
+                # Get previous token, if such exists.
+                stop_char = self._LT.stop if self._LT else None
+                return Chunk(
+                    block, comments, first_token.start, stop_char, first_token.line
+                )
         return False
 
     def parse_block(self) -> Block:
+        t: Token = self._stream.LT(1)
         statements = []
 
         while True:
@@ -436,7 +476,7 @@ class Builder:
         stat = self.parse_ret_stat()
         if stat:
             statements.append(stat)
-        return Block(statements)
+        return Block(statements, t.start, statements[-1].stop_char, t.line)
 
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
@@ -475,24 +515,32 @@ class Builder:
     def parse_ret_stat(self) -> Return or bool:
         self.save()
         if self.next_is_rc(Tokens.RETURN):
+            t: Token = self._LT
             expr_list = self.parse_expr_list()  # optional
             # consume optional token
             if self.next_is(Tokens.SEMCOL):
                 self.next_is_rc(Tokens.SEMCOL)
 
             self.success()
-            return Return(expr_list)
+            return Return(expr_list, t.start, self._LT.stop, t.line)
         return self.failure()
 
     def parse_assignment(self) -> Assign or bool:
         self.save()
+        t: Token = self._stream.LT(1)
         targets = self.parse_var_list()
         if targets:
             if self.next_is_rc(Tokens.ASSIGN):
                 values = self.parse_expr_list()
                 if values:
                     self.success()
-                    return Assign(targets, values)
+                    return Assign(
+                        targets,
+                        values,
+                        start_char=t.start,
+                        stop_char=self._LT.stop,
+                        lineno=t.line,
+                    )
                 else:
                     self.abort()
 
@@ -526,6 +574,9 @@ class Builder:
         if root:
             tail = self.parse_tail()
             while tail:
+                tail.start_char = root.start_char
+                tail.lineno = root.lineno
+
                 if isinstance(tail, Call):
                     tail.func = root
                 elif isinstance(tail, Index):
@@ -533,7 +584,16 @@ class Builder:
                 elif isinstance(tail, Invoke):
                     tail.source = root
                 else:
-                    tail = Call(root, _listify(tail))
+                    args = _listify(tail)
+                    stop_char = args[-1].stop_char if args else None
+
+                    tail = Call(
+                        root,
+                        args,
+                        start_char=root.start_char,
+                        stop_char=stop_char,
+                        lineno=root.lineno,
+                    )
                 root = tail
 
                 tail = self.parse_tail()
@@ -550,7 +610,17 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME, False):
             self.success()
-            return Index(Name(self.text), Name(""))  # value must be set in parent
+            return Index(
+                Name(
+                    self.text,
+                    start_char=self._LT.start,
+                    stop_char=self._LT.stop,
+                    lineno=self._LT.line,
+                ),
+                # value must be set in parent
+                Name(""),
+                stop_char=self._LT.stop,
+            )
 
         self.failure_save()
         if self.next_is_rc(Tokens.OBRACK):
@@ -558,12 +628,20 @@ class Builder:
             if expr and self.next_is_rc(Tokens.CBRACK, False):
                 self.success()
                 return Index(
-                    expr, Name(""), notation=IndexNotation.SQUARE
-                )  # value must be set in parent
+                    expr,
+                    Name(""),
+                    notation=IndexNotation.SQUARE,
+                    # value must be set in parent
+                )
 
         self.failure_save()
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
-            name = Name(self.text)
+            name = Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
             if self.next_is_rc(Tokens.OPAR):
                 expr_list = self.parse_expr_list() or []
                 if self.next_is_rc(Tokens.CPAR, False):
@@ -573,7 +651,12 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
-            name = Name(self.text)
+            name = Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
             table = self.parse_table_constructor(False)
             if table:
                 self.success()
@@ -582,9 +665,17 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
-            name = Name(self.text)
+            name = Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
             if self.next_is_rc(Tokens.STRING, False):
                 string = self.parse_lua_str(self.text)
+                string.start_char = self._LT.start
+                string.stop_char = self._LT.stop
+                string.lineno = self._LT.line
                 self.success()
                 # noinspection PyTypeChecker
                 return Invoke(None, name, [string])
@@ -612,7 +703,7 @@ class Builder:
             if self.next_is_rc(Tokens.CPAR, False):
                 self.success()
                 # noinspection PyTypeChecker
-                return Call(None, expr_list)
+                return Call(None, expr_list, stop_char=self._LT.stop)
 
         self.failure_save()
         table = self.parse_table_constructor(False)
@@ -623,6 +714,9 @@ class Builder:
         self.failure_save()
         if self.next_is_rc(Tokens.STRING, False):
             string = self.parse_lua_str(self.text)
+            string.start_char = self._LT.start
+            string.stop_char = self._LT.stop
+            string.lineno = self._LT.line
             self.success()
             return string
 
@@ -715,12 +809,23 @@ class Builder:
                     self.failure()
 
                 self.success()
-                return LocalAssign(targets, values)
+                return LocalAssign(
+                    targets,
+                    values,
+                    start_char=start_token.start,
+                    stop_char=values[-1].stop_char,
+                    lineno=start_token.line,
+                )
 
             self.save()
 
             if self.next_is_rc(Tokens.FUNCTION) and self.next_is_rc(Tokens.NAME):
-                name = Name(self.text)
+                name = Name(
+                    self.text,
+                    start_char=self._LT.start,
+                    stop_char=self._LT.stop,
+                    lineno=self._LT.line,
+                )
                 body = self.parse_func_body()
                 if body:
                     self.success()
@@ -739,7 +844,14 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.GOTO) and self.next_is_rc(Tokens.NAME):
             self.success()
-            return Goto(Name(self.text))
+            return Goto(
+                Name(
+                    self.text,
+                    start_char=self._LT.start,
+                    stop_char=self._LT.stop,
+                    lineno=self._LT.line,
+                )
+            )
         return self.failure()
 
     def parse_if_stat(self) -> If or bool:
@@ -800,7 +912,12 @@ class Builder:
         if self.next_is_rc(Tokens.FOR):
             self.save()
             if self.next_is_rc(Tokens.NAME):
-                target = Name(self.text)
+                target = Name(
+                    self.text,
+                    start_char=self._LT.start,
+                    stop_char=self._LT.stop,
+                    lineno=self._LT.line,
+                )
                 if self.next_is_rc(Tokens.ASSIGN):
                     start = self.parse_expr()
                     if start and self.next_is_rc(Tokens.COMMA):
@@ -844,15 +961,26 @@ class Builder:
             if names:
                 self.save()
                 if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
-                    name = Name(self.text)
+                    name = Name(
+                        self.text,
+                        start_char=self._LT.start,
+                        stop_char=self._LT.stop,
+                        lineno=self._LT.line,
+                    )
                     func_body = self.parse_func_body()
                     if func_body:
                         self.success()
                         self.success()
-                        node = Method(names, name, func_body[0], func_body[1])
+                        node = Method(
+                            names,
+                            name,
+                            func_body[0],
+                            func_body[1],
+                            start_token.start,
+                            func_body[1].stop_char,
+                            start_token.line,
+                        )
                         self.handle_hidden_right()
-                        node.start_char = start_token.start
-                        node.stop_char = func_body[1].stop_char
                         return node
 
                 self.failure()
@@ -860,10 +988,15 @@ class Builder:
                 func_body = self.parse_func_body()
                 if func_body:
                     self.success()
-                    node = Function(names, func_body[0], func_body[1])
+                    node = Function(
+                        names,
+                        func_body[0],
+                        func_body[1],
+                        start_token.start,
+                        func_body[1].stop_char,
+                        start_token.line,
+                    )
                     self.handle_hidden_right()
-                    node.start_char = start_token.start
-                    node.stop_char = func_body[1].stop_char
                     return node
             self.abort()
 
@@ -872,12 +1005,25 @@ class Builder:
     def parse_names(self) -> Name or Index or bool:
         self.save()
         if self.next_is_rc(Tokens.NAME):
-            root = Name(self.text)
+            root = Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
             while True:
                 self.save()
                 if self.next_is_rc(Tokens.DOT) and self.next_is_rc(Tokens.NAME):
                     self.success()
-                    child = Index(Name(self.text), root)
+                    child = Index(
+                        Name(
+                            self.text,
+                            start_char=self._LT.start,
+                            stop_char=self._LT.stop,
+                            lineno=self._LT.line,
+                        ),
+                        root,
+                    )
                     root = child
                 else:
                     self.failure()
@@ -934,11 +1080,25 @@ class Builder:
         self.save()
         names: List[Name] = []
         if self.next_is_rc(Tokens.NAME):
-            names.append(Name(self.text))
+            names.append(
+                Name(
+                    self.text,
+                    start_char=self._LT.start,
+                    stop_char=self._LT.stop,
+                    lineno=self._LT.line,
+                )
+            )
             while True:
                 self.save()
                 if self.next_is_rc(Tokens.COMMA) and self.next_is_rc(Tokens.NAME):
-                    names.append(Name(self.text))
+                    names.append(
+                        Name(
+                            self.text,
+                            start_char=self._LT.start,
+                            stop_char=self._LT.stop,
+                            lineno=self._LT.line,
+                        )
+                    )
                     self.success()
                 else:
                     self.failure()
@@ -950,7 +1110,12 @@ class Builder:
     def parse_label(self) -> Label or bool:
         self.save()
         if self.next_is_rc(Tokens.COLCOL) and self.next_is_rc(Tokens.NAME):
-            name = Name(self.text)
+            name = Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
             if self.next_is_rc(Tokens.COLCOL):
                 self.success()
                 return Label(name)
@@ -970,7 +1135,12 @@ class Builder:
         self.save()
         if self.next_is_rc(Tokens.NAME):
             self.success()
-            return Name(self.text)
+            return Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
         return self.failure()
 
     def parse_expr(self) -> Expression or bool:
@@ -1174,31 +1344,35 @@ class Builder:
     def parse_unary_expr(self) -> Expression or bool:
         self.save()
         if self.next_is_rc(Tokens.MINUS):
+            t: Token = self._LT
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UMinusOp(expr)
+                return UMinusOp(expr, t.start, t.stop, t.line)
 
         self.failure_save()
         if self.next_is_rc(Tokens.LENGTH):
+            t: Token = self._LT
             expr = self.parse_pow_expr()
             if expr:
                 self.success()
-                return ULengthOP(expr)
+                return ULengthOP(expr, t.start, t.stop, t.line)
 
         self.failure_save()
         if self.next_is_rc(Tokens.NOT):
+            t: Token = self._LT
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return ULNotOp(expr)
+                return ULNotOp(expr, t.start, t.stop, t.line)
 
         self.failure_save()
         if self.next_is_rc(Tokens.BITNOT):
+            t: Token = self._LT
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UBNotOp(expr)
+                return UBNotOp(expr, t.start, t.stop, t.line)
 
         self.failure_save()
         expr = self.parse_pow_expr()
@@ -1251,19 +1425,23 @@ class Builder:
             except:
                 # exception occurs with leading zero number: 002
                 number = float(self.text)
-            return Number(number)
+            return Number(number, self._LT.start, self._LT.stop, self._LT.line)
 
         if self.next_is(Tokens.STRING) and self.next_is_rc(Tokens.STRING):
-            return self.parse_lua_str(self.text)
+            string = self.parse_lua_str(self.text)
+            string.start_char = self._LT.start
+            string.stop_char = self._LT.stop
+            string.lineno = self._LT.line
+            return string
 
         if self.next_is(Tokens.NIL) and self.next_is_rc(Tokens.NIL):
-            return Nil()
+            return Nil(self._LT.start, self._LT.stop, self._LT.line)
 
         if self.next_is(Tokens.TRUE) and self.next_is_rc(Tokens.TRUE):
-            return TrueExpr()
+            return TrueExpr(self._LT.start, self._LT.stop, self._LT.line)
 
         if self.next_is(Tokens.FALSE) and self.next_is_rc(Tokens.FALSE):
-            return FalseExpr()
+            return FalseExpr(self._LT.start, self._LT.stop, self._LT.line)
         return None
 
     @staticmethod
@@ -1290,10 +1468,13 @@ class Builder:
     def parse_function_literal(self) -> AnonymousFunction or bool:
         self.save()
         if self.next_is_rc(Tokens.FUNCTION):
+            t: Token = self._LT
             func_body = self.parse_func_body()
             if func_body:
                 self.success()
-                node = AnonymousFunction(func_body[0], func_body[1])
+                node = AnonymousFunction(
+                    func_body[0], func_body[1], t.start, self._LT.stop, t.line
+                )
                 self.handle_hidden_right()
                 return node
 
@@ -1364,7 +1545,12 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(Tokens.NAME):
-            key = Name(self.text)
+            key = Name(
+                self.text,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
             if self.next_is_rc(Tokens.ASSIGN):
                 comments = self.get_comments()
                 value = self.parse_expr()
