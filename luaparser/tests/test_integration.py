@@ -85,62 +85,61 @@ class IntegrationTestCase(tests.TestCase):
         pretty_str = ast.to_pretty_str(tree)
         exp = textwrap.dedent(r'''
         Chunk: {} 5 keys
-          start_char: 67
+          start_char: 1
           stop_char: 67
-          line: 5
+          lineno: 2
           body: {} 5 keys
             Block: {} 5 keys
-              start_char: 67
+              start_char: 1
               stop_char: 67
-              line: 5
+              lineno: 2
               body: [] 2 items
                 0: {} 1 key          
                   LocalFunction: {} 7 keys
                     start_char: 1
                     stop_char: 56
-                    line: 4
                     name: {} 5 keys
                       Name: {} 5 keys
                         start_char: 16
                         stop_char: 23
-                        line: 2
+                        lineno: 2
                         id: 'sayHello'
                     args: [] 0 item
                     body: {} 5 keys
                       Block: {} 5 keys
-                        start_char: 52
+                        start_char: 31
                         stop_char: 56
-                        line: 3
+                        lineno: 3
                         body: [] 1 item
                           0: {} 1 key                    
                             Call: {} 6 keys
-                              start_char: 52
+                              start_char: 31
                               stop_char: 52
-                              line: 3
+                              lineno: 3
                               func: {} 5 keys
                                 Name: {} 5 keys
                                   start_char: 31
                                   stop_char: 35
-                                  line: 3
+                                  lineno: 3
                                   id: 'print'
                               args: [] 1 item
                                 0: {} 1 key                          
                                   String: {} 6 keys
                                     start_char: 37
                                     stop_char: 51
-                                    line: 3
+                                    lineno: 3
                                     s: 'hello world !'
                                     delimiter: SINGLE_QUOTE
                 1: {} 1 key          
                   Call: {} 6 keys
-                    start_char: 67
+                    start_char: 58
                     stop_char: 67
-                    line: 5
+                    lineno: 5
                     func: {} 5 keys
                       Name: {} 5 keys
                         start_char: 58
                         stop_char: 65
-                        line: 5
+                        lineno: 5
                         id: 'sayHello'
                     args: [] 0 item''')
         self.assertEqual(exp, pretty_str)

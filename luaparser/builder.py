@@ -476,7 +476,8 @@ class Builder:
         stat = self.parse_ret_stat()
         if stat:
             statements.append(stat)
-        return Block(statements, t.start, statements[-1].stop_char, t.line)
+        stop_char = statements[-1].stop_char if statements else None
+        return Block(statements, t.start, stop_char, t.line)
 
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
@@ -809,11 +810,12 @@ class Builder:
                     self.failure()
 
                 self.success()
+                stop_char = values[-1].stop_char if values else None
                 return LocalAssign(
                     targets,
                     values,
                     start_char=start_token.start,
-                    stop_char=values[-1].stop_char,
+                    stop_char=stop_char,
                     lineno=start_token.line,
                 )
 

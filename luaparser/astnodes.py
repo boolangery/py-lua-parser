@@ -47,7 +47,7 @@ class Node:
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
             return _equal_dicts(
-                self.__dict__, other.__dict__, ["start_char", "stop_char", "line"]
+                self.__dict__, other.__dict__, ["start_char", "stop_char", "lineno"]
             )
         return False
 
