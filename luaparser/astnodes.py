@@ -4,7 +4,6 @@
 
     Contains all Ast Node definitions.
 """
-import inspect
 from enum import Enum
 from typing import List, Optional
 
@@ -33,7 +32,6 @@ class Node:
         self.start_char: int = None  # start character offset
         self.stop_char: int = None  # stop character offset
         self.line: int = None
-        self._enrich_info()
 
     @property
     def display_name(self) -> str:
@@ -45,26 +43,6 @@ class Node:
                 self.__dict__, other.__dict__, ["start_char", "stop_char", "line"]
             )
         return False
-
-    def _enrich_info(self) -> None:
-        """"Add additional information to node such as line numbers."""
-
-        def is_builder_frame(frame_info) -> bool:
-            return hasattr(frame_info.frame.f_locals.get("self", None), "_stream")
-
-        token = next(
-            (
-                frame_info.frame.f_locals["self"]._stream.LT(-1)
-                for frame_info in inspect.stack()
-                if is_builder_frame(frame_info)
-            ),
-            None,
-        )
-
-        if token:
-            self.line = token.line
-            self.start_char = token.start
-            self.stop_char = token.stop
 
     def to_json(self) -> any:
         return {
