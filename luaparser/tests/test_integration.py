@@ -1,7 +1,8 @@
-from luaparser.utils import tests
+import textwrap
+
 from luaparser import ast
 from luaparser.astnodes import *
-import textwrap
+from luaparser.utils import tests
 
 
 class IntegrationTestCase(tests.TestCase):
@@ -159,3 +160,22 @@ class IntegrationTestCase(tests.TestCase):
         ]
         for node, exp in zip(nodes, expected_cls):
             self.assertIsInstance(node, exp)
+
+    # Comments are ignored if they are written after the last line of a table ending with a comma #15
+    def test_cont_int_6(self):
+        tree = ast.parse(textwrap.dedent("""
+            foo = {
+                mykey = "myvalue",
+                -- this comment is ignored if previous line ends with a comma
+            }
+            """))
+        exp = Chunk(Block([
+            Assign(
+                [Name('foo')],
+                [Table([
+                    Field(Name('mykey'), String("myvalue", delimiter=StringDelimiter.DOUBLE_QUOTE),
+                          [Comment('-- this comment is ignored if previous line ends with a comma')]),
+                ])],
+            )
+        ]))
+        self.assertEqual(exp, tree)
