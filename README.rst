@@ -45,6 +45,23 @@ Usage: luaparser [options] filename
 Quickstart
 ==============================================================================
 
+Node structure
+------------------------------------------------------------------------------
+
+Each node contains the following data:
+
+.. code-block:: python
+
+	class Node:
+		"""Base class for AST node."""
+		comments: Comments
+		first_token: Optional[Token]
+		last_token: Optional[Token]
+		start_char: Optional[int]
+		stop_char: Optional[int]
+		line: Optional[int]
+
+
 Working on AST tree
 ------------------------------------------------------------------------------
 
