@@ -8,13 +8,13 @@ class VisitorException(Exception):
 
 def _qualname(obj):
     """Get the fully-qualified name of an object (including module)."""
-    return obj.__module__ + '.' + obj.__qualname__
+    return obj.__module__ + "." + obj.__qualname__
 
 
 def _declaring_class(obj):
     """Get the name of the class that declared an object."""
     name = _qualname(obj)
-    return name[:name.rfind('.')]
+    return name[: name.rfind(".")]
 
 
 # Stores the actual visitor methods
@@ -37,7 +37,7 @@ def _visitor_impl(self, arg):
                 return method(self, arg)
             else:
                 arg_parent_type = arg_parent_type.__bases__[0]
-    raise VisitorException('No visitor found for class ' + str(type(arg)))
+    raise VisitorException("No visitor found for class " + str(type(arg)))
 
 
 # The actual @visitor decorator

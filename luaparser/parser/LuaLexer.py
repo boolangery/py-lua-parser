@@ -13,8 +13,8 @@ def serializedATN():
         buf.write("\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23")
         buf.write("\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30")
         buf.write("\4\31\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4\35\t\35\4\36")
-        buf.write("\t\36\4\37\t\37\4 \t \4!\t!\4\"\t\"\4#\t#\4$\t$\4%\t%")
-        buf.write("\4&\t&\4\'\t\'\4(\t(\4)\t)\4*\t*\4+\t+\4,\t,\4-\t-\4.")
+        buf.write('\t\36\4\37\t\37\4 \t \4!\t!\4"\t"\4#\t#\4$\t$\4%\t%')
+        buf.write("\4&\t&\4'\t'\4(\t(\4)\t)\4*\t*\4+\t+\4,\t,\4-\t-\4.")
         buf.write("\t.\4/\t/\4\60\t\60\4\61\t\61\4\62\t\62\4\63\t\63\4\64")
         buf.write("\t\64\4\65\t\65\4\66\t\66\4\67\t\67\48\t8\49\t9\4:\t:")
         buf.write("\4;\t;\4<\t<\4=\t=\4>\t>\4?\t?\4@\t@\4A\tA\4B\tB\4C\t")
@@ -30,7 +30,7 @@ def serializedATN():
         buf.write("\3\25\3\26\3\26\3\26\3\26\3\26\3\26\3\27\3\27\3\27\3\27")
         buf.write("\3\27\3\27\3\30\3\30\3\31\3\31\3\32\3\32\3\33\3\33\3\34")
         buf.write("\3\34\3\34\3\35\3\35\3\36\3\36\3\37\3\37\3 \3 \3 \3!\3")
-        buf.write("!\3!\3\"\3\"\3\"\3#\3#\3#\3$\3$\3%\3%\3&\3&\3\'\3\'\3")
+        buf.write('!\3!\3"\3"\3"\3#\3#\3#\3$\3$\3%\3%\3&\3&\3\'\3\'\3')
         buf.write("(\3(\3)\3)\3*\3*\3*\3+\3+\3+\3,\3,\3-\3-\3.\3.\3/\3/\3")
         buf.write("\60\3\60\3\61\3\61\3\62\3\62\3\62\3\63\3\63\3\64\3\64")
         buf.write("\3\65\3\65\3\65\3\65\3\66\3\66\3\66\3\67\3\67\38\38\3")
@@ -54,19 +54,19 @@ def serializedATN():
         buf.write("H\u0217\nH\3H\3H\5H\u021b\nH\3I\3I\3I\3I\3I\3I\7I\u0223")
         buf.write("\nI\fI\16I\u0226\13I\3I\5I\u0229\nI\3J\3J\3J\3J\3\u0224")
         buf.write("\2K\3\3\5\4\7\5\t\6\13\7\r\b\17\t\21\n\23\13\25\f\27\r")
-        buf.write("\31\16\33\17\35\20\37\21!\22#\23%\24\'\25)\26+\27-\30")
-        buf.write("/\31\61\32\63\33\65\34\67\359\36;\37= ?!A\"C#E$G%I&K\'")
+        buf.write("\31\16\33\17\35\20\37\21!\22#\23%\24'\25)\26+\27-\30")
+        buf.write("/\31\61\32\63\33\65\34\67\359\36;\37= ?!A\"C#E$G%I&K'")
         buf.write("M(O)Q*S+U,W-Y.[/]\60_\61a\62c\63e\64g\65i\66k\67m8o9q")
         buf.write(":s;u<w=y>{?}@\177A\u0081\2\u0083\2\u0085\2\u0087\2\u0089")
         buf.write("\2\u008b\2\u008d\2\u008f\2\u0091\2\u0093B\3\2\20\4\2Z")
         buf.write("Zzz\6\2\f\f\17\17$$^^\6\2\f\f\17\17))^^\6\2\f\f\17\17")
-        buf.write("??]]\4\2\f\f\17\17\5\2\f\f\17\17]]\4\2\13\13\"\"\4\2\f")
+        buf.write('??]]\4\2\f\f\17\17\5\2\f\f\17\17]]\4\2\13\13""\4\2\f')
         buf.write("\f\16\17\4\2C\\c|\4\2CHch\4\2GGgg\4\2--//\4\2RRrr\f\2")
         buf.write("$$))^^cdhhppttvvxx||\2\u0253\2\3\3\2\2\2\2\5\3\2\2\2\2")
         buf.write("\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2\2\2\2\r\3\2\2\2\2\17\3")
         buf.write("\2\2\2\2\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2\2\27\3\2")
         buf.write("\2\2\2\31\3\2\2\2\2\33\3\2\2\2\2\35\3\2\2\2\2\37\3\2\2")
-        buf.write("\2\2!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2\'\3\2\2\2\2)\3\2")
+        buf.write("\2\2!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2'\3\2\2\2\2)\3\2")
         buf.write("\2\2\2+\3\2\2\2\2-\3\2\2\2\2/\3\2\2\2\2\61\3\2\2\2\2\63")
         buf.write("\3\2\2\2\2\65\3\2\2\2\2\67\3\2\2\2\29\3\2\2\2\2;\3\2\2")
         buf.write("\2\2=\3\2\2\2\2?\3\2\2\2\2A\3\2\2\2\2C\3\2\2\2\2E\3\2")
@@ -81,7 +81,7 @@ def serializedATN():
         buf.write("\3\2\2\2\17\u00b2\3\2\2\2\21\u00b8\3\2\2\2\23\u00bc\3")
         buf.write("\2\2\2\25\u00c5\3\2\2\2\27\u00ca\3\2\2\2\31\u00cd\3\2")
         buf.write("\2\2\33\u00d0\3\2\2\2\35\u00d6\3\2\2\2\37\u00da\3\2\2")
-        buf.write("\2!\u00de\3\2\2\2#\u00e1\3\2\2\2%\u00e8\3\2\2\2\'\u00ef")
+        buf.write("\2!\u00de\3\2\2\2#\u00e1\3\2\2\2%\u00e8\3\2\2\2'\u00ef")
         buf.write("\3\2\2\2)\u00f4\3\2\2\2+\u00f9\3\2\2\2-\u00ff\3\2\2\2")
         buf.write("/\u0105\3\2\2\2\61\u0107\3\2\2\2\63\u0109\3\2\2\2\65\u010b")
         buf.write("\3\2\2\2\67\u010d\3\2\2\29\u0110\3\2\2\2;\u0112\3\2\2")
@@ -123,7 +123,7 @@ def serializedATN():
         buf.write("\7p\2\2\u00d7\u00d8\7k\2\2\u00d8\u00d9\7n\2\2\u00d9\36")
         buf.write("\3\2\2\2\u00da\u00db\7p\2\2\u00db\u00dc\7q\2\2\u00dc\u00dd")
         buf.write("\7v\2\2\u00dd \3\2\2\2\u00de\u00df\7q\2\2\u00df\u00e0")
-        buf.write("\7t\2\2\u00e0\"\3\2\2\2\u00e1\u00e2\7t\2\2\u00e2\u00e3")
+        buf.write('\7t\2\2\u00e0"\3\2\2\2\u00e1\u00e2\7t\2\2\u00e2\u00e3')
         buf.write("\7g\2\2\u00e3\u00e4\7r\2\2\u00e4\u00e5\7g\2\2\u00e5\u00e6")
         buf.write("\7c\2\2\u00e6\u00e7\7v\2\2\u00e7$\3\2\2\2\u00e8\u00e9")
         buf.write("\7t\2\2\u00e9\u00ea\7g\2\2\u00ea\u00eb\7v\2\2\u00eb\u00ec")
@@ -139,7 +139,7 @@ def serializedATN():
         buf.write("\2\2\u0107\u0108\7/\2\2\u0108\62\3\2\2\2\u0109\u010a\7")
         buf.write(",\2\2\u010a\64\3\2\2\2\u010b\u010c\7\61\2\2\u010c\66\3")
         buf.write("\2\2\2\u010d\u010e\7\61\2\2\u010e\u010f\7\61\2\2\u010f")
-        buf.write("8\3\2\2\2\u0110\u0111\7\'\2\2\u0111:\3\2\2\2\u0112\u0113")
+        buf.write("8\3\2\2\2\u0110\u0111\7'\2\2\u0111:\3\2\2\2\u0112\u0113")
         buf.write("\7`\2\2\u0113<\3\2\2\2\u0114\u0115\7%\2\2\u0115>\3\2\2")
         buf.write("\2\u0116\u0117\7?\2\2\u0117\u0118\7?\2\2\u0118@\3\2\2")
         buf.write("\2\u0119\u011a\7\u0080\2\2\u011a\u011b\7?\2\2\u011bB\3")
@@ -271,7 +271,7 @@ class LuaLexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
-    decisionsToDFA = [ DFA(ds, i) for i, ds in enumerate(atn.decisionToState) ]
+    decisionsToDFA = [DFA(ds, i) for i, ds in enumerate(atn.decisionToState)]
 
     AND = 1
     BREAK = 2
@@ -338,51 +338,220 @@ class LuaLexer(Lexer):
     SHEBANG = 63
     LongBracket = 64
 
-    channelNames = [ u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN" ]
+    channelNames = [u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN"]
 
-    modeNames = [ "DEFAULT_MODE" ]
+    modeNames = ["DEFAULT_MODE"]
 
-    literalNames = [ "<INVALID>",
-            "'and'", "'break'", "'do'", "'else'", "'elseif'", "'end'", "'false'", 
-            "'for'", "'function'", "'goto'", "'if'", "'in'", "'local'", 
-            "'nil'", "'not'", "'or'", "'repeat'", "'return'", "'then'", 
-            "'true'", "'until'", "'while'", "'+'", "'-'", "'*'", "'/'", 
-            "'//'", "'%'", "'^'", "'#'", "'=='", "'~='", "'<='", "'>='", 
-            "'<'", "'>'", "'='", "'&'", "'|'", "'~'", "'>>'", "'<<'", "'('", 
-            "')'", "'{'", "'}'", "'['", "']'", "'::'", "':'", "','", "'...'", 
-            "'..'", "'.'", "';'" ]
+    literalNames = [
+        "<INVALID>",
+        "'and'",
+        "'break'",
+        "'do'",
+        "'else'",
+        "'elseif'",
+        "'end'",
+        "'false'",
+        "'for'",
+        "'function'",
+        "'goto'",
+        "'if'",
+        "'in'",
+        "'local'",
+        "'nil'",
+        "'not'",
+        "'or'",
+        "'repeat'",
+        "'return'",
+        "'then'",
+        "'true'",
+        "'until'",
+        "'while'",
+        "'+'",
+        "'-'",
+        "'*'",
+        "'/'",
+        "'//'",
+        "'%'",
+        "'^'",
+        "'#'",
+        "'=='",
+        "'~='",
+        "'<='",
+        "'>='",
+        "'<'",
+        "'>'",
+        "'='",
+        "'&'",
+        "'|'",
+        "'~'",
+        "'>>'",
+        "'<<'",
+        "'('",
+        "')'",
+        "'{'",
+        "'}'",
+        "'['",
+        "']'",
+        "'::'",
+        "':'",
+        "','",
+        "'...'",
+        "'..'",
+        "'.'",
+        "';'",
+    ]
 
-    symbolicNames = [ "<INVALID>",
-            "AND", "BREAK", "DO", "ELSE", "ELSEIF", "END", "FALSE", "FOR", 
-            "FUNCTION", "GOTO", "IF", "IN", "LOCAL", "NIL", "NOT", "OR", 
-            "REPEAT", "RETURN", "THEN", "TRUE", "UNTIL", "WHILE", "ADD", 
-            "MINUS", "MULT", "DIV", "FLOOR", "MOD", "POW", "LENGTH", "EQ", 
-            "NEQ", "LTEQ", "GTEQ", "LT", "GT", "ASSIGN", "BITAND", "BITOR", 
-            "BITNOT", "BITRSHIFT", "BITRLEFT", "OPAR", "CPAR", "OBRACE", 
-            "CBRACE", "OBRACK", "CBRACK", "COLCOL", "COL", "COMMA", "VARARGS", 
-            "CONCAT", "DOT", "SEMCOL", "NAME", "NUMBER", "STRING", "COMMENT", 
-            "LINE_COMMENT", "SPACE", "NEWLINE", "SHEBANG", "LongBracket" ]
+    symbolicNames = [
+        "<INVALID>",
+        "AND",
+        "BREAK",
+        "DO",
+        "ELSE",
+        "ELSEIF",
+        "END",
+        "FALSE",
+        "FOR",
+        "FUNCTION",
+        "GOTO",
+        "IF",
+        "IN",
+        "LOCAL",
+        "NIL",
+        "NOT",
+        "OR",
+        "REPEAT",
+        "RETURN",
+        "THEN",
+        "TRUE",
+        "UNTIL",
+        "WHILE",
+        "ADD",
+        "MINUS",
+        "MULT",
+        "DIV",
+        "FLOOR",
+        "MOD",
+        "POW",
+        "LENGTH",
+        "EQ",
+        "NEQ",
+        "LTEQ",
+        "GTEQ",
+        "LT",
+        "GT",
+        "ASSIGN",
+        "BITAND",
+        "BITOR",
+        "BITNOT",
+        "BITRSHIFT",
+        "BITRLEFT",
+        "OPAR",
+        "CPAR",
+        "OBRACE",
+        "CBRACE",
+        "OBRACK",
+        "CBRACK",
+        "COLCOL",
+        "COL",
+        "COMMA",
+        "VARARGS",
+        "CONCAT",
+        "DOT",
+        "SEMCOL",
+        "NAME",
+        "NUMBER",
+        "STRING",
+        "COMMENT",
+        "LINE_COMMENT",
+        "SPACE",
+        "NEWLINE",
+        "SHEBANG",
+        "LongBracket",
+    ]
 
-    ruleNames = [ "AND", "BREAK", "DO", "ELSE", "ELSEIF", "END", "FALSE", 
-                  "FOR", "FUNCTION", "GOTO", "IF", "IN", "LOCAL", "NIL", 
-                  "NOT", "OR", "REPEAT", "RETURN", "THEN", "TRUE", "UNTIL", 
-                  "WHILE", "ADD", "MINUS", "MULT", "DIV", "FLOOR", "MOD", 
-                  "POW", "LENGTH", "EQ", "NEQ", "LTEQ", "GTEQ", "LT", "GT", 
-                  "ASSIGN", "BITAND", "BITOR", "BITNOT", "BITRSHIFT", "BITRLEFT", 
-                  "OPAR", "CPAR", "OBRACE", "CBRACE", "OBRACK", "CBRACK", 
-                  "COLCOL", "COL", "COMMA", "VARARGS", "CONCAT", "DOT", 
-                  "SEMCOL", "NAME", "NUMBER", "STRING", "COMMENT", "LINE_COMMENT", 
-                  "SPACE", "NEWLINE", "SHEBANG", "Letter", "Digit", "HexDigit", 
-                  "HexDigits", "Exponent", "BinaryExponent", "EscapeSequence", 
-                  "LineBreak", "NESTED_STR", "LongBracket" ]
+    ruleNames = [
+        "AND",
+        "BREAK",
+        "DO",
+        "ELSE",
+        "ELSEIF",
+        "END",
+        "FALSE",
+        "FOR",
+        "FUNCTION",
+        "GOTO",
+        "IF",
+        "IN",
+        "LOCAL",
+        "NIL",
+        "NOT",
+        "OR",
+        "REPEAT",
+        "RETURN",
+        "THEN",
+        "TRUE",
+        "UNTIL",
+        "WHILE",
+        "ADD",
+        "MINUS",
+        "MULT",
+        "DIV",
+        "FLOOR",
+        "MOD",
+        "POW",
+        "LENGTH",
+        "EQ",
+        "NEQ",
+        "LTEQ",
+        "GTEQ",
+        "LT",
+        "GT",
+        "ASSIGN",
+        "BITAND",
+        "BITOR",
+        "BITNOT",
+        "BITRSHIFT",
+        "BITRLEFT",
+        "OPAR",
+        "CPAR",
+        "OBRACE",
+        "CBRACE",
+        "OBRACK",
+        "CBRACK",
+        "COLCOL",
+        "COL",
+        "COMMA",
+        "VARARGS",
+        "CONCAT",
+        "DOT",
+        "SEMCOL",
+        "NAME",
+        "NUMBER",
+        "STRING",
+        "COMMENT",
+        "LINE_COMMENT",
+        "SPACE",
+        "NEWLINE",
+        "SHEBANG",
+        "Letter",
+        "Digit",
+        "HexDigit",
+        "HexDigits",
+        "Exponent",
+        "BinaryExponent",
+        "EscapeSequence",
+        "LineBreak",
+        "NESTED_STR",
+        "LongBracket",
+    ]
 
     grammarFileName = "Lua.g4"
 
-    def __init__(self, input=None, output:TextIO = sys.stdout):
+    def __init__(self, input=None, output: TextIO = sys.stdout):
         super().__init__(input, output)
         self.checkVersion("4.7.1")
-        self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
+        self._interp = LexerATNSimulator(
+            self, self.atn, self.decisionsToDFA, PredictionContextCache()
+        )
         self._actions = None
         self._predicates = None
-
-

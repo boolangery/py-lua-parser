@@ -10,14 +10,12 @@ from typing import Generator
 
 
 def parse(source: str) -> Chunk:
-    """ Parse Lua source to a Chunk.
-    """
+    """Parse Lua source to a Chunk."""
     return Builder(source).process()
 
 
 def get_token_stream(source: str) -> CommonTokenStream:
-    """ Get the antlr token stream.
-    """
+    """Get the antlr token stream."""
     lexer = LuaLexer(InputStream(source))
     stream = CommonTokenStream(lexer)
     return stream
@@ -41,6 +39,7 @@ def to_pretty_str(root: Node, indent=2) -> str:
 def to_lua_source(root: Node, indent=4) -> str:
     return printers.LuaOutputVisitor(indent_size=indent).visit(root)
 
+
 def to_xml_str(tree):
     tree_visitor = printers.HTMLStyleVisitor()
     return tree_visitor.get_xml_string(tree)
@@ -54,7 +53,7 @@ class JSONEncoder(json.JSONEncoder):
                 return to_json()
 
         except AttributeError:
-            return {k: v for k, v in o.__dict__.items() if not k.startswith('_')}
+            return {k: v for k, v in o.__dict__.items() if not k.startswith("_")}
 
 
 def to_pretty_json(root: Node) -> str:
@@ -73,13 +72,15 @@ class ASTVisitor:
             # push childs to the stack:
             if isinstance(node, Node):
                 # call visit method
-                name = 'visit_' + node.__class__.__name__
+                name = "visit_" + node.__class__.__name__
                 tree_visitor = getattr(self, name, None)
                 if tree_visitor:
                     tree_visitor(node)
 
                 # add childs
-                children = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+                children = [
+                    attr for attr in node.__dict__.keys() if not attr.startswith("_")
+                ]
                 for child in children:
                     node_stack.append(node.__dict__[child])
             elif isinstance(node, list):
@@ -96,7 +97,7 @@ class ASTRecursiveVisitor:
             # search in parent arg type:
             parent_type = node.__class__
             while parent_type != object:
-                name = 'enter_' + parent_type.__name__
+                name = "enter_" + parent_type.__name__
                 tree_visitor = getattr(self, name, None)
                 if tree_visitor:
                     tree_visitor(node)
@@ -105,7 +106,9 @@ class ASTRecursiveVisitor:
                     parent_type = parent_type.__bases__[0]
 
             # visit all object public attributes:
-            children = [attr for attr in node.__dict__.keys() if not attr.startswith("_")]
+            children = [
+                attr for attr in node.__dict__.keys() if not attr.startswith("_")
+            ]
             for child in children:
                 self.visit(node.__dict__[child])
 
@@ -114,7 +117,7 @@ class ASTRecursiveVisitor:
             # search in parent arg type:
             parent_type = node.__class__
             while parent_type != object:
-                name = 'exit_' + parent_type.__name__
+                name = "exit_" + parent_type.__name__
                 tree_visitor = getattr(self, name, None)
                 if tree_visitor:
                     tree_visitor(node)
@@ -348,13 +351,19 @@ class SyntaxException(Exception):
 
 class ParserErrorListener(ErrorListener):
     def syntaxError(self, recognizer, offending_symbol, line, column, msg, e):
-        raise SyntaxException(str(line) + ":" + str(column) + ': ' + str(msg))
+        raise SyntaxException(str(line) + ":" + str(column) + ": " + str(msg))
 
-    def reportAmbiguity(self, recognizer, dfa, start_index, stop_index, exact, ambig_alts, configs):
+    def reportAmbiguity(
+        self, recognizer, dfa, start_index, stop_index, exact, ambig_alts, configs
+    ):
         pass
 
-    def reportAttemptingFullContext(self, recognizer, dfa, start_index, stop_index, conflicting_alts, configs):
+    def reportAttemptingFullContext(
+        self, recognizer, dfa, start_index, stop_index, conflicting_alts, configs
+    ):
         pass
 
-    def reportContextSensitivity(self, recognizer, dfa, start_index, stop_index, prediction, configs):
+    def reportContextSensitivity(
+        self, recognizer, dfa, start_index, stop_index, prediction, configs
+    ):
         pass

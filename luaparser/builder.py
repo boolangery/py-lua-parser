@@ -1,11 +1,10 @@
-from antlr4 import InputStream, CommonTokenStream
-from luaparser.parser.LuaLexer import LuaLexer
-from luaparser.astnodes import *
-from enum import Enum
 import ast
 import re
-from typing import List
-from antlr4.Token import Token
+
+from antlr4 import InputStream, CommonTokenStream
+
+from luaparser.astnodes import *
+from luaparser.parser.LuaLexer import LuaLexer
 
 
 class SyntaxException(Exception):
@@ -201,7 +200,7 @@ class Builder:
         # contains a list of CommonTokens
         self._line_count: int = 0
         self._right_index: int = 0
-        self._last_expr_type: int = None
+        self._last_expr_type: Optional[int] = None
 
         # following stack are used to backup values
         self._index_stack: List[int] = []
@@ -405,11 +404,11 @@ class Builder:
 
         # search first comment
         while idx < len(self.comments) and self.comments[idx] is None:
-            idx = idx + 1
+            idx += 1
         # get comments starting from this index
         while idx < len(self.comments) and self.comments[idx] is not None:
             comments.append(self.comments[idx])
-            idx = idx + 1
+            idx += 1
         # check if followed by a blank line
         if idx + 1 < len(self.comments):
             if self.comments[idx] is None and self.comments[idx + 1] is None:
@@ -458,7 +457,11 @@ class Builder:
                 # Get previous token, if such exists.
                 stop_char = self._LT.stop if self._LT else None
                 return Chunk(
-                    block, comments, first_token.start, stop_char, first_token.line
+                    block,
+                    comments=comments,
+                    start_char=first_token.start,
+                    stop_char=stop_char,
+                    lineno=first_token.line,
                 )
         return False
 
@@ -477,7 +480,7 @@ class Builder:
         if stat:
             statements.append(stat)
         stop_char = statements[-1].stop_char if statements else None
-        return Block(statements, t.start, stop_char, t.line)
+        return Block(statements, start_char=t.start, stop_char=stop_char, lineno=t.line)
 
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
@@ -523,7 +526,9 @@ class Builder:
                 self.next_is_rc(Tokens.SEMCOL)
 
             self.success()
-            return Return(expr_list, t.start, self._LT.stop, t.line)
+            return Return(
+                expr_list, start_char=t.start, stop_char=self._LT.stop, lineno=t.line
+            )
         return self.failure()
 
     def parse_assignment(self) -> Assign or bool:
@@ -978,9 +983,9 @@ class Builder:
                             name,
                             func_body[0],
                             func_body[1],
-                            start_token.start,
-                            func_body[1].stop_char,
-                            start_token.line,
+                            start_char=start_token.start,
+                            stop_char=func_body[1].stop_char,
+                            lineno=start_token.line,
                         )
                         self.handle_hidden_right()
                         return node
@@ -994,9 +999,9 @@ class Builder:
                         names,
                         func_body[0],
                         func_body[1],
-                        start_token.start,
-                        func_body[1].stop_char,
-                        start_token.line,
+                        start_char=start_token.start,
+                        stop_char=func_body[1].stop_char,
+                        lineno=start_token.line,
                     )
                     self.handle_hidden_right()
                     return node
@@ -1350,7 +1355,9 @@ class Builder:
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UMinusOp(expr, t.start, t.stop, t.line)
+                return UMinusOp(
+                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
+                )
 
         self.failure_save()
         if self.next_is_rc(Tokens.LENGTH):
@@ -1358,7 +1365,9 @@ class Builder:
             expr = self.parse_pow_expr()
             if expr:
                 self.success()
-                return ULengthOP(expr, t.start, t.stop, t.line)
+                return ULengthOP(
+                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
+                )
 
         self.failure_save()
         if self.next_is_rc(Tokens.NOT):
@@ -1366,7 +1375,9 @@ class Builder:
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return ULNotOp(expr, t.start, t.stop, t.line)
+                return ULNotOp(
+                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
+                )
 
         self.failure_save()
         if self.next_is_rc(Tokens.BITNOT):
@@ -1374,7 +1385,9 @@ class Builder:
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UBNotOp(expr, t.start, t.stop, t.line)
+                return UBNotOp(
+                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
+                )
 
         self.failure_save()
         expr = self.parse_pow_expr()
@@ -1427,7 +1440,12 @@ class Builder:
             except:
                 # exception occurs with leading zero number: 002
                 number = float(self.text)
-            return Number(number, self._LT.start, self._LT.stop, self._LT.line)
+            return Number(
+                number,
+                start_char=self._LT.start,
+                stop_char=self._LT.stop,
+                lineno=self._LT.line,
+            )
 
         if self.next_is(Tokens.STRING) and self.next_is_rc(Tokens.STRING):
             string = self.parse_lua_str(self.text)
@@ -1437,19 +1455,25 @@ class Builder:
             return string
 
         if self.next_is(Tokens.NIL) and self.next_is_rc(Tokens.NIL):
-            return Nil(self._LT.start, self._LT.stop, self._LT.line)
+            return Nil(
+                start_char=self._LT.start, stop_char=self._LT.stop, lineno=self._LT.line
+            )
 
         if self.next_is(Tokens.TRUE) and self.next_is_rc(Tokens.TRUE):
-            return TrueExpr(self._LT.start, self._LT.stop, self._LT.line)
+            return TrueExpr(
+                start_char=self._LT.start, stop_char=self._LT.stop, lineno=self._LT.line
+            )
 
         if self.next_is(Tokens.FALSE) and self.next_is_rc(Tokens.FALSE):
-            return FalseExpr(self._LT.start, self._LT.stop, self._LT.line)
+            return FalseExpr(
+                start_char=self._LT.start, stop_char=self._LT.stop, lineno=self._LT.line
+            )
         return None
 
     @staticmethod
     def parse_lua_str(lua_str) -> String:
         delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
-        p = re.compile(r"^\[=+\[(.*)\]=+\]")  # nested quote pattern
+        p = re.compile(r"^\[=+\[(.*)]=+]")  # nested quote pattern
         # try remove double quote:
         if lua_str.startswith('"') and lua_str.endswith('"'):
             lua_str = lua_str[1:-1]
@@ -1475,7 +1499,11 @@ class Builder:
             if func_body:
                 self.success()
                 node = AnonymousFunction(
-                    func_body[0], func_body[1], t.start, self._LT.stop, t.line
+                    func_body[0],
+                    func_body[1],
+                    start_char=t.start,
+                    stop_char=self._LT.stop,
+                    lineno=t.line,
                 )
                 self.handle_hidden_right()
                 return node
@@ -1543,7 +1571,9 @@ class Builder:
                     value = self.parse_expr()
                     if value:
                         self.success()
-                        return Field(key, value, comments, between_brackets=True)
+                        return Field(
+                            key, value, comments=comments, between_brackets=True
+                        )
 
         self.failure_save()
         if self.next_is_rc(Tokens.NAME):
@@ -1558,7 +1588,7 @@ class Builder:
                 value = self.parse_expr()
                 if value:
                     self.success()
-                    return Field(key, value, comments)
+                    return Field(key, value, comments=comments)
 
         self.failure_save()
         comments = self.get_comments()
@@ -1567,7 +1597,7 @@ class Builder:
             self.success()
             # noinspection PyTypeChecker
             return Field(
-                None, value, comments
+                None, value, comments=comments
             )  # Key will be set in parse_table_constructor
 
         return self.failure()
