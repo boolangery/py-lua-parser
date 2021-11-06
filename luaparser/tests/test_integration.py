@@ -5,6 +5,8 @@ import textwrap
 
 
 class IntegrationTestCase(tests.TestCase):
+    maxDiff = None
+
     def test_cont_int_1(self):
         tree = ast.parse(
             textwrap.dedent(
@@ -141,63 +143,34 @@ class IntegrationTestCase(tests.TestCase):
         pretty_str = ast.to_pretty_str(tree)
         exp = textwrap.dedent(
             r"""
-        Chunk: {} 5 keys
-          start_char: 1
-          stop_char: 67
-          lineno: 2
-          body: {} 5 keys
-            Block: {} 5 keys
-              start_char: 1
-              stop_char: 67
-              lineno: 2
-              body: [] 2 items
-                0: {} 1 key          
-                  LocalFunction: {} 7 keys
-                    start_char: 1
-                    stop_char: 56
-                    name: {} 5 keys
-                      Name: {} 5 keys
-                        start_char: 16
-                        stop_char: 23
-                        lineno: 2
-                        id: 'sayHello'
-                    args: [] 0 item
-                    body: {} 5 keys
-                      Block: {} 5 keys
-                        start_char: 31
-                        stop_char: 56
-                        lineno: 3
-                        body: [] 1 item
-                          0: {} 1 key                    
-                            Call: {} 6 keys
-                              start_char: 31
-                              stop_char: 52
-                              lineno: 3
-                              func: {} 5 keys
-                                Name: {} 5 keys
-                                  start_char: 31
-                                  stop_char: 35
-                                  lineno: 3
-                                  id: 'print'
-                              args: [] 1 item
-                                0: {} 1 key                          
-                                  String: {} 6 keys
-                                    start_char: 37
-                                    stop_char: 51
-                                    lineno: 3
-                                    s: 'hello world !'
-                                    delimiter: SINGLE_QUOTE
-                1: {} 1 key          
-                  Call: {} 6 keys
-                    start_char: 58
-                    stop_char: 67
-                    lineno: 5
-                    func: {} 5 keys
-                      Name: {} 5 keys
-                        start_char: 58
-                        stop_char: 65
-                        lineno: 5
-                        id: 'sayHello'
-                    args: [] 0 item"""
+                Chunk: {} 2 keys
+                  body: {} 2 keys
+                    Block: {} 2 keys
+                      body: [] 2 items
+                        0: {} 1 key          
+                          LocalFunction: {} 4 keys
+                            name: {} 2 keys
+                              Name: {} 2 keys
+                                id: 'sayHello'
+                            args: [] 0 item
+                            body: {} 2 keys
+                              Block: {} 2 keys
+                                body: [] 1 item
+                                  0: {} 1 key                    
+                                    Call: {} 3 keys
+                                      func: {} 2 keys
+                                        Name: {} 2 keys
+                                          id: 'print'
+                                      args: [] 1 item
+                                        0: {} 1 key                          
+                                          String: {} 3 keys
+                                            s: 'hello world !'
+                                            delimiter: SINGLE_QUOTE
+                        1: {} 1 key          
+                          Call: {} 3 keys
+                            func: {} 2 keys
+                              Name: {} 2 keys
+                                id: 'sayHello'
+                            args: [] 0 item"""
         )
         self.assertEqual(exp, pretty_str)

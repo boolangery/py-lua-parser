@@ -338,9 +338,8 @@ class Builder:
                         self.comments.append(
                             Comment(
                                 t.text,
-                                start_char=t.start,
-                                stop_char=t.stop,
-                                lineno=t.line,
+                                first_token=t,
+                                last_token=t,
                             )
                         )
                     elif t.type == Tokens.COMMENT:
@@ -348,9 +347,8 @@ class Builder:
                             Comment(
                                 t.text,
                                 True,
-                                start_char=t.start,
-                                stop_char=t.stop,
-                                lineno=t.line,
+                                first_token=t,
+                                last_token=t,
                             )
                         )
                     elif t.type == Tokens.NEWLINE:
@@ -368,9 +366,8 @@ class Builder:
                         self.comments.append(
                             Comment(
                                 t.text,
-                                start_char=t.start,
-                                stop_char=t.stop,
-                                lineno=t.line,
+                                first_token=t,
+                                last_token=t,
                             )
                         )
                     elif t.type == Tokens.COMMENT:
@@ -378,9 +375,8 @@ class Builder:
                             Comment(
                                 t.text,
                                 True,
-                                start_char=t.start,
-                                stop_char=t.stop,
-                                lineno=t.line,
+                                first_token=t,
+                                last_token=t,
                             )
                         )
                     elif t.type == Tokens.NEWLINE:
@@ -454,14 +450,11 @@ class Builder:
             token = self._stream.LT(1)
             if token.type == -1:
                 # do not consume EOF
-                # Get previous token, if such exists.
-                stop_char = self._LT.stop if self._LT else None
                 return Chunk(
                     block,
                     comments=comments,
-                    start_char=first_token.start,
-                    stop_char=stop_char,
-                    lineno=first_token.line,
+                    first_token=first_token,
+                    last_token=self._LT,
                 )
         return False
 
@@ -479,8 +472,11 @@ class Builder:
         stat = self.parse_ret_stat()
         if stat:
             statements.append(stat)
-        stop_char = statements[-1].stop_char if statements else None
-        return Block(statements, start_char=t.start, stop_char=stop_char, lineno=t.line)
+        return Block(
+            statements,
+            first_token=t,
+            last_token=statements[-1].last_token if statements else None,
+        )
 
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
@@ -526,9 +522,7 @@ class Builder:
                 self.next_is_rc(Tokens.SEMCOL)
 
             self.success()
-            return Return(
-                expr_list, start_char=t.start, stop_char=self._LT.stop, lineno=t.line
-            )
+            return Return(expr_list, first_token=t, last_token=self._LT)
         return self.failure()
 
     def parse_assignment(self) -> Assign or bool:
@@ -543,9 +537,8 @@ class Builder:
                     return Assign(
                         targets,
                         values,
-                        start_char=t.start,
-                        stop_char=self._LT.stop,
-                        lineno=t.line,
+                        first_token=t,
+                        last_token=self._LT,
                     )
                 else:
                     self.abort()
@@ -580,8 +573,7 @@ class Builder:
         if root:
             tail = self.parse_tail()
             while tail:
-                tail.start_char = root.start_char
-                tail.lineno = root.lineno
+                tail.first_token = root.first_token
 
                 if isinstance(tail, Call):
                     tail.func = root
@@ -591,14 +583,11 @@ class Builder:
                     tail.source = root
                 else:
                     args = _listify(tail)
-                    stop_char = args[-1].stop_char if args else None
-
                     tail = Call(
                         root,
                         args,
-                        start_char=root.start_char,
-                        stop_char=stop_char,
-                        lineno=root.lineno,
+                        first_token=root.first_token,
+                        last_token=args[-1].last_token if args else None,
                     )
                 root = tail
 
@@ -619,13 +608,12 @@ class Builder:
             return Index(
                 Name(
                     self.text,
-                    start_char=self._LT.start,
-                    stop_char=self._LT.stop,
-                    lineno=self._LT.line,
+                    first_token=self._LT,
+                    last_token=self._LT,
                 ),
                 # value must be set in parent
                 Name(""),
-                stop_char=self._LT.stop,
+                last_token=self._LT,
             )
 
         self.failure_save()
@@ -644,9 +632,8 @@ class Builder:
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
             name = Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
             if self.next_is_rc(Tokens.OPAR):
                 expr_list = self.parse_expr_list() or []
@@ -659,9 +646,8 @@ class Builder:
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
             name = Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
             table = self.parse_table_constructor(False)
             if table:
@@ -673,15 +659,13 @@ class Builder:
         if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
             name = Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
             if self.next_is_rc(Tokens.STRING, False):
                 string = self.parse_lua_str(self.text)
-                string.start_char = self._LT.start
-                string.stop_char = self._LT.stop
-                string.lineno = self._LT.line
+                string.first_token = self._LT.start
+                string.last_token = self._LT
                 self.success()
                 # noinspection PyTypeChecker
                 return Invoke(None, name, [string])
@@ -709,7 +693,7 @@ class Builder:
             if self.next_is_rc(Tokens.CPAR, False):
                 self.success()
                 # noinspection PyTypeChecker
-                return Call(None, expr_list, stop_char=self._LT.stop)
+                return Call(None, expr_list, last_token=self._LT)
 
         self.failure_save()
         table = self.parse_table_constructor(False)
@@ -720,9 +704,8 @@ class Builder:
         self.failure_save()
         if self.next_is_rc(Tokens.STRING, False):
             string = self.parse_lua_str(self.text)
-            string.start_char = self._LT.start
-            string.stop_char = self._LT.stop
-            string.lineno = self._LT.line
+            string.first_token = self._LT
+            string.last_token = self._LT
             self.success()
             return string
 
@@ -815,13 +798,11 @@ class Builder:
                     self.failure()
 
                 self.success()
-                stop_char = values[-1].stop_char if values else None
                 return LocalAssign(
                     targets,
                     values,
-                    start_char=start_token.start,
-                    stop_char=stop_char,
-                    lineno=start_token.line,
+                    first_token=start_token,
+                    last_token=values[-1].last_token if values else None,
                 )
 
             self.save()
@@ -829,9 +810,8 @@ class Builder:
             if self.next_is_rc(Tokens.FUNCTION) and self.next_is_rc(Tokens.NAME):
                 name = Name(
                     self.text,
-                    start_char=self._LT.start,
-                    stop_char=self._LT.stop,
-                    lineno=self._LT.line,
+                    first_token=self._LT,
+                    last_token=self._LT,
                 )
                 body = self.parse_func_body()
                 if body:
@@ -839,8 +819,8 @@ class Builder:
                     self.success()
                     node = LocalFunction(name, body[0], body[1])
                     self.handle_hidden_right()
-                    node.start_char = start_token.start
-                    node.stop_char = body[1].stop_char
+                    node.first_token = start_token
+                    node.last_token = body[1].last_token
                     return node
             self.failure()
             self.abort()
@@ -854,9 +834,8 @@ class Builder:
             return Goto(
                 Name(
                     self.text,
-                    start_char=self._LT.start,
-                    stop_char=self._LT.stop,
-                    lineno=self._LT.line,
+                    first_token=self._LT,
+                    last_token=self._LT,
                 )
             )
         return self.failure()
@@ -921,9 +900,8 @@ class Builder:
             if self.next_is_rc(Tokens.NAME):
                 target = Name(
                     self.text,
-                    start_char=self._LT.start,
-                    stop_char=self._LT.stop,
-                    lineno=self._LT.line,
+                    first_token=self._LT,
+                    last_token=self._LT,
                 )
                 if self.next_is_rc(Tokens.ASSIGN):
                     start = self.parse_expr()
@@ -970,9 +948,8 @@ class Builder:
                 if self.next_is_rc(Tokens.COL) and self.next_is_rc(Tokens.NAME):
                     name = Name(
                         self.text,
-                        start_char=self._LT.start,
-                        stop_char=self._LT.stop,
-                        lineno=self._LT.line,
+                        first_token=self._LT,
+                        last_token=self._LT,
                     )
                     func_body = self.parse_func_body()
                     if func_body:
@@ -983,9 +960,8 @@ class Builder:
                             name,
                             func_body[0],
                             func_body[1],
-                            start_char=start_token.start,
-                            stop_char=func_body[1].stop_char,
-                            lineno=start_token.line,
+                            first_token=start_token,
+                            last_token=func_body[1].last_token,
                         )
                         self.handle_hidden_right()
                         return node
@@ -999,9 +975,8 @@ class Builder:
                         names,
                         func_body[0],
                         func_body[1],
-                        start_char=start_token.start,
-                        stop_char=func_body[1].stop_char,
-                        lineno=start_token.line,
+                        first_token=start_token,
+                        last_token=func_body[1].last_token,
                     )
                     self.handle_hidden_right()
                     return node
@@ -1014,9 +989,8 @@ class Builder:
         if self.next_is_rc(Tokens.NAME):
             root = Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
             while True:
                 self.save()
@@ -1025,9 +999,8 @@ class Builder:
                     child = Index(
                         Name(
                             self.text,
-                            start_char=self._LT.start,
-                            stop_char=self._LT.stop,
-                            lineno=self._LT.line,
+                            first_token=self._LT,
+                            last_token=self._LT,
                         ),
                         root,
                     )
@@ -1054,7 +1027,7 @@ class Builder:
                         self._expected = []
                         token = self.next_is_rc(Tokens.END, False)
                         if token:
-                            body.stop_char = token.stop
+                            body.last_token = token
                             self.success()
                             return args, body
                         else:
@@ -1090,9 +1063,8 @@ class Builder:
             names.append(
                 Name(
                     self.text,
-                    start_char=self._LT.start,
-                    stop_char=self._LT.stop,
-                    lineno=self._LT.line,
+                    first_token=self._LT,
+                    last_token=self._LT,
                 )
             )
             while True:
@@ -1101,9 +1073,8 @@ class Builder:
                     names.append(
                         Name(
                             self.text,
-                            start_char=self._LT.start,
-                            stop_char=self._LT.stop,
-                            lineno=self._LT.line,
+                            first_token=self._LT,
+                            last_token=self._LT,
                         )
                     )
                     self.success()
@@ -1119,9 +1090,8 @@ class Builder:
         if self.next_is_rc(Tokens.COLCOL) and self.next_is_rc(Tokens.NAME):
             name = Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
             if self.next_is_rc(Tokens.COLCOL):
                 self.success()
@@ -1144,9 +1114,8 @@ class Builder:
             self.success()
             return Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
         return self.failure()
 
@@ -1355,9 +1324,7 @@ class Builder:
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UMinusOp(
-                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
-                )
+                return UMinusOp(expr, first_token=t, last_token=t)
 
         self.failure_save()
         if self.next_is_rc(Tokens.LENGTH):
@@ -1365,9 +1332,7 @@ class Builder:
             expr = self.parse_pow_expr()
             if expr:
                 self.success()
-                return ULengthOP(
-                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
-                )
+                return ULengthOP(expr, first_token=t, last_token=t)
 
         self.failure_save()
         if self.next_is_rc(Tokens.NOT):
@@ -1375,9 +1340,7 @@ class Builder:
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return ULNotOp(
-                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
-                )
+                return ULNotOp(expr, first_token=t, last_token=t)
 
         self.failure_save()
         if self.next_is_rc(Tokens.BITNOT):
@@ -1385,9 +1348,7 @@ class Builder:
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UBNotOp(
-                    expr, start_char=t.start, stop_char=t.stop, lineno=t.line
-                )
+                return UBNotOp(expr, first_token=t, last_token=t)
 
         self.failure_save()
         expr = self.parse_pow_expr()
@@ -1442,32 +1403,24 @@ class Builder:
                 number = float(self.text)
             return Number(
                 number,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
 
         if self.next_is(Tokens.STRING) and self.next_is_rc(Tokens.STRING):
             string = self.parse_lua_str(self.text)
-            string.start_char = self._LT.start
-            string.stop_char = self._LT.stop
-            string.lineno = self._LT.line
+            string.first_token = self._LT
+            string.last_token = self._LT
             return string
 
         if self.next_is(Tokens.NIL) and self.next_is_rc(Tokens.NIL):
-            return Nil(
-                start_char=self._LT.start, stop_char=self._LT.stop, lineno=self._LT.line
-            )
+            return Nil(first_token=self._LT, last_token=self._LT)
 
         if self.next_is(Tokens.TRUE) and self.next_is_rc(Tokens.TRUE):
-            return TrueExpr(
-                start_char=self._LT.start, stop_char=self._LT.stop, lineno=self._LT.line
-            )
+            return TrueExpr(first_token=self._LT, last_token=self._LT)
 
         if self.next_is(Tokens.FALSE) and self.next_is_rc(Tokens.FALSE):
-            return FalseExpr(
-                start_char=self._LT.start, stop_char=self._LT.stop, lineno=self._LT.line
-            )
+            return FalseExpr(first_token=self._LT, last_token=self._LT)
         return None
 
     @staticmethod
@@ -1501,9 +1454,8 @@ class Builder:
                 node = AnonymousFunction(
                     func_body[0],
                     func_body[1],
-                    start_char=t.start,
-                    stop_char=self._LT.stop,
-                    lineno=t.line,
+                    first_token=t,
+                    last_token=self._LT,
                 )
                 self.handle_hidden_right()
                 return node
@@ -1579,9 +1531,8 @@ class Builder:
         if self.next_is_rc(Tokens.NAME):
             key = Name(
                 self.text,
-                start_char=self._LT.start,
-                stop_char=self._LT.stop,
-                lineno=self._LT.line,
+                first_token=self._LT,
+                last_token=self._LT,
             )
             if self.next_is_rc(Tokens.ASSIGN):
                 comments = self.get_comments()

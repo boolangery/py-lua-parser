@@ -30,9 +30,8 @@ class Node:
         self,
         name: str,
         comments: Comments = None,
-        start_char: Optional[int] = None,
-        stop_char: Optional[int] = None,
-        lineno: Optional[int] = None,
+        first_token: Optional[Token] = None,
+        last_token: Optional[Token] = None,
     ):
         """
 
@@ -46,9 +45,8 @@ class Node:
             comments = []
         self._name: str = name
         self.comments: Comments = comments
-        self.start_char: Optional[int] = start_char
-        self.stop_char: Optional[int] = stop_char
-        self.lineno: Optional[int] = lineno
+        self._first_token: Optional[Token] = first_token
+        self._last_token: Optional[Token] = last_token
 
     @property
     def display_name(self) -> str:
@@ -57,14 +55,52 @@ class Node:
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
             return _equal_dicts(
-                self.__dict__, other.__dict__, ["start_char", "stop_char", "lineno"]
+                self.__dict__, other.__dict__, ["_first_token", "_last_token"]
             )
         return False
+
+    @property
+    def first_token(self) -> Optional[Token]:
+        return self._first_token
+
+    @first_token.setter
+    def first_token(self, val):
+        self._first_token = val
+
+    @property
+    def last_token(self) -> Optional[Token]:
+        return self._last_token
+
+    @last_token.setter
+    def last_token(self, val):
+        self._last_token = val
+
+    @property
+    def start_char(self) -> Optional[int]:
+        return self._first_token.start if self._first_token else None
+
+    @property
+    def stop_char(self) -> Optional[int]:
+        return self._last_token.stop if self._last_token else None
+
+    @property
+    def line(self) -> Optional[int]:
+        """Line number."""
+        return self._first_token.start if self._first_token else None
 
     def to_json(self) -> any:
         return {
             self._name: {
-                k: v for k, v in self.__dict__.items() if not k.startswith("_") and v
+                **{
+                    k: v
+                    for k, v in self.__dict__.items()
+                    if not k.startswith("_") and v
+                },
+                **{
+                    "start_char": self.start_char,
+                    "stop_char": self.stop_char,
+                    "line": self.line,
+                },
             }
         }
 
