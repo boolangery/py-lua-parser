@@ -5,6 +5,8 @@ from antlr4 import InputStream, CommonTokenStream
 
 from luaparser.astnodes import *
 from luaparser.parser.LuaLexer import LuaLexer
+from typing import List, Tuple
+from antlr4.Token import Token
 
 
 class SyntaxException(Exception):
@@ -1485,7 +1487,7 @@ class Builder:
     def parse_field_list(self) -> List[Field] or bool:
         field_list = []
         self.save()
-        field = self.parse_field()
+        field, _ = self.parse_field()
         if field:
             field_list.append(field)
             while True:
@@ -1494,16 +1496,17 @@ class Builder:
                     inline_com = self.get_inline_comment()
                     if inline_com:
                         field.comments.append(inline_com)
-                    field = self.parse_field()
+                    prev_field = field
+                    field, remaining_comments = self.parse_field()
                     if field:
                         field_list.append(field)
                         self.success()
                     else:
+                        prev_field.comments.extend(remaining_comments)
                         self.success()
                         self.success()
                         return field_list
                 else:
-
                     field.comments.extend(self.get_comments())
                     self.failure()
                     break
@@ -1512,7 +1515,7 @@ class Builder:
             return field_list
         return self.failure()
 
-    def parse_field(self) -> Field or bool:
+    def parse_field(self) -> Tuple[Field or bool, Comments]:
         self.save()
 
         if self.next_is_rc(Tokens.OBRACK):
@@ -1523,8 +1526,9 @@ class Builder:
                     value = self.parse_expr()
                     if value:
                         self.success()
-                        return Field(
-                            key, value, comments=comments, between_brackets=True
+                        return (
+                            Field(key, value, comments=comments, between_brackets=True),
+                            comments,
                         )
 
         self.failure_save()
@@ -1539,7 +1543,7 @@ class Builder:
                 value = self.parse_expr()
                 if value:
                     self.success()
-                    return Field(key, value, comments=comments)
+                    return Field(key, value, comments=comments), comments
 
         self.failure_save()
         comments = self.get_comments()
@@ -1547,11 +1551,12 @@ class Builder:
         if value:
             self.success()
             # noinspection PyTypeChecker
-            return Field(
-                None, value, comments=comments
+            return (
+                Field(None, value, comments=comments),
+                [],
             )  # Key will be set in parse_table_constructor
 
-        return self.failure()
+        return self.failure(), comments
 
     def parse_field_sep(self) -> bool:
         self.save()
