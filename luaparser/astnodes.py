@@ -86,7 +86,7 @@ class Node:
     @property
     def line(self) -> Optional[int]:
         """Line number."""
-        return self._first_token.start if self._first_token else None
+        return self._first_token.line if self._first_token else None
 
     def to_json(self) -> any:
         return {
