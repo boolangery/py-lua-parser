@@ -80,9 +80,10 @@ class Node:
         return self._first_token
 
     @first_token.setter
-    def first_token(self, val: CommonToken):
-        self._first_token = val.clone()
-        self._first_token.source = CommonToken.EMPTY_SOURCE
+    def first_token(self, val: Optional[CommonToken]):
+        if val is not None:
+            self._first_token = val.clone()
+            self._first_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def last_token(self) -> Optional[CommonToken]:
@@ -94,9 +95,10 @@ class Node:
         return self._last_token
 
     @last_token.setter
-    def last_token(self, val: CommonToken):
-        self._last_token = val.clone()
-        self._last_token.source = CommonToken.EMPTY_SOURCE
+    def last_token(self, val: Optional[CommonToken]):
+        if val is not None:
+            self._last_token = val.clone()
+            self._last_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def start_char(self) -> Optional[int]:
