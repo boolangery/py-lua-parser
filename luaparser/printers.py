@@ -280,11 +280,11 @@ class LuaOutputVisitor:
     @visitor(If)
     def visit(self, node: If) -> str:
         output = (
-            "if " + self.visit(node.test) + " then\n" + self.visit(node.body) + "\n"
+            "if " + self.visit(node.test) + " then\n" + self.visit(node.body)
         )
         if isinstance(node.orelse, ElseIf):
             output += self.visit(node.orelse)
-        else:
+        elif node.orelse:
             output += "else\n" + self.visit(node.orelse)
         output += "\nend"
         return output

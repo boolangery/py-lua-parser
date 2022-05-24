@@ -1,7 +1,7 @@
-from luaparser.utils import tests
-from luaparser import ast
-from luaparser.astnodes import *
 import textwrap
+
+from luaparser import ast
+from luaparser.utils import tests
 
 
 class LuaOutputTestCase(tests.TestCase):
@@ -118,5 +118,21 @@ class LuaOutputTestCase(tests.TestCase):
                 ['ok'] = true,
                 foo = bar,
             }"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_int_24(self):
+        source = textwrap.dedent(
+            """\
+            local a = 0
+            if a == 0 then
+                if a == 1 then
+                    if a == 2 then
+                        if a == 3 then
+                        end
+                    end
+                end
+            end
+            """
         )
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
