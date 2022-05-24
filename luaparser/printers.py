@@ -218,6 +218,7 @@ class HTMLStyleVisitor:
 class LuaOutputVisitor:
     def __init__(self, indent_size: int):
         self._indent_size = indent_size
+        self._level = 0
 
     @visitor(str)
     def visit(self, node) -> str:
@@ -245,9 +246,11 @@ class LuaOutputVisitor:
 
     @visitor(Block)
     def visit(self, node: Block) -> str:
+        self._level += 1
         output = indent(
-            "\n".join([self.visit(n) for n in node.body]), " " * self._indent_size
+            "\n".join([self.visit(n) for n in node.body]), " " * (self._indent_size if self._level > 1 else 0)
         )
+        self._level -= 1
         return output
 
     @visitor(Assign)
@@ -274,21 +277,21 @@ class LuaOutputVisitor:
             "if " + self.visit(node.test) + " then\n" + self.visit(node.body)
         )
         if isinstance(node.orelse, ElseIf):
-            output += self.visit(node.orelse)
+            output += "\n" + self.visit(node.orelse)
         elif node.orelse:
-            output += "else\n" + self.visit(node.orelse)
+            output += "\nelse\n" + self.visit(node.orelse)
         output += "\nend"
         return output
 
     @visitor(ElseIf)
     def visit(self, node: ElseIf) -> str:
         output = (
-            "elseif " + self.visit(node.test) + " then\n" + self.visit(node.body) + "\n"
+            "elseif " + self.visit(node.test) + " then\n" + self.visit(node.body)
         )
         if isinstance(node.orelse, ElseIf):
-            output += self.visit(node.orelse)
-        else:
-            output += "else\n" + self.visit(node.orelse)
+            output += "\n" + self.visit(node.orelse)
+        elif node.orelse:
+            output += "\nelse\n" + self.visit(node.orelse)
         return output
 
     @visitor(Label)

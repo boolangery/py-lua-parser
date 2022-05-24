@@ -129,10 +129,10 @@ class LuaOutputTestCase(tests.TestCase):
                 if a == 1 then
                     if a == 2 then
                         if a == 3 then
+                        
                         end
                     end
                 end
-            end
-            """
+            end"""
         )
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
