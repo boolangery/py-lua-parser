@@ -218,13 +218,6 @@ class HTMLStyleVisitor:
 class LuaOutputVisitor:
     def __init__(self, indent_size: int):
         self._indent_size = indent_size
-        self._curr_indent = -self._indent_size
-
-    def _up(self):
-        self._curr_indent += self._indent_size
-
-    def _down(self):
-        self._curr_indent -= self._indent_size
 
     @visitor(str)
     def visit(self, node) -> str:
@@ -252,11 +245,9 @@ class LuaOutputVisitor:
 
     @visitor(Block)
     def visit(self, node: Block) -> str:
-        self._up()
         output = indent(
-            "\n".join([self.visit(n) for n in node.body]), " " * self._curr_indent
+            "\n".join([self.visit(n) for n in node.body]), " " * self._indent_size
         )
-        self._down()
         return output
 
     @visitor(Assign)
@@ -423,10 +414,8 @@ class LuaOutputVisitor:
     @visitor(Table)
     def visit(self, node: Table):
         output = "{\n"
-        self._up()
         for field in node.fields:
-            output += indent(self.visit(field) + ",\n", " " * self._curr_indent)
-        self._down()
+            output += indent(self.visit(field) + ",\n", " " * self._indent_size)
         output += "}"
         return output
 
