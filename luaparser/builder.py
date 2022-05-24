@@ -220,7 +220,7 @@ class Builder:
         self._hidden_handled_stack: List[bool] = []
 
     @property
-    def _LT(self) -> Token:
+    def _LT(self) -> CommonToken:
         """Last token that was consumed in next_i*_* method."""
         return self._stream.LT(-1)
 
@@ -665,9 +665,7 @@ class Builder:
                 last_token=self._LT,
             )
             if self.next_is_rc(Tokens.STRING, False):
-                string = self.parse_lua_str(self.text)
-                string.first_token = self._LT.start
-                string.last_token = self._LT
+                string = self.parse_lua_str(self.text, self._LT)
                 self.success()
                 # noinspection PyTypeChecker
                 return Invoke(None, name, [string])
@@ -705,9 +703,7 @@ class Builder:
 
         self.failure_save()
         if self.next_is_rc(Tokens.STRING, False):
-            string = self.parse_lua_str(self.text)
-            string.first_token = self._LT
-            string.last_token = self._LT
+            string = self.parse_lua_str(self.text, self._LT)
             self.success()
             return string
 
@@ -1410,9 +1406,7 @@ class Builder:
             )
 
         if self.next_is(Tokens.STRING) and self.next_is_rc(Tokens.STRING):
-            string = self.parse_lua_str(self.text)
-            string.first_token = self._LT
-            string.last_token = self._LT
+            string = self.parse_lua_str(self.text, self._LT)
             return string
 
         if self.next_is(Tokens.NIL) and self.next_is_rc(Tokens.NIL):
@@ -1426,7 +1420,7 @@ class Builder:
         return None
 
     @staticmethod
-    def parse_lua_str(lua_str) -> String:
+    def parse_lua_str(lua_str, token: Optional[CommonToken] = None) -> String:
         delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
         p = re.compile(r"^\[=+\[(.*)]=+]")  # nested quote pattern
         # try remove double quote:
@@ -1444,7 +1438,7 @@ class Builder:
         # nested quote
         elif p.match(lua_str):
             lua_str = p.search(lua_str).group(1)
-        return String(lua_str, delimiter)
+        return String(lua_str, delimiter, first_token=token, last_token=token)
 
     def parse_function_literal(self) -> AnonymousFunction or bool:
         self.save()

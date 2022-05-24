@@ -7,7 +7,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from antlr4 import Token
+from antlr4.Token import CommonToken
 
 Comments = Optional[List["Comment"]]
 
@@ -30,8 +30,8 @@ class Node:
         self,
         name: str,
         comments: Comments = None,
-        first_token: Optional[Token] = None,
-        last_token: Optional[Token] = None,
+        first_token: Optional[CommonToken] = None,
+        last_token: Optional[CommonToken] = None,
     ):
         """
 
@@ -45,8 +45,19 @@ class Node:
             comments = []
         self._name: str = name
         self.comments: Comments = comments
-        self._first_token: Optional[Token] = first_token
-        self._last_token: Optional[Token] = last_token
+        self._first_token: Optional[CommonToken] = first_token
+        self._last_token: Optional[CommonToken] = last_token
+
+        # We want to have nodes be serializable with pickle.
+        # To allow that we must not have mutable fields such as streams.
+        # Tokens have streams, create a stream-less copy of tokens.
+        if self._first_token is not None:
+            self._first_token = self._first_token.clone()
+            self._first_token.source = CommonToken.EMPTY_SOURCE
+
+        if self._last_token is not None:
+            self._last_token = self._last_token.clone()
+            self._last_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def display_name(self) -> str:
@@ -60,20 +71,34 @@ class Node:
         return False
 
     @property
-    def first_token(self) -> Optional[Token]:
+    def first_token(self) -> Optional[CommonToken]:
+        """
+        First token of a node.
+
+        Note: Token is disconnected from underline source streams.
+        """
         return self._first_token
 
     @first_token.setter
-    def first_token(self, val):
-        self._first_token = val
+    def first_token(self, val: Optional[CommonToken]):
+        if val is not None:
+            self._first_token = val.clone()
+            self._first_token.source = CommonToken.EMPTY_SOURCE
 
     @property
-    def last_token(self) -> Optional[Token]:
+    def last_token(self) -> Optional[CommonToken]:
+        """
+        Last token of a node.
+
+        Note: Token is disconnected from underline source streams.
+        """
         return self._last_token
 
     @last_token.setter
-    def last_token(self, val):
-        self._last_token = val
+    def last_token(self, val: Optional[CommonToken]):
+        if val is not None:
+            self._last_token = val.clone()
+            self._last_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def start_char(self) -> Optional[int]:
