@@ -143,6 +143,7 @@ class CommentsTestCase(tests.TestCase):
                                         Number(1),
                                         String("foo", StringDelimiter.DOUBLE_QUOTE),
                                         comments=[Comment("-- just a value")],
+                                        between_brackets=True,
                                     ),
                                     Field(
                                         Number(2),
@@ -151,6 +152,7 @@ class CommentsTestCase(tests.TestCase):
                                             Comment("-- last"),
                                             Comment("-- toto value"),
                                         ],
+                                        between_brackets=True,
                                     ),
                                     Field(
                                         Name("Model"),
