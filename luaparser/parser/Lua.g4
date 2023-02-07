@@ -370,6 +370,7 @@ fragment BinaryExponent
 fragment EscapeSequence
   : '\\'
   ( ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | '"' | '\'' | 'z' | LineBreak)
+  | 'u{' HexDigits '}'
   | Digit (Digit Digit?)?
   | 'x' HexDigit HexDigit
   )
