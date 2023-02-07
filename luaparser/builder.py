@@ -1472,6 +1472,7 @@ class Builder:
                     for field in fields:
                         if field.key is None:
                             field.key = Number(array_like_index)
+                            field.between_brackets = True
                             array_like_index += 1
 
                 return Table(fields or [])
