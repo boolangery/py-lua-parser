@@ -39,13 +39,13 @@ class StatementsTestCase(tests.TestCase):
         self.assertEqual(exp, tree)
 
     def test_set_string(self):
-        tree = ast.parse('i="foo bar"')
+        tree = ast.parse('i="foo bar \\u{41}"')
         exp = Chunk(
             Block(
                 [
                     Assign(
                         targets=[Name("i")],
-                        values=[String("foo bar", StringDelimiter.DOUBLE_QUOTE)],
+                        values=[String("foo bar \\u{41}", StringDelimiter.DOUBLE_QUOTE)],
                     )
                 ]
             )
