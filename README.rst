@@ -267,3 +267,14 @@ Will output:
             }
         }
     }
+
+Command line
+==============================================================================
+
+Documentation can be built with Sphinx:
+
+.. code-block::
+
+    $ cd doc
+    $ pip install -r requirements.txt
+    $ make html

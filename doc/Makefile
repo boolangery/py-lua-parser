@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = python3.6 -msphinx
+SPHINXBUILD   = python3 -msphinx
 SPHINXPROJ    = luaparser
 SOURCEDIR     = source
 BUILDDIR      = build
