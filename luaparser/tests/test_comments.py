@@ -210,3 +210,51 @@ class CommentsTestCase(tests.TestCase):
             comments=[Comment("--- @module utils")],
         )
         self.assertEqual(exp, tree)
+
+    def test_comment_chunk_tail(self):
+        tree = ast.parse(
+            textwrap.dedent(
+                """
+            local x = 1
+            -- comments should be visited
+            """
+            )
+        )
+        exp = Chunk(Block(
+            [LocalAssign(targets=[Name("x")], values=[Number(n=1)])],
+            comments=[Comment("-- comments should be visited")]
+        ))
+        self.assertEqual(exp, tree)
+
+    def test_comment_function_tail(self):
+        tree = ast.parse(
+            textwrap.dedent(
+                """
+            function ok()
+              -- comments should be visited
+            end
+            -- another comment
+            """
+            )
+        )
+        exp = Chunk(
+            Block([
+                Function(
+                    name=Name("ok"),
+                    args=[],
+                    body=Block([], comments=[Comment("-- comments should be visited")])
+                )
+            ], comments=[Comment("-- another comment")])
+        )
+        self.assertEqual(exp, tree)
+
+    def test_just_comment(self):
+        tree = ast.parse(
+            textwrap.dedent(
+                """
+            -- just a comment
+            """
+            )
+        )
+        exp = Chunk(Block([], comments=[Comment("-- just a comment")]))
+        self.assertEqual(exp, tree)

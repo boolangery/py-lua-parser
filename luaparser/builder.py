@@ -13,7 +13,7 @@ class SyntaxException(Exception):
     def __init__(self, user_msg, token=None):
         if token:
             message = (
-                "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
+                    "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
             )
         else:
             message = "Error: " + user_msg
@@ -268,7 +268,7 @@ class Builder:
         self._hidden_handled_stack.append(self._hidden_handled)
 
     def next_is_rc(
-        self, type_to_seek: int, hidden_right: bool = True
+            self, type_to_seek: int, hidden_right: bool = True
     ) -> Optional[Token]:
         token = self._stream.LT(1)
         tok_type: int = token.type
@@ -332,58 +332,60 @@ class Builder:
             return False
 
     def handle_hidden_left(self) -> None:
+        if self._hidden_handled:
+            return
         tokens = self._stream.getHiddenTokensToLeft(self._stream.index)
         if tokens:
             for t in tokens:
-                if not self._hidden_handled:
-                    if t.type == Tokens.LINE_COMMENT:
-                        self.comments.append(
-                            Comment(
-                                t.text,
-                                first_token=t,
-                                last_token=t,
-                            )
+                if t.type == Tokens.LINE_COMMENT:
+                    self.comments.append(
+                        Comment(
+                            t.text,
+                            first_token=t,
+                            last_token=t,
                         )
-                    elif t.type == Tokens.COMMENT:
-                        self.comments.append(
-                            Comment(
-                                t.text,
-                                True,
-                                first_token=t,
-                                last_token=t,
-                            )
+                    )
+                elif t.type == Tokens.COMMENT:
+                    self.comments.append(
+                        Comment(
+                            t.text,
+                            True,
+                            first_token=t,
+                            last_token=t,
                         )
-                    elif t.type == Tokens.NEWLINE:
-                        # append n time a None value (indicate newline)
-                        self.comments += t.text.count("\n") * [None]
+                    )
+                elif t.type == Tokens.NEWLINE:
+                    # append n time a None value (indicate newline)
+                    self.comments += t.text.count("\n") * [None]
 
         self._hidden_handled = True
 
     def handle_hidden_right(self) -> None:
+        if self._hidden_handled:
+            return
         tokens = self._stream.getHiddenTokensToRight(self._right_index)
         if tokens:
             for t in tokens:
-                if not self._hidden_handled:
-                    if t.type == Tokens.LINE_COMMENT:
-                        self.comments.append(
-                            Comment(
-                                t.text,
-                                first_token=t,
-                                last_token=t,
-                            )
+                if t.type == Tokens.LINE_COMMENT:
+                    self.comments.append(
+                        Comment(
+                            t.text,
+                            first_token=t,
+                            last_token=t,
                         )
-                    elif t.type == Tokens.COMMENT:
-                        self.comments.append(
-                            Comment(
-                                t.text,
-                                True,
-                                first_token=t,
-                                last_token=t,
-                            )
+                    )
+                elif t.type == Tokens.COMMENT:
+                    self.comments.append(
+                        Comment(
+                            t.text,
+                            True,
+                            first_token=t,
+                            last_token=t,
                         )
-                    elif t.type == Tokens.NEWLINE:
-                        # append n time a None value (indicate newline)
-                        self.comments += t.text.count("\n") * [None]
+                    )
+                elif t.type == Tokens.NEWLINE:
+                    # append n time a None value (indicate newline)
+                    self.comments += t.text.count("\n") * [None]
 
         self._hidden_handled = True
 
@@ -411,7 +413,7 @@ class Builder:
         if idx + 1 < len(self.comments):
             if self.comments[idx] is None and self.comments[idx + 1] is None:
                 # clean list
-                self.comments = self.comments[idx + 2 :]
+                self.comments = self.comments[idx + 2:]
                 return comments
         return []
 
@@ -474,26 +476,31 @@ class Builder:
         stat = self.parse_ret_stat()
         if stat:
             statements.append(stat)
+
+        # force handle trailing hidden tokens after block
+        self._hidden_handled = False
+        self.handle_hidden_right()
         return Block(
             statements,
             first_token=t,
             last_token=statements[-1].last_token if statements else None,
+            comments=self.get_comments(),
         )
 
     def parse_stat(self) -> Statement or None:
         comments = self.get_comments()
 
         stat = (
-            self.parse_assignment()
-            or self.parse_var(is_statement=True)
-            or self.parse_while_stat()
-            or self.parse_repeat_stat()
-            or self.parse_local()
-            or self.parse_goto_stat()
-            or self.parse_if_stat()
-            or self.parse_for_stat()
-            or self.parse_function()
-            or self.parse_label()
+                self.parse_assignment()
+                or self.parse_var(is_statement=True)
+                or self.parse_while_stat()
+                or self.parse_repeat_stat()
+                or self.parse_local()
+                or self.parse_goto_stat()
+                or self.parse_if_stat()
+                or self.parse_for_stat()
+                or self.parse_function()
+                or self.parse_label()
         )
 
         if stat:
@@ -913,7 +920,7 @@ class Builder:
                             step = 1
                             # optional step
                             if self.next_is(Tokens.COMMA) and self.next_is_rc(
-                                Tokens.COMMA
+                                    Tokens.COMMA
                             ):
                                 step = self.parse_expr()
 
@@ -1286,13 +1293,13 @@ class Builder:
             while True:
                 self.save()
                 if self.next_in_rc(
-                    [
-                        Tokens.BITAND,
-                        Tokens.BITOR,
-                        Tokens.BITNOT,
-                        Tokens.BITRSHIFT,
-                        Tokens.BITRLEFT,
-                    ]
+                        [
+                            Tokens.BITAND,
+                            Tokens.BITOR,
+                            Tokens.BITNOT,
+                            Tokens.BITRSHIFT,
+                            Tokens.BITRLEFT,
+                        ]
                 ):
                     op = self.type
                     right = self.parse_unary_expr()
