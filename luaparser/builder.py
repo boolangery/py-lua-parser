@@ -485,7 +485,7 @@ class Builder:
 
         stat = (
             self.parse_assignment()
-            or self.parse_var()
+            or self.parse_var(is_statement=True)
             or self.parse_while_stat()
             or self.parse_repeat_stat()
             or self.parse_local()
@@ -570,7 +570,9 @@ class Builder:
             return lua_vars
         return self.failure()
 
-    def parse_var(self) -> Node or bool:
+    # When is_statement is true, root must be a Statement.
+    def parse_var(self, is_statement=False) -> Node or bool:
+        self.save()
         root = self.parse_callee()
         if root:
             tail = self.parse_tail()
@@ -596,11 +598,13 @@ class Builder:
                 tail = self.parse_tail()
                 if tail:
                     self.handle_hidden_right()
-
+            if is_statement and not isinstance(root, Statement):
+                return self.failure()
             self.handle_hidden_right()
+            self.success()
             return root
 
-        return False
+        return self.failure()
 
     def parse_tail(self) -> Node or bool:
         # do not render last hidden

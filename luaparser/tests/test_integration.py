@@ -109,24 +109,25 @@ class IntegrationTestCase(tests.TestCase):
 
     # Unable to tell apart true indexing vs. syntactic sugar indexing #1
     def test_cont_int_3(self):
-        tree = ast.parse(textwrap.dedent(r"x[a]"))
-        exp = Chunk(
-            Block(
-                [Index(idx=Name("a"), value=Name("x"), notation=IndexNotation.SQUARE)]
-            )
-        )
+        tree = ast.parse(textwrap.dedent(r"print(x[a])"))
+        exp = Chunk(Block([Call(
+            func=Name("print"),
+            args=[Index(idx=Name("a"), value=Name("x"), notation=IndexNotation.SQUARE)],
+        )]))
         self.assertEqual(exp, tree)
 
-        tree = ast.parse(textwrap.dedent(r"""x['a']"""))
-        exp = Chunk(
-            Block(
-                [Index(idx=String("a"), value=Name("x"), notation=IndexNotation.SQUARE)]
-            )
-        )
+        tree = ast.parse(textwrap.dedent(r"""print(x['a'])"""))
+        exp = Chunk(Block([Call(
+            func=Name("print"),
+            args=[Index(idx=String("a"), value=Name("x"), notation=IndexNotation.SQUARE)],
+        )]))
         self.assertEqual(exp, tree)
 
-        tree = ast.parse(textwrap.dedent(r"x.a"))
-        exp = Chunk(Block([Index(idx=Name("a"), value=Name("x"))]))
+        tree = ast.parse(textwrap.dedent(r"print(x.a)"))
+        exp = Chunk(Block([Call(
+            func=Name("print"),
+            args=[Index(idx=Name("a"), value=Name("x"))],
+        )]))
         self.assertEqual(exp, tree)
 
     # luaparser.utils.visitor.VisitorException: No visitor found for class <enum 'StringDelimiter'>

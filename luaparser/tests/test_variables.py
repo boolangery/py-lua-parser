@@ -1,3 +1,6 @@
+import textwrap
+
+from luaparser.builder import SyntaxException
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -8,6 +11,14 @@ class VariablesTestCase(tests.TestCase):
         tree = ast.parse("foo = 42")
         exp = Chunk(Block([Assign(targets=[Name("foo")], values=[Number(n=42)])]))
         self.assertEqual(exp, tree)
+
+    def test_global_var_unassigned(self):
+        src = "var"
+        self.assertRaises(SyntaxException, ast.parse, src)
+        src = "var.foo"
+        self.assertRaises(SyntaxException, ast.parse, src)
+        src = "foo, bar"
+        self.assertRaises(SyntaxException, ast.parse, src)
 
     def test_local_var(self):
         tree = ast.parse("local foo = 42")
