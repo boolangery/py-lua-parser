@@ -8,6 +8,8 @@ import textwrap
 
 
 class ExpressionsTestCase(tests.TestCase):
+    maxDiff = None
+
     """
     3.4.1 – Arithmetic Operators
     """
@@ -111,6 +113,34 @@ class ExpressionsTestCase(tests.TestCase):
                     Assign(
                         targets=[Name("a")],
                         values=[ExpoOp(left=Number(1), right=Number(2))],
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)
+
+    def test_exponentiation_minus(self):
+        tree = ast.parse(r"a = 1^-2")
+        exp = Chunk(
+            Block(
+                [
+                    Assign(
+                        targets=[Name("a")],
+                        values=[ExpoOp(left=Number(1), right=UMinusOp(Number(2)))],
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)
+
+    def test_exponentiation_3(self):
+        tree = ast.parse(r"a = 10^-foo()")
+        exp = Chunk(
+            Block(
+                [
+                    Assign(
+                        targets=[Name("a")],
+                        values=[ExpoOp(left=Number(10), right=UMinusOp(Call(Name("foo"), [])))],
                     )
                 ]
             )
@@ -360,6 +390,9 @@ class ExpressionsTestCase(tests.TestCase):
             )
         )
         self.assertEqual(exp, tree)
+
+    def test_length_op_2(self):
+        ast.parse(r"""len = #{"a","b","c"}""")
 
     """ ----------------------------------------------------------------------- """
     """ 3.4.9 – Table Constructors                                              """

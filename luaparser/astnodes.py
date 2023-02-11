@@ -137,12 +137,12 @@ class Comment(Node):
         self.is_multi_line: bool = is_multi_line
 
 
-class Statement(Node):
-    """Base class for Lua statement."""
-
-
 class Expression(Node):
     """Define a Lua expression."""
+
+
+class Statement(Expression):
+    """Base class for Lua statement."""
 
 
 class Block(Node):
@@ -163,6 +163,10 @@ class Chunk(Node):
     def __init__(self, body: Block, **kwargs):
         super(Chunk, self).__init__("Chunk", **kwargs)
         self.body = body
+
+    def __repr__(self):
+        from luaparser.ast import to_pretty_str
+        return to_pretty_str(self)
 
 
 """

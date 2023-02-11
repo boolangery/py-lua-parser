@@ -1338,7 +1338,7 @@ class Builder:
         self.failure_save()
         if self.next_is_rc(Tokens.LENGTH):
             t: Token = self._LT
-            expr = self.parse_pow_expr()
+            expr = self.parse_expr()
             if expr:
                 self.success()
                 return ULengthOP(expr, first_token=t, last_token=t)
@@ -1374,7 +1374,7 @@ class Builder:
             while True:
                 self.save()
                 if self.next_is_rc(Tokens.POW):
-                    right = self.parse_atom()
+                    right = self.parse_expr()
                     if right:
                         self.success()
                         left = ExpoOp(left, right)
@@ -1401,6 +1401,7 @@ class Builder:
             return atom
         if self.next_is(Tokens.VARARGS) and self.next_is_rc(Tokens.VARARGS):
             return Varargs()
+
 
         if self.next_is(Tokens.NUMBER) and self.next_is_rc(Tokens.NUMBER):
             # TODO: optimize
