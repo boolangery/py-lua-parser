@@ -437,97 +437,125 @@ class LuaOutputVisitor:
 
     @visitor(AnonymousFunction)
     def visit(self, node: AnonymousFunction) -> str:
+        # Modded: Added closed parentheses around the function
         return (
-            "function("
+            "(function("
             + self.visit(node.args)
             + ")\n"
             + self.visit(node.body)
-            + "\nend"
+            + "\nend)"
         )
 
     @visitor(AddOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " + " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)}) + ({self.visit(node.right)})"
+        #return self.visit(node.left) + " + " + self.visit(node.right)
 
     @visitor(SubOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " - " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)}) - ({self.visit(node.right)})"
+        #return self.visit(node.left) + " - " + self.visit(node.right)
 
     @visitor(MultOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " * " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)}) * ({self.visit(node.right)})"
+        #return self.visit(node.left) + " * " + self.visit(node.right)
 
     @visitor(FloatDivOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " / " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)}) / ({self.visit(node.right)})"
+        #return self.visit(node.left) + " / " + self.visit(node.right)
 
     @visitor(FloorDivOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " // " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)}) // ({self.visit(node.right)})"
+        #return self.visit(node.left) + " // " + self.visit(node.right)
 
     @visitor(ModOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " % " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)}) % ({self.visit(node.right)})"
+        #return self.visit(node.left) + " % " + self.visit(node.right)
 
     @visitor(ExpoOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " ^ " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  ^  ({self.visit(node.right)})"
 
     @visitor(BAndOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " & " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  &  ({self.visit(node.right)})"
 
     @visitor(BOrOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " | " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  |  ({self.visit(node.right)})"
 
     @visitor(BXorOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " ~ " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  ~  ({self.visit(node.right)})"
 
     @visitor(BShiftROp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " >> " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  >>  ({self.visit(node.right)})"
 
     @visitor(BShiftLOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " << " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  <<  ({self.visit(node.right)})"
 
     @visitor(LessThanOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " < " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  <  ({self.visit(node.right)})"
 
     @visitor(GreaterThanOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " > " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  >  ({self.visit(node.right)})"
 
     @visitor(LessOrEqThanOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " <= " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  <=  ({self.visit(node.right)})"
 
     @visitor(GreaterOrEqThanOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " >= " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  >=  ({self.visit(node.right)})"
 
     @visitor(EqToOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " == " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  ==  ({self.visit(node.right)})"
 
     @visitor(NotEqToOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " ~= " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  ~=  ({self.visit(node.right)})"
 
     @visitor(AndLoOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " and " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  and  ({self.visit(node.right)})"
 
     @visitor(OrLoOp)
     def visit(self, node) -> str:
-        return self.visit(node.left) + " or " + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})  or  ({self.visit(node.right)})"
 
     @visitor(Concat)
     def visit(self, node) -> str:
-        return self.visit(node.left) + ".." + self.visit(node.right)
+        # Modded: Added closed parentheses to both side of operator
+        return f"({self.visit(node.left)})..({self.visit(node.right)})"
 
     @visitor(UMinusOp)
     def visit(self, node) -> str:
