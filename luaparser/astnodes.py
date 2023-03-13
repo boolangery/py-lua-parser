@@ -141,7 +141,7 @@ class Expression(Node):
     """Define a Lua expression.
 
     Attributes:
-        wrapped (`bool`): The string delimiter
+        wrapped (`bool`): True if expression is between parentheses
     """
     wrapped: bool
 
