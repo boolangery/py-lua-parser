@@ -1115,7 +1115,7 @@ class Builder:
             if expr:
                 if self.next_is_rc(Tokens.CPAR):
                     self.success()
-                    # TODO: create a node to indicate parenthesis
+                    expr.wrapped = True
                     return expr
         self.failure()
         self.save()
@@ -1131,7 +1131,7 @@ class Builder:
     def parse_expr(self) -> Expression or bool:
         return self.parse_or_expr()
 
-    def parse_or_expr(self) -> Expression or bool:
+    def parse_or_expr(self) -> Expression or False:
         self.save()
         left = self.parse_and_expr()
         if left:

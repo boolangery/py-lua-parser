@@ -136,3 +136,7 @@ class LuaOutputTestCase(tests.TestCase):
             end"""
         )
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_parenthesis(self):
+        source = "a = (1 * 2) + 3"
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))

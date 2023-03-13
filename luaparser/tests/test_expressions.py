@@ -239,7 +239,7 @@ class ExpressionsTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("res")],
-                        values=[LessThanOp(left=Number(1), right=Number(2))],
+                        values=[LessThanOp(left=Number(1), right=Number(2), wrapped=True)],
                     )
                 ]
             )
@@ -253,7 +253,7 @@ class ExpressionsTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("res")],
-                        values=[GreaterThanOp(left=Number(1), right=Number(2))],
+                        values=[GreaterThanOp(left=Number(1), right=Number(2), wrapped=True)],
                     )
                 ]
             )
@@ -267,7 +267,7 @@ class ExpressionsTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("res")],
-                        values=[LessOrEqThanOp(left=Number(1), right=Number(2))],
+                        values=[LessOrEqThanOp(left=Number(1), right=Number(2), wrapped=True)],
                     )
                 ]
             )
@@ -281,7 +281,7 @@ class ExpressionsTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("res")],
-                        values=[GreaterOrEqThanOp(left=Number(1), right=Number(2))],
+                        values=[GreaterOrEqThanOp(left=Number(1), right=Number(2), wrapped=True)],
                     )
                 ]
             )
