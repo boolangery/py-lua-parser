@@ -317,7 +317,10 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: Return) -> str:
-        return "return " + self.do_visit(node.values)
+        res = self.do_visit(node.values)
+        if res == "False":
+            return "return"
+        return "return " + res
 
     @visit.register
     def visit(self, node: Fornum) -> str:
