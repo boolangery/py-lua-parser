@@ -749,16 +749,20 @@ class Builder:
     def parse_do_block(self) -> Block or bool:
         self.save()
         if self.next_is_rc(Tokens.DO, False):
+            t: Token = self._LT
             self.handle_hidden_right()
             block = self.parse_block()
             if block:
                 if self.next_is_rc(Tokens.END):
+                    block.first_token = t
+                    block.last_token = self._LT
                     self.success()
                     return block
         return self.failure()
 
     def parse_while_stat(self) -> While or bool:
         self.save()
+        first_token = self._stream.LT(1)
         if self.next_is_rc(Tokens.WHILE):
             self._expected = []
             expr = self.parse_expr()
@@ -767,13 +771,14 @@ class Builder:
                 body = self.parse_do_block()
                 if body:
                     self.success()
-                    return While(expr, body)
+                    return While(expr, body, first_token=first_token, last_token=body.last_token)
             self.abort()
 
         return self.failure()
 
     def parse_repeat_stat(self) -> Repeat or bool:
         self.save()
+        first_token = self._stream.LT(1)
         if self.next_is_rc(Tokens.REPEAT, False):
             self.handle_hidden_right()
             body = self.parse_block()
@@ -782,7 +787,7 @@ class Builder:
                     expr = self.parse_expr()
                     if expr:
                         self.success()
-                        return Repeat(body, expr)
+                        return Repeat(body, expr, first_token=first_token, last_token=expr.last_token)
 
         return self.failure()
 
@@ -851,6 +856,7 @@ class Builder:
 
     def parse_if_stat(self) -> If or bool:
         self.save()
+        first_token = self._stream.LT(1)
         if self.next_is_rc(Tokens.IFTOK):
             self._expected = []
             test = self.parse_expr()
@@ -859,7 +865,7 @@ class Builder:
                     self.handle_hidden_right()
                     body = self.parse_block()
                     if body:
-                        main = If(test, body, None)
+                        main = If(test, body, None, first_token=first_token) # ln 应该传入first token参数
                         root = main
                         while True:  # zero or more
                             orelse = self.parse_elseif_stat()
@@ -872,7 +878,9 @@ class Builder:
                         else_exp = self.parse_else_stat()  # optional
                         if else_exp:
                             root.orelse = else_exp
+                        last_token = self._stream.LT(1)
                         if self.next_is_rc(Tokens.END):
+                            main.last_token = last_token
                             self.success()
                             return main
             self.abort()
@@ -880,6 +888,7 @@ class Builder:
 
     def parse_elseif_stat(self) -> ElseIf or bool:
         self.save()
+        first_token = self._stream.LT(1)
         if self.next_is_rc(Tokens.ELSEIF):
             test = self.parse_expr()
             if test:
@@ -888,7 +897,7 @@ class Builder:
                     body = self.parse_block()
                     if body:
                         self.success()
-                        return ElseIf(test, body, None)  # orelse will be set in parent
+                        return ElseIf(test, body, None, first_token=first_token, last_token=body.last_token)  # orelse will be set in parent
         return self.failure()
 
     def parse_else_stat(self) -> Block or bool:
@@ -904,6 +913,7 @@ class Builder:
 
     def parse_for_stat(self) -> Fornum or Forin or bool:
         self.save()
+        first_token = self._stream.LT(1)
         if self.next_is_rc(Tokens.FOR):
             self.save()
             if self.next_is_rc(Tokens.NAME):
@@ -930,7 +940,7 @@ class Builder:
                                 return self.failure()
                             self.success()
                             self.success()
-                            return Fornum(target, start, stop, step, body)
+                            return Fornum(target, start, stop, step, body, first_token=first_token, last_token=body.last_token)
 
             self.failure_save()
             target = self.parse_name_list()
@@ -941,7 +951,7 @@ class Builder:
                     if body:
                         self.success()
                         self.success()
-                        return Forin(body, iter_expr, target)
+                        return Forin(body, iter_expr, target, first_token=first_token, last_token=body.last_token)
             self.failure()
 
         return self.failure()
@@ -1050,8 +1060,9 @@ class Builder:
         if param_list:
             self.save()
             if self.next_is_rc(Tokens.COMMA) and self.next_is_rc(Tokens.VARARGS):
+                t: Token = self._LT
                 self.success()
-                param_list.append(Varargs())
+                param_list.append(Varargs(first_token=t, last_token=t))
                 return param_list
             else:
                 self.failure()
@@ -1059,8 +1070,9 @@ class Builder:
 
         self.save()
         if self.next_is_rc(Tokens.VARARGS):
+            t: Token = self._LT
             self.success()
-            return [Varargs()]
+            return [Varargs(first_token=t, last_token=t)]
 
         self.success()
         return []
@@ -1103,8 +1115,9 @@ class Builder:
                 last_token=self._LT,
             )
             if self.next_is_rc(Tokens.COLCOL):
+                t: Token = self._LT
                 self.success()
-                return Label(name)
+                return Label(name, first_token=t, last_token=t)
 
         return self.failure()
 
@@ -1141,7 +1154,7 @@ class Builder:
                     right = self.parse_and_expr()
                     if right:
                         self.success()
-                        left = OrLoOp(left, right)
+                        left = OrLoOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     else:
                         self.failure()
                         return self.failure()
@@ -1163,7 +1176,7 @@ class Builder:
                     right = self.parse_rel_expr()
                     if right:
                         self.success()
-                        left = AndLoOp(left, right)
+                        left = AndLoOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     else:
                         self.failure()
                         return self.failure()
@@ -1186,17 +1199,17 @@ class Builder:
                 if right:
                     self.success()
                     if op == Tokens.LT:
-                        left = LessThanOp(left, right)
+                        left = LessThanOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     elif op == Tokens.GT:
-                        left = GreaterThanOp(left, right)
+                        left = GreaterThanOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     elif op == Tokens.LTEQ:
-                        left = LessOrEqThanOp(left, right)
+                        left = LessOrEqThanOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     elif op == Tokens.GTEQ:
-                        left = GreaterOrEqThanOp(left, right)
+                        left = GreaterOrEqThanOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     elif op == Tokens.NEQ:
-                        left = NotEqToOp(left, right)
+                        left = NotEqToOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     elif op == Tokens.EQ:
-                        left = EqToOp(left, right)
+                        left = EqToOp(left, right, first_token=left.first_token, last_token=right.last_token)
                 else:
                     self.failure()
                     return self.failure()
@@ -1217,7 +1230,7 @@ class Builder:
                     right = self.parse_add_expr()
                     if right:
                         self.success()
-                        left = Concat(left, right)
+                        left = Concat(left, right, first_token=left.first_token, last_token=right.last_token)
                     else:
                         self.failure()
                         self.failure()
@@ -1242,9 +1255,9 @@ class Builder:
                     if right:
                         self.success()
                         if op == Tokens.ADD:
-                            left = AddOp(left, right)
+                            left = AddOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.MINUS:
-                            left = SubOp(left, right)
+                            left = SubOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     else:
                         self.failure()
                         return self.failure()
@@ -1268,13 +1281,13 @@ class Builder:
                     if right:
                         self.success()
                         if op == Tokens.MULT:
-                            left = MultOp(left, right)
+                            left = MultOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.DIV:
-                            left = FloatDivOp(left, right)
+                            left = FloatDivOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.MOD:
-                            left = ModOp(left, right)
+                            left = ModOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.FLOOR:
-                            left = FloorDivOp(left, right)
+                            left = FloorDivOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     else:
                         self.failure()
                         return self.failure()
@@ -1306,15 +1319,15 @@ class Builder:
                     if right:
                         self.success()
                         if op == Tokens.BITAND:
-                            left = BAndOp(left, right)
+                            left = BAndOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.BITOR:
-                            left = BOrOp(left, right)
+                            left = BOrOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.BITNOT:
-                            left = BXorOp(left, right)
+                            left = BXorOp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.BITRSHIFT:
-                            left = BShiftROp(left, right)
+                            left = BShiftROp(left, right, first_token=left.first_token, last_token=right.last_token)
                         elif op == Tokens.BITRLEFT:
-                            left = BShiftLOp(left, right)
+                            left = BShiftLOp(left, right, first_token=left.first_token, last_token=right.last_token)
                     else:
                         self.failure()
                         return self.failure()
@@ -1473,10 +1486,12 @@ class Builder:
     def parse_table_constructor(self, render_last_hidden=True) -> Table or bool:
         self.save()
         if self.next_is_rc(Tokens.OBRACE, False):  # do not render right hidden
+            first_token = self._LT
             self.handle_hidden_right()  # render hidden after new level
 
             fields = self.parse_field_list()
             if self.next_is_rc(Tokens.CBRACE, render_last_hidden):
+                last_token = self._LT
                 self.success()
 
                 array_like_index = 1
@@ -1487,7 +1502,7 @@ class Builder:
                             field.between_brackets = True
                             array_like_index += 1
 
-                return Table(fields or [])
+                return Table(fields or [], first_token=first_token, last_token=last_token)
 
         return self.failure()
 
@@ -1526,20 +1541,24 @@ class Builder:
         self.save()
 
         if self.next_is_rc(Tokens.OBRACK):
+            first_token: Token = self._LT
             key = self.parse_expr()
             if key and self.next_is_rc(Tokens.CBRACK):
                 if self.next_is_rc(Tokens.ASSIGN):
                     comments = self.get_comments()
                     value = self.parse_expr()
                     if value:
+                        last_token = value.last_token
                         self.success()
                         return (
-                            Field(key, value, comments=comments, between_brackets=True),
+                            Field(key, value, comments=comments, between_brackets=True,
+                                  first_token=first_token, last_token=last_token),
                             comments,
                         )
 
         self.failure_save()
         if self.next_is_rc(Tokens.NAME):
+            first_token = self._LT
             key = Name(
                 self.text,
                 first_token=self._LT,
@@ -1548,9 +1567,10 @@ class Builder:
             if self.next_is_rc(Tokens.ASSIGN):
                 comments = self.get_comments()
                 value = self.parse_expr()
+                last_token = value.last_token
                 if value:
                     self.success()
-                    return Field(key, value, comments=comments), comments
+                    return Field(key, value, comments=comments, first_token=first_token, last_token=last_token), comments
 
         self.failure_save()
         comments = self.get_comments()
@@ -1559,7 +1579,7 @@ class Builder:
             self.success()
             # noinspection PyTypeChecker
             return (
-                Field(None, value, comments=comments),
+                Field(None, value, comments=comments, first_token=value.first_token, last_token=value.last_token),
                 [],
             )  # Key will be set in parse_table_constructor
 
