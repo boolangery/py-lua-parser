@@ -865,7 +865,7 @@ class Builder:
                     self.handle_hidden_right()
                     body = self.parse_block()
                     if body:
-                        main = If(test, body, None, first_token=first_token) # ln 应该传入first token参数
+                        main = If(test, body, None, first_token=first_token)
                         root = main
                         while True:  # zero or more
                             orelse = self.parse_elseif_stat()
