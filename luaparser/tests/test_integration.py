@@ -285,3 +285,8 @@ class IntegrationTestCase(tests.TestCase):
             )
         )
         self.assertEqual(exp, tree)
+
+    # Brackets are absent in output of AST->source_code conversion #57
+    def test_cont_int_8(self):
+        source = r"result = (a + b) / (c + d)"
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
