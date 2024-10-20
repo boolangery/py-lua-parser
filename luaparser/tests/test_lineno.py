@@ -8,7 +8,6 @@ from luaparser.utils import tests
 
 
 class LineNoTest(tests.TestCase):
-
     def test_while_loop(self):
         lua_code = """
         function func()
