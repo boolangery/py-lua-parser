@@ -270,3 +270,18 @@ class IntegrationTestCase(tests.TestCase):
             )
         )
         self.assertEqual(exp, tree)
+
+    # Bitwise precedence is wrong #33
+    def test_cont_int_7(self):
+        tree = ast.parse(r"a = 1&2+3")
+        exp = Chunk(
+            Block(
+                [
+                    Assign(
+                        targets=[Name("a")],
+                        values=[BAndOp(left=Number(1), right=AddOp(left=Number(2), right=Number(3)))],
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)

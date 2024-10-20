@@ -25,6 +25,12 @@ The package can be installed through `pip`:
 It will install the shell command 'luaparser'.
 
 
+Compatibility with Lua grammar
+------------------------------------------------------------------------------
+
+3.2.1  =>  Lua 5.3 grammar
+3.2.1+ =>  Lua 5.4 grammar
+
 Options
 ------------------------------------------------------------------------------
 

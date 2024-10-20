@@ -24,9 +24,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  *
- * Project      : lua-parser; a Lua 5.2 grammar/parser
+ * Project      : lua-parser; a Lua 5.4 grammar/parser
  * Developed by : Bart Kiers, bart@big-o.nl
- *                Eliott Dumeix, (update to antlr4 + Lua 5.3 grammar)
+ *                Eliott Dumeix, (update to antlr4 + Lua 5.4 grammar)
  */
 grammar Lua;
 
@@ -141,7 +141,23 @@ and_expr
   ;
 
 rel_expr
-  : concat_expr ((LT | GT | LTEQ | GTEQ | NEQ | EQ) concat_expr)?
+  : bitor_expr ((LT | GT | LTEQ | GTEQ | NEQ | EQ) bitor_expr)?
+  ;
+
+bitor_expr
+  : bitnot_expr ((BITOR) bitnot_expr)*
+  ;
+
+bitnot_expr
+  : bitand_expr ((BITNOT) bitand_expr)*
+  ;
+
+bitand_expr
+  : bitshift_expr ((BITAND) bitshift_expr)*
+  ;
+
+bitshift_expr
+  : concat_expr ((BITRSHIFT | BITRLEFT) concat_expr)*
   ;
 
 concat_expr
@@ -153,17 +169,13 @@ add_expr
   ;
 
 mult_expr
-  : bitwise_expr ((MULT | DIV | MOD | FLOOR) bitwise_expr)*
-  ;
-
-bitwise_expr
-  : unary_expr ((BITAND | BITOR | BITNOT | BITRSHIFT | BITRLEFT) unary_expr)*
+  : unary_expr ((MULT | DIV | MOD | FLOOR) unary_expr)*
   ;
 
 unary_expr
-  : MINUS unary_expr
+  : NOT unary_expr
   | LENGTH pow_expr
-  | NOT unary_expr
+  | MINUS unary_expr
   | BITNOT unary_expr
   | pow_expr
   ;

@@ -1177,12 +1177,12 @@ class Builder:
 
     def parse_rel_expr(self) -> Expression or bool:
         self.save()
-        left = self.parse_concat_expr()
+        left = self.parse_bit_or_expr()
         if left:
             self.save()
             if self.next_in_rc(self.REL_OPERATORS):
                 op = self.type
-                right = self.parse_concat_expr()
+                right = self.parse_bit_or_expr()
                 if right:
                     self.success()
                     if op == Tokens.LT:
@@ -1204,6 +1204,103 @@ class Builder:
                 self.failure()
             self.success()
             return left
+        return self.failure()
+
+    def parse_bit_or_expr(self) -> Expression or Literal[False]:
+        self.save()
+        left = self.parse_bit_not_expr()
+        if left:
+            while True:
+                self.save()
+                if self.next_is_rc(Tokens.BITOR):
+                    right = self.parse_bit_not_expr()
+                    if right:
+                        self.success()
+                        left = BOrOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
+                else:
+                    self.failure()
+                    break
+            self.success()
+            return left
+
+        return self.failure()
+
+    def parse_bit_not_expr(self) -> Expression or Literal[False]:
+        self.save()
+        left = self.parse_bit_and_expr()
+        if left:
+            while True:
+                self.save()
+                if self.next_is_rc(Tokens.BITNOT):
+                    right = self.parse_bit_and_expr()
+                    if right:
+                        self.success()
+                        left = BXorOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
+                else:
+                    self.failure()
+                    break
+            self.success()
+            return left
+
+        return self.failure()
+
+    def parse_bit_and_expr(self) -> Expression or Literal[False]:
+        self.save()
+        left = self.parse_bit_shift_expr()
+        if left:
+            while True:
+                self.save()
+                if self.next_is_rc(Tokens.BITAND):
+                    right = self.parse_bit_shift_expr()
+                    if right:
+                        self.success()
+                        left = BAndOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
+                else:
+                    self.failure()
+                    break
+            self.success()
+            return left
+
+        return self.failure()
+
+    def parse_bit_shift_expr(self) -> Expression or bool:
+        self.save()
+        left = self.parse_concat_expr()
+        if left:
+            while True:
+                self.save()
+                if self.next_in_rc(
+                        [
+                            Tokens.BITRSHIFT,
+                            Tokens.BITRLEFT,
+                        ]
+                ):
+                    op = self.type
+                    right = self.parse_concat_expr()
+                    if right:
+                        self.success()
+                        if op == Tokens.BITRSHIFT:
+                            left = BShiftROp(left, right)
+                        elif op == Tokens.BITRLEFT:
+                            left = BShiftLOp(left, right)
+                    else:
+                        self.failure()
+                        return self.failure()
+                else:
+                    self.failure()
+                    break
+            self.success()
+            return left
+
         return self.failure()
 
     def parse_concat_expr(self) -> Expression or bool:
@@ -1258,13 +1355,13 @@ class Builder:
 
     def parse_mult_expr(self) -> Expression or bool:
         self.save()
-        left = self.parse_bitwise_expr()
+        left = self.parse_unary_expr()
         if left:
             while True:
                 self.save()
                 if self.next_in_rc([Tokens.MULT, Tokens.DIV, Tokens.MOD, Tokens.FLOOR]):
                     op = self.type
-                    right = self.parse_bitwise_expr()
+                    right = self.parse_unary_expr()
                     if right:
                         self.success()
                         if op == Tokens.MULT:
@@ -1286,54 +1383,14 @@ class Builder:
 
         return self.failure()
 
-    def parse_bitwise_expr(self) -> Expression or bool:
-        self.save()
-        left = self.parse_unary_expr()
-        if left:
-            while True:
-                self.save()
-                if self.next_in_rc(
-                        [
-                            Tokens.BITAND,
-                            Tokens.BITOR,
-                            Tokens.BITNOT,
-                            Tokens.BITRSHIFT,
-                            Tokens.BITRLEFT,
-                        ]
-                ):
-                    op = self.type
-                    right = self.parse_unary_expr()
-                    if right:
-                        self.success()
-                        if op == Tokens.BITAND:
-                            left = BAndOp(left, right)
-                        elif op == Tokens.BITOR:
-                            left = BOrOp(left, right)
-                        elif op == Tokens.BITNOT:
-                            left = BXorOp(left, right)
-                        elif op == Tokens.BITRSHIFT:
-                            left = BShiftROp(left, right)
-                        elif op == Tokens.BITRLEFT:
-                            left = BShiftLOp(left, right)
-                    else:
-                        self.failure()
-                        return self.failure()
-                else:
-                    self.failure()
-                    break
-            self.success()
-            return left
-
-        return self.failure()
-
     def parse_unary_expr(self) -> Expression or bool:
         self.save()
-        if self.next_is_rc(Tokens.MINUS):
+        if self.next_is_rc(Tokens.NOT):
             t: Token = self._LT
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return UMinusOp(expr, first_token=t, last_token=t)
+                return ULNotOp(expr, first_token=t, last_token=t)
 
         self.failure_save()
         if self.next_is_rc(Tokens.LENGTH):
@@ -1344,12 +1401,12 @@ class Builder:
                 return ULengthOP(expr, first_token=t, last_token=t)
 
         self.failure_save()
-        if self.next_is_rc(Tokens.NOT):
+        if self.next_is_rc(Tokens.MINUS):
             t: Token = self._LT
             expr = self.parse_unary_expr()
             if expr:
                 self.success()
-                return ULNotOp(expr, first_token=t, last_token=t)
+                return UMinusOp(expr, first_token=t, last_token=t)
 
         self.failure_save()
         if self.next_is_rc(Tokens.BITNOT):
