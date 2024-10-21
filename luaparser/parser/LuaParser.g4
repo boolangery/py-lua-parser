@@ -31,21 +31,66 @@ block
 
 stat
     : ';'
-    | varlist '=' explist
+    | assign
     | functioncall
     | label
     | 'break'
-    | 'goto' NAME
-    | 'do' block 'end'
-    | 'while' exp 'do' block 'end'
-    | 'repeat' block 'until' exp
-    | 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end'
-    | 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end'
-    | 'for' namelist 'in' explist 'do' block 'end'
-    | 'function' funcname funcbody
-    | 'local' 'function' NAME funcbody
-    | 'local' attnamelist ('=' explist)?
+    | goto
+    | do
+    | while
+    | repeat
+    | if
+    | for
+    | forin
+    | functiondef
+    | localfunction
+    | localassign
     ;
+
+assign
+	: varlist '=' explist
+	;
+
+goto
+	: 'goto' NAME
+	;
+
+do
+	: 'do' block 'end'
+	;
+
+while
+	: 'while' exp 'do' block 'end'
+	;
+
+repeat
+	: 'repeat' block 'until' exp
+	;
+
+if
+	: 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end'
+	;
+
+for
+	: 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end'
+	;
+
+forin
+	: 'for' namelist 'in' explist 'do' block 'end'
+	;
+
+functiondef
+	: 'function' funcname funcbody
+	;
+
+localfunction
+	: 'local' 'function' NAME funcbody
+	;
+
+localassign
+	: 'local' namelist ('=' explist)?
+	;
+
 
 attnamelist
     : NAME attrib (',' NAME attrib)*
@@ -103,25 +148,33 @@ exp
 // var ::=  Name | prefixexp '[' exp ']' | prefixexp '.' Name
 var
     : NAME
-    | prefixexp ('[' exp ']' | '.' NAME)
+    | prefixexp tail
     ;
 
 // prefixexp ::= var | functioncall | '(' exp ')'
 prefixexp
-    : NAME ('[' exp ']' | '.' NAME)*
-    | functioncall ('[' exp ']' | '.' NAME)*
-    | '(' exp ')' ('[' exp ']' | '.' NAME)*
+    : NAME nestedtail
+    | functioncall nestedtail
+    | '(' exp ')' nestedtail
     ;
 
 // functioncall ::=  prefixexp args | prefixexp ':' Name args;
 functioncall
-    : NAME ('[' exp ']' | '.' NAME)* args
-    | functioncall ('[' exp ']' | '.' NAME)* args
-    | '(' exp ')' ('[' exp ']' | '.' NAME)* args
-    | NAME ('[' exp ']' | '.' NAME)* ':' NAME args
-    | functioncall ('[' exp ']' | '.' NAME)* ':' NAME args
-    | '(' exp ')' ('[' exp ']' | '.' NAME)* ':' NAME args
+    : NAME nestedtail args
+    | functioncall nestedtail args
+    | '(' exp ')' nestedtail args
+    | NAME nestedtail ':' NAME args
+    | functioncall nestedtail ':' NAME args
+    | '(' exp ')' nestedtail ':' NAME args
     ;
+
+tail
+	: ('[' exp ']' | '.' NAME)
+	;
+
+nestedtail
+	: tail*
+	;
 
 args
     : '(' explist? ')'
@@ -129,7 +182,7 @@ args
     | string
     ;
 
-functiondef
+anonfunctiondef
     : 'function' funcbody
     ;
 
