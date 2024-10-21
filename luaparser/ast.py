@@ -1,7 +1,9 @@
 import ast
+import re
 
 from antlr4 import InputStream, CommonTokenStream
 from antlr4.tree.Tree import ParseTreeVisitor, TerminalNodeImpl, ErrorNodeImpl
+from antlr_ast.ast import LexerErrorListener, StrictErrorListener, ConsoleErrorListener
 
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astnodes import *
@@ -156,7 +158,7 @@ class MyVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#explist.
     def visitExplist(self, ctx: LuaParser.ExplistContext):
-        return self.visitChildren(ctx)
+        return [self.visit(exp) for exp in ctx.exp()]
 
     # Visit a parse tree produced by LuaParser#exp.
     def visitExp(self, ctx: LuaParser.ExpContext):
@@ -166,8 +168,18 @@ class MyVisitor(LuaParserVisitor):
             return FalseExpr()
         elif ctx.TRUE():
             return TrueExpr()
+        elif ctx.number():
+            return self.visit(ctx.number())
+        elif ctx.string():
+            return self.visit(ctx.string())
         elif ctx.DDD():
             return Dots()
+        elif ctx.functiondef():
+            return self.visit(ctx.functiondef())
+        elif ctx.prefixexp():
+            return self.visit(ctx.prefixexp())
+        elif ctx.tableconstructor():
+            return self.visit(ctx.tableconstructor())
         else:
             expressions = ctx.exp()
 
@@ -346,17 +358,42 @@ class MyVisitor(LuaParserVisitor):
             number,
         )
 
+    # Visit a parse tree produced by LuaParser#string.
+    def visitString(self, ctx: LuaParser.StringContext):
+        lua_str = ctx.getText()
 
-# Visit a parse tree produced by LuaParser#string.
-def visitString(self, ctx: LuaParser.StringContext):
-    return self.visitChildren(ctx)
+        delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
+        p = re.compile(r"^\[=+\[(.*)]=+]")  # nested quote pattern
+        # try remove double quote:
+        if lua_str.startswith('"') and lua_str.endswith('"'):
+            lua_str = lua_str[1:-1]
+            delimiter = StringDelimiter.DOUBLE_QUOTE
+        # try remove single quote:
+        elif lua_str.startswith("'") and lua_str.endswith("'"):
+            lua_str = lua_str[1:-1]
+            delimiter = StringDelimiter.SINGLE_QUOTE
+        # try remove double square bracket:
+        elif lua_str.startswith("[[") and lua_str.endswith("]]"):
+            lua_str = lua_str[2:-2]
+            delimiter = StringDelimiter.DOUBLE_SQUARE
+        # nested quote
+        elif p.match(lua_str):
+            lua_str = p.search(lua_str).group(1)
+
+        return String(lua_str, delimiter)
 
 
 def parse(source: str) -> Chunk:
     """Parse Lua source to a Chunk."""
     lexer = LuaLexer(InputStream(source))
-    stream = CommonTokenStream(lexer)
-    parser = LuaParser(stream)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(ConsoleErrorListener())
+    lexer.addErrorListener(LexerErrorListener())
+
+    token_stream = CommonTokenStream(lexer)
+    parser = LuaParser(token_stream)
+    parser.addErrorListener(ConsoleErrorListener())
+    parser.addErrorListener(StrictErrorListener())
     tree = parser.start_()
 
     if parser.getNumberOfSyntaxErrors() > 0:
