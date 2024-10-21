@@ -253,13 +253,13 @@ class MyVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#prefixexp.
     def visitPrefixexp(self, ctx: LuaParser.PrefixexpContext):
-        tail = self.visit(ctx.nestedtail())
+        nested_tail = self.visit(ctx.nestedtail())
 
         if ctx.NAME():  # NAME nestedtail
-            if isinstance(tail, Index):
-                tail.value = self.visit(ctx.NAME())
-                return tail
-            elif tail is None:
+            if isinstance(nested_tail, Index):
+                nested_tail.value = self.visit(ctx.NAME())
+                return nested_tail
+            elif nested_tail is None:
                 return Name(ctx.NAME().getText())
             else:
                 raise Exception("Invalid tail type")
@@ -274,22 +274,41 @@ class MyVisitor(LuaParserVisitor):
     # Visit a parse tree produced by LuaParser#functioncall.
     def visitFunctioncall(self, ctx: LuaParser.FunctioncallContext):
         args = self.visit(ctx.args())
+        args_with_parenthesis = False
+
+        # Trick to detect parenthesis :
+        if isinstance(args, Call):
+            args = args.args
+            args_with_parenthesis = True
+
         names = ctx.NAME()
-
-        tail = self.visit(ctx.nestedtail())
-
+        nested_tail = self.visit(ctx.nestedtail())
         if len(names) == 1:  # NAME nestedtail args
             name = self.visit(names[0])
 
-            if isinstance(tail, Call):
-                tail.func = name
-            elif isinstance(tail, Index):
-                tail.value = name
-            elif isinstance(tail, Invoke):
-                tail.source = name
-            elif tail is None:
+            if ctx.OP() and ctx.CP(): # '(' exp ')' nestedtail ':' NAME args
+                raise NotImplementedError("functioncall not implemented")
+            elif ctx.functioncall() and ctx.COL(): # functioncall nestedtail ':' NAME args
+                function_call = self.visit(ctx.functioncall())
+                return Invoke(source=function_call, func=name, args=_listify(args))
+
+            if isinstance(nested_tail, Call):
+                nested_tail.func = name
+            elif isinstance(nested_tail, Index):
+                nested_tail.value = name
+            elif isinstance(nested_tail, Invoke):
+                nested_tail.source = name
+            elif nested_tail is None:
                 return Call(name,_listify(args))
-            return Call(tail, _listify(args))
+            return Call(nested_tail, _listify(args))
+        elif len(names) == 2: # NAME nestedtail ':' NAME args
+            source = self.visit(names[0])
+            func = self.visit(names[1])
+
+            return Invoke(source, func, _listify(args))
+        else: # zero names
+            if ctx.OP() and ctx.CP(): # '(' exp ')' nestedtail args
+                raise Exception("functioncall not implemented")
 
         return Call(
             func=ctx.NAME(),
