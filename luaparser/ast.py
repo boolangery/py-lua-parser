@@ -259,6 +259,8 @@ class MyVisitor(LuaParserVisitor):
             if isinstance(tail, Index):
                 tail.value = self.visit(ctx.NAME())
                 return tail
+            elif tail is None:
+                return Name(ctx.NAME().getText())
             else:
                 raise Exception("Invalid tail type")
         elif ctx.functioncall():  # functioncall nestedtail
@@ -274,14 +276,20 @@ class MyVisitor(LuaParserVisitor):
         args = self.visit(ctx.args())
         names = ctx.NAME()
 
-        tails = None
-        if ctx.tail():
-            tails = [self.visit(t) for t in ctx.tail()]
+        tail = self.visit(ctx.nestedtail())
 
-        if len(names) == 1:  # NAME tail* args
-            if isinstance(args, Call):
-                args.func = self.visit(names[0])
-                return args
+        if len(names) == 1:  # NAME nestedtail args
+            name = self.visit(names[0])
+
+            if isinstance(tail, Call):
+                tail.func = name
+            elif isinstance(tail, Index):
+                tail.value = name
+            elif isinstance(tail, Invoke):
+                tail.source = name
+            elif tail is None:
+                return Call(name,_listify(args))
+            return Call(tail, _listify(args))
 
         return Call(
             func=ctx.NAME(),
@@ -292,7 +300,34 @@ class MyVisitor(LuaParserVisitor):
         return self.visitChildren(ctx)
 
     def visitNestedtail(self, ctx: LuaParser.NestedtailContext):
-        return self.visitChildren(ctx)
+        if ctx.children is None:
+            return None
+
+        root = None # parent root will be set in caller
+        tail = self.visit(ctx.tail(0)) # root tail
+        i = 1
+        while tail:
+            if isinstance(tail, Call):
+                tail.func = root
+            elif isinstance(tail, Index):
+                tail.value = root
+            elif isinstance(tail, Invoke):
+                tail.source = root
+            else:
+                args = _listify(tail)
+                tail = Call(
+                    root,
+                    args,
+                    first_token=root.first_token,
+                    last_token=args[-1].last_token if args else None,
+                )
+            root = tail
+            tail_node = ctx.tail(i)
+            if not tail_node:
+                break
+            tail = self.visit(tail_node)
+            i += 1
+        return root
 
     def visitTail(self, ctx: LuaParser.TailContext):
         if ctx.OB() and ctx.CB():
@@ -303,20 +338,23 @@ class MyVisitor(LuaParserVisitor):
             )
         else:
             return Index(
-                idx=Name(self.visit(ctx.NAME())),
+                idx=self.visit(ctx.NAME()),
                 value=Name(""),  # value must be set in parent
                 notation=IndexNotation.DOT,
             )
 
     # Visit a parse tree produced by LuaParser#args.
     def visitArgs(self, ctx: LuaParser.ArgsContext):
-        if ctx.OP() and ctx.CP():
+        if ctx.OP() and ctx.CP():  # '(' explist? ')'
             exp_list = []
             if ctx.explist():
                 exp_list = self.visit(ctx.explist())
 
             return Call(None, exp_list)
-        return self.visitChildren(ctx)
+        elif ctx.tableconstructor():  # tableconstructor
+            return self.visit(ctx.tableconstructor())
+        else:  # string
+            return self.visit(ctx.string())
 
     # Visit a parse tree produced by LuaParser#functiondef.
     def visitFunctiondef(self, ctx: LuaParser.FunctiondefContext):
@@ -332,15 +370,36 @@ class MyVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#tableconstructor.
     def visitTableconstructor(self, ctx: LuaParser.TableconstructorContext):
-        return self.visitChildren(ctx)
+        if ctx.fieldlist():
+            fields = self.visit(ctx.fieldlist())
+
+            array_like_index = 1
+            if fields:  # optional
+                for field in fields:
+                    if field.key is None:
+                        field.key = Number(array_like_index)
+                        field.between_brackets = True
+                        array_like_index += 1
+            return Table(fields)
+        return Table([])
 
     # Visit a parse tree produced by LuaParser#fieldlist.
     def visitFieldlist(self, ctx: LuaParser.FieldlistContext):
-        return self.visitChildren(ctx)
+        return [self.visit(f) for f in ctx.field()]
 
     # Visit a parse tree produced by LuaParser#field.
     def visitField(self, ctx: LuaParser.FieldContext):
-        return self.visitChildren(ctx)
+        if ctx.OB():  # '[' exp ']' '=' exp
+            key = self.visit(ctx.exp(0))
+            value = self.visit(ctx.exp(1))
+            return Field(key, value, between_brackets=True)
+        elif ctx.NAME():  # NAME '=' exp
+            key = Name(ctx.NAME().getText())
+            value = self.visit(ctx.exp(0))
+            return Field(key, value)
+        else:  # exp
+            # Key will be set in parent call:
+            return Field(None, self.visit(ctx.exp(0)))
 
     # Visit a parse tree produced by LuaParser#fieldsep.
     def visitFieldsep(self, ctx: LuaParser.FieldsepContext):

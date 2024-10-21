@@ -369,7 +369,7 @@ class LuaLexer(LuaLexerBase):
 
     def COMMENT_action(self, localctx:RuleContext , actionIndex:int):
         if actionIndex == 0:
-             this.HandleComment(); 
+             self.HandleComment();
      
 
     def sempred(self, localctx:RuleContext, ruleIndex:int, predIndex:int):
@@ -385,7 +385,7 @@ class LuaLexer(LuaLexerBase):
 
     def SHEBANG_sempred(self, localctx:RuleContext, predIndex:int):
             if predIndex == 0:
-                return  this.IsLine1Col0() 
+                return  self.IsLine1Col0()
          
 
 
