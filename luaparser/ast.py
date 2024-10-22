@@ -2,13 +2,12 @@ import ast
 import re
 
 from antlr4 import InputStream, CommonTokenStream
-from antlr4.tree.Tree import ParseTreeVisitor, TerminalNodeImpl, ErrorNodeImpl
+from antlr4.tree.Tree import TerminalNodeImpl, ErrorNodeImpl
 from antlr_ast.ast import LexerErrorListener, StrictErrorListener, ConsoleErrorListener
 
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.astnodes import *
 from luaparser import printers
-from luaparser.builder import Builder
 from luaparser.parser.LuaParser import LuaParser
 from luaparser.parser.LuaParserVisitor import LuaParserVisitor
 from luaparser.utils.visitor import *
@@ -253,13 +252,13 @@ class MyVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#prefixexp.
     def visitPrefixexp(self, ctx: LuaParser.PrefixexpContext):
-        nested_tail = self.visit(ctx.nestedtail())
+        tail = self.visitAllTails(ctx.tail())
 
         if ctx.NAME():  # NAME nestedtail
-            if isinstance(nested_tail, Index):
-                nested_tail.value = self.visit(ctx.NAME())
-                return nested_tail
-            elif nested_tail is None:
+            if isinstance(tail, Index):
+                tail.value = self.visit(ctx.NAME())
+                return tail
+            elif tail is None:
                 return Name(ctx.NAME().getText())
             else:
                 raise Exception("Invalid tail type")
@@ -274,40 +273,41 @@ class MyVisitor(LuaParserVisitor):
     # Visit a parse tree produced by LuaParser#functioncall.
     def visitFunctioncall(self, ctx: LuaParser.FunctioncallContext):
         args = self.visit(ctx.args())
-        args_with_parenthesis = False
+        call_style = CallStyle.NO_PARENTHESIS
 
         # Trick to detect parenthesis :
         if isinstance(args, Call):
             args = args.args
-            args_with_parenthesis = True
+            call_style = CallStyle.DEFAULT
 
         names = ctx.NAME()
-        nested_tail = self.visit(ctx.nestedtail())
+        tail = self.visitAllTails(ctx.tail())
         if len(names) == 1:  # NAME nestedtail args
             name = self.visit(names[0])
 
-            if ctx.OP() and ctx.CP(): # '(' exp ')' nestedtail ':' NAME args
+            if ctx.OP() and ctx.CP():  # '(' exp ')' nestedtail ':' NAME args
                 raise NotImplementedError("functioncall not implemented")
-            elif ctx.functioncall() and ctx.COL(): # functioncall nestedtail ':' NAME args
+            elif ctx.functioncall() and ctx.COL():  # functioncall nestedtail ':' NAME args
                 function_call = self.visit(ctx.functioncall())
                 return Invoke(source=function_call, func=name, args=_listify(args))
 
-            if isinstance(nested_tail, Call):
-                nested_tail.func = name
-            elif isinstance(nested_tail, Index):
-                nested_tail.value = name
-            elif isinstance(nested_tail, Invoke):
-                nested_tail.source = name
-            elif nested_tail is None:
-                return Call(name,_listify(args))
-            return Call(nested_tail, _listify(args))
-        elif len(names) == 2: # NAME nestedtail ':' NAME args
+            if isinstance(tail, Call):
+                tail.func = name
+                tail.style = call_style
+            elif isinstance(tail, Index):
+                tail.value = name
+            elif isinstance(tail, Invoke):
+                tail.source = name
+            elif tail is None:
+                return Call(name, _listify(args), style=call_style)
+            return Call(tail, _listify(args), style=call_style)
+        elif len(names) == 2:  # NAME nestedtail ':' NAME args
             source = self.visit(names[0])
             func = self.visit(names[1])
 
             return Invoke(source, func, _listify(args))
-        else: # zero names
-            if ctx.OP() and ctx.CP(): # '(' exp ')' nestedtail args
+        else:  # zero names
+            if ctx.OP() and ctx.CP():  # '(' exp ')' nestedtail args
                 raise Exception("functioncall not implemented")
 
         return Call(
@@ -318,12 +318,12 @@ class MyVisitor(LuaParserVisitor):
     def visitAnonfunctiondef(self, ctx: LuaParser.AnonfunctiondefContext):
         return self.visitChildren(ctx)
 
-    def visitNestedtail(self, ctx: LuaParser.NestedtailContext):
-        if ctx.children is None:
+    def visitAllTails(self, ctx: List[LuaParser.TailContext]):
+        if not ctx:
             return None
 
-        root = None # parent root will be set in caller
-        tail = self.visit(ctx.tail(0)) # root tail
+        root = None  # parent root will be set in caller
+        tail = self.visit(ctx[0])  # root tail
         i = 1
         while tail:
             if isinstance(tail, Call):
@@ -341,7 +341,7 @@ class MyVisitor(LuaParserVisitor):
                     last_token=args[-1].last_token if args else None,
                 )
             root = tail
-            tail_node = ctx.tail(i)
+            tail_node = ctx[i]
             if not tail_node:
                 break
             tail = self.visit(tail_node)
@@ -374,10 +374,6 @@ class MyVisitor(LuaParserVisitor):
             return self.visit(ctx.tableconstructor())
         else:  # string
             return self.visit(ctx.string())
-
-    # Visit a parse tree produced by LuaParser#functiondef.
-    def visitFunctiondef(self, ctx: LuaParser.FunctiondefContext):
-        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by LuaParser#funcbody.
     def visitFuncbody(self, ctx: LuaParser.FuncbodyContext):

@@ -149,11 +149,6 @@ class LuaParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by LuaParser#nestedtail.
-    def visitNestedtail(self, ctx:LuaParser.NestedtailContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by LuaParser#args.
     def visitArgs(self, ctx:LuaParser.ArgsContext):
         return self.visitChildren(ctx)

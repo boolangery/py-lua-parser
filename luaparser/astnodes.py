@@ -27,11 +27,11 @@ class Node:
     """Base class for AST node."""
 
     def __init__(
-        self,
-        name: str,
-        comments: Comments = None,
-        first_token: Optional[CommonToken] = None,
-        last_token: Optional[CommonToken] = None,
+            self,
+            name: str,
+            comments: Comments = None,
+            first_token: Optional[CommonToken] = None,
+            last_token: Optional[CommonToken] = None,
     ):
         """
 
@@ -146,10 +146,10 @@ class Expression(Node):
     wrapped: bool
 
     def __init__(
-        self,
-        name: str,
-        wrapped=False,
-        **kwargs,
+            self,
+            name: str,
+            wrapped=False,
+            **kwargs,
     ):
         super(Expression, self).__init__(name, **kwargs)
         self.wrapped = wrapped
@@ -218,11 +218,11 @@ class Index(Lhs):
     """
 
     def __init__(
-        self,
-        idx: Expression,
-        value: Name,
-        notation: IndexNotation = IndexNotation.DOT,
-        **kwargs
+            self,
+            idx: Expression,
+            value: Name,
+            notation: IndexNotation = IndexNotation.DOT,
+            **kwargs
     ):
         super(Index, self).__init__("Index", **kwargs)
         self.idx: Name = idx
@@ -329,7 +329,7 @@ class If(Statement):
     """
 
     def __init__(
-        self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
+            self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
     ):
         super().__init__("If", **kwargs)
         self.test: Expression = test
@@ -399,13 +399,13 @@ class Fornum(Statement):
     """
 
     def __init__(
-        self,
-        target: Name,
-        start: Expression,
-        stop: Expression,
-        step: Expression,
-        body: Block,
-        **kwargs
+            self,
+            target: Name,
+            start: Expression,
+            stop: Expression,
+            step: Expression,
+            body: Block,
+            **kwargs
     ):
         super(Fornum, self).__init__("Fornum", **kwargs)
         self.target: Name = target
@@ -425,12 +425,17 @@ class Forin(Statement):
     """
 
     def __init__(
-        self, body: Block, iter: List[Expression], targets: List[Name], **kwargs
+            self, body: Block, iter: List[Expression], targets: List[Name], **kwargs
     ):
         super(Forin, self).__init__("Forin", **kwargs)
         self.body: Block = body
         self.iter: List[Expression] = iter
         self.targets: List[Name] = targets
+
+
+class CallStyle(Enum):
+    DEFAULT = 0  # print("foo")
+    NO_PARENTHESIS = 1  # print "foo"
 
 
 class Call(Statement):
@@ -439,12 +444,18 @@ class Call(Statement):
     Attributes:
         func (`Expression`): Function to call.
         args (`list<Expression>`): Function call arguments.
+        style (`CallStyle`): Call style.
     """
 
-    def __init__(self, func: Expression, args: List[Expression], **kwargs):
+    def __init__(self,
+                 func: Expression,
+                 args: List[Expression],
+                 style: CallStyle = CallStyle.DEFAULT,
+                 **kwargs):
         super(Call, self).__init__("Call", **kwargs)
         self.func: Expression = func
         self.args: List[Expression] = args
+        self.style: CallStyle = style
 
 
 class Invoke(Statement):
@@ -457,7 +468,7 @@ class Invoke(Statement):
     """
 
     def __init__(
-        self, source: Expression, func: Expression, args: List[Expression], **kwargs
+            self, source: Expression, func: Expression, args: List[Expression], **kwargs
     ):
         super(Invoke, self).__init__("Invoke", **kwargs)
         self.source: Expression = source
@@ -508,12 +519,12 @@ class Method(Statement):
     """
 
     def __init__(
-        self,
-        source: Expression,
-        name: Expression,
-        args: List[Expression],
-        body: Block,
-        **kwargs
+            self,
+            source: Expression,
+            name: Expression,
+            args: List[Expression],
+            body: Block,
+            **kwargs
     ):
         super(Method, self).__init__("Method", **kwargs)
         self.source: Expression = source
@@ -589,10 +600,10 @@ class String(Expression):
     """
 
     def __init__(
-        self,
-        s: str,
-        delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
-        **kwargs
+            self,
+            s: str,
+            delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
+            **kwargs
     ):
         super(String, self).__init__("String", **kwargs)
         self.s: str = s
@@ -608,11 +619,11 @@ class Field(Expression):
     """
 
     def __init__(
-        self,
-        key: Expression,
-        value: Expression,
-        between_brackets: bool = False,
-        **kwargs
+            self,
+            key: Expression,
+            value: Expression,
+            between_brackets: bool = False,
+            **kwargs
     ):
         super().__init__("Field", **kwargs)
         self.key: Expression = key

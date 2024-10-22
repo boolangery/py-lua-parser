@@ -260,15 +260,6 @@ class LuaParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#nestedtail.
-    def enterNestedtail(self, ctx:LuaParser.NestedtailContext):
-        pass
-
-    # Exit a parse tree produced by LuaParser#nestedtail.
-    def exitNestedtail(self, ctx:LuaParser.NestedtailContext):
-        pass
-
-
     # Enter a parse tree produced by LuaParser#args.
     def enterArgs(self, ctx:LuaParser.ArgsContext):
         pass

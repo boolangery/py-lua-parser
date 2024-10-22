@@ -153,27 +153,23 @@ var
 
 // prefixexp ::= var | functioncall | '(' exp ')'
 prefixexp
-    : NAME nestedtail
-    | functioncall nestedtail
-    | '(' exp ')' nestedtail
+    : NAME tail*
+    | functioncall tail*
+    | '(' exp ')' tail*
     ;
 
 // functioncall ::=  prefixexp args | prefixexp ':' Name args;
 functioncall
-    : NAME nestedtail args
-    | functioncall nestedtail args
-    | '(' exp ')' nestedtail args
-    | NAME nestedtail ':' NAME args
-    | functioncall nestedtail ':' NAME args
-    | '(' exp ')' nestedtail ':' NAME args
+    : NAME tail* args
+    | functioncall tail* args
+    | '(' exp ')' tail* args
+    | NAME tail* ':' NAME args
+    | functioncall tail* ':' NAME args
+    | '(' exp ')' tail* ':' NAME args
     ;
 
 tail
 	: ('[' exp ']' | '.' NAME)
-	;
-
-nestedtail
-	: tail*
 	;
 
 args
