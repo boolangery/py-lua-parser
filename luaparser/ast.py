@@ -13,7 +13,7 @@ from luaparser.parser.LuaParserVisitor import LuaParserVisitor
 from luaparser.utils.visitor import *
 from antlr4.error.ErrorListener import ErrorListener
 import json
-from typing import Generator
+from typing import Generator, Tuple
 
 
 def _listify(obj):
@@ -124,7 +124,9 @@ class MyVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#stat_function.
     def visitStat_function(self, ctx: LuaParser.Stat_functionContext):
-        return self.visitChildren(ctx)
+        func_name = self.visitFuncname(ctx.funcname())
+        param_list, block = self.visitFuncbody(ctx.funcbody())
+        return Function(func_name, param_list, block)
 
     # Visit a parse tree produced by LuaParser#stat_localfunction.
     def visitStat_localfunction(self, ctx: LuaParser.Stat_localfunctionContext):
@@ -142,7 +144,7 @@ class MyVisitor(LuaParserVisitor):
         return LocalAssign(targets=att_name_list, values=exp_list)
 
     # Visit a parse tree produced by LuaParser#functiondef.
-    def visitFunctiondef(self, ctx: LuaParser.FunctiondefContext):
+    def visitFunctiondef(self, ctx: LuaParser.FunctiondefContext) -> AnonymousFunction:
         param_list, block = self.visitFuncbody(ctx.funcbody())
         return AnonymousFunction(param_list, block)
 
@@ -151,7 +153,7 @@ class MyVisitor(LuaParserVisitor):
         return [self.visit(a) for a in ctx.nameattrib()]
 
     def visitNameattrib(self, ctx: LuaParser.NameattribContext):
-        name = self.visit(ctx.NAME())
+        name = self.visitNamelist(ctx.NAME())
         if ctx.attrib():
             attrib = self.visit(ctx.attrib())
             name.attribute = attrib
@@ -171,14 +173,28 @@ class MyVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#funcname.
     def visitFuncname(self, ctx: LuaParser.FuncnameContext):
-        return self.visitChildren(ctx)
+        names = ctx.NAME()
+        has_invoke = ctx.COL() is not None
+        root = self.visit(names[0])
+        until = len(names) - 1 if has_invoke else len(names)
+        for i in range(1, until):
+            root = Index(
+                idx=self.visit(names[i]),
+                value=root,
+                notation=IndexNotation.DOT,
+            )
+
+        if has_invoke:
+            return Invoke(root, self.visit(names[-1]), [])
+
+        return root
 
     # Visit a parse tree produced by LuaParser#varlist.
     def visitVarlist(self, ctx: LuaParser.VarlistContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by LuaParser#namelist.
-    def visitNamelist(self, ctx: LuaParser.NamelistContext):
+    def visitNamelist(self, ctx: LuaParser.NamelistContext) -> List[Name]:
         return [self.visit(n) for n in ctx.NAME()]
 
     # Visit a parse tree produced by LuaParser#explist.
@@ -401,15 +417,15 @@ class MyVisitor(LuaParserVisitor):
             return False, self.visit(ctx.string())
 
     # Visit a parse tree produced by LuaParser#funcbody.
-    def visitFuncbody(self, ctx: LuaParser.FuncbodyContext):
-        par_list = self.visit(ctx.parlist())
+    def visitFuncbody(self, ctx: LuaParser.FuncbodyContext) -> Tuple[List[Expression], Block]:
+        par_list = self.visitParlist(ctx.parlist())
         block = self.visit(ctx.block())
         return par_list, block
 
     # Visit a parse tree produced by LuaParser#parlist.
-    def visitParlist(self, ctx: LuaParser.ParlistContext):
+    def visitParlist(self, ctx: LuaParser.ParlistContext) -> List[Expression]:
         if ctx.namelist():
-            name_list = self.visit(ctx.namelist())
+            name_list: List[Expression] = self.visitNamelist(ctx.namelist())
         else:
             name_list = []
 

@@ -564,7 +564,7 @@ class StatementsTestCase(tests.TestCase):
         )
         self.assertEqual(exp, tree)
 
-     def test_attr(self):
+    def test_attr(self):
         tree = ast.parse(
             textwrap.dedent(
                 """local x <const> = 42"""
