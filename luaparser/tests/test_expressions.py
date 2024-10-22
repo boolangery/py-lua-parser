@@ -584,6 +584,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Call(
                         func=Name("print"),
                         args=[String("hello", StringDelimiter.DOUBLE_QUOTE)],
+                        style=CallStyle.NO_PARENTHESIS,
                     )
                 ]
             )
@@ -592,13 +593,13 @@ class ExpressionsTestCase(tests.TestCase):
 
     def test_function_call_no_par_table(self):
         tree = ast.parse(r"print {}")
-        exp = Chunk(Block([Call(func=Name("print"), args=[Table([])])]))
+        exp = Chunk(Block([Call(func=Name("print"), args=[Table([])], style=CallStyle.NO_PARENTHESIS)]))
         self.assertEqual(exp, tree)
 
     def test_index_function_call(self):
         tree = ast.parse(r"foo.print {}")
         exp = Chunk(
-            Block([Call(func=Index(Name("print"), Name("foo")), args=[Table([])])])
+            Block([Call(func=Index(Name("print"), Name("foo")), args=[Table([])], style=CallStyle.NO_PARENTHESIS)])
         )
         self.assertEqual(exp, tree)
 
@@ -654,7 +655,7 @@ class ExpressionsTestCase(tests.TestCase):
     """ ----------------------------------------------------------------------- """
 
     def test_function_def_anonymous(self):
-        tree = ast.parse(r"f = function() local a end")
+        tree = ast.parse(r"f = function() local a <const> end")
         exp = Chunk(
             Block(
                 [
@@ -664,7 +665,7 @@ class ExpressionsTestCase(tests.TestCase):
                             AnonymousFunction(
                                 args=[],
                                 body=Block(
-                                    [LocalAssign(targets=[Name("a")], values=[])]
+                                    [LocalAssign(targets=[Name("a", attribute=Attribute("const"))], values=[])]
                                 ),
                             )
                         ],

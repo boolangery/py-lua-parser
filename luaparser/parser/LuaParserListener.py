@@ -35,111 +35,129 @@ class LuaParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#stat.
-    def enterStat(self, ctx:LuaParser.StatContext):
+    # Enter a parse tree produced by LuaParser#stat_empty.
+    def enterStat_empty(self, ctx:LuaParser.Stat_emptyContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#stat.
-    def exitStat(self, ctx:LuaParser.StatContext):
-        pass
-
-
-    # Enter a parse tree produced by LuaParser#assign.
-    def enterAssign(self, ctx:LuaParser.AssignContext):
-        pass
-
-    # Exit a parse tree produced by LuaParser#assign.
-    def exitAssign(self, ctx:LuaParser.AssignContext):
+    # Exit a parse tree produced by LuaParser#stat_empty.
+    def exitStat_empty(self, ctx:LuaParser.Stat_emptyContext):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#goto.
-    def enterGoto(self, ctx:LuaParser.GotoContext):
+    # Enter a parse tree produced by LuaParser#stat_assignment.
+    def enterStat_assignment(self, ctx:LuaParser.Stat_assignmentContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#goto.
-    def exitGoto(self, ctx:LuaParser.GotoContext):
-        pass
-
-
-    # Enter a parse tree produced by LuaParser#do.
-    def enterDo(self, ctx:LuaParser.DoContext):
-        pass
-
-    # Exit a parse tree produced by LuaParser#do.
-    def exitDo(self, ctx:LuaParser.DoContext):
+    # Exit a parse tree produced by LuaParser#stat_assignment.
+    def exitStat_assignment(self, ctx:LuaParser.Stat_assignmentContext):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#while.
-    def enterWhile(self, ctx:LuaParser.WhileContext):
+    # Enter a parse tree produced by LuaParser#stat_functioncall.
+    def enterStat_functioncall(self, ctx:LuaParser.Stat_functioncallContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#while.
-    def exitWhile(self, ctx:LuaParser.WhileContext):
-        pass
-
-
-    # Enter a parse tree produced by LuaParser#repeat.
-    def enterRepeat(self, ctx:LuaParser.RepeatContext):
-        pass
-
-    # Exit a parse tree produced by LuaParser#repeat.
-    def exitRepeat(self, ctx:LuaParser.RepeatContext):
+    # Exit a parse tree produced by LuaParser#stat_functioncall.
+    def exitStat_functioncall(self, ctx:LuaParser.Stat_functioncallContext):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#if.
-    def enterIf(self, ctx:LuaParser.IfContext):
+    # Enter a parse tree produced by LuaParser#stat_label.
+    def enterStat_label(self, ctx:LuaParser.Stat_labelContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#if.
-    def exitIf(self, ctx:LuaParser.IfContext):
-        pass
-
-
-    # Enter a parse tree produced by LuaParser#for.
-    def enterFor(self, ctx:LuaParser.ForContext):
-        pass
-
-    # Exit a parse tree produced by LuaParser#for.
-    def exitFor(self, ctx:LuaParser.ForContext):
+    # Exit a parse tree produced by LuaParser#stat_label.
+    def exitStat_label(self, ctx:LuaParser.Stat_labelContext):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#forin.
-    def enterForin(self, ctx:LuaParser.ForinContext):
+    # Enter a parse tree produced by LuaParser#stat_break.
+    def enterStat_break(self, ctx:LuaParser.Stat_breakContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#forin.
-    def exitForin(self, ctx:LuaParser.ForinContext):
-        pass
-
-
-    # Enter a parse tree produced by LuaParser#functiondef.
-    def enterFunctiondef(self, ctx:LuaParser.FunctiondefContext):
-        pass
-
-    # Exit a parse tree produced by LuaParser#functiondef.
-    def exitFunctiondef(self, ctx:LuaParser.FunctiondefContext):
+    # Exit a parse tree produced by LuaParser#stat_break.
+    def exitStat_break(self, ctx:LuaParser.Stat_breakContext):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#localfunction.
-    def enterLocalfunction(self, ctx:LuaParser.LocalfunctionContext):
+    # Enter a parse tree produced by LuaParser#stat_goto.
+    def enterStat_goto(self, ctx:LuaParser.Stat_gotoContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#localfunction.
-    def exitLocalfunction(self, ctx:LuaParser.LocalfunctionContext):
+    # Exit a parse tree produced by LuaParser#stat_goto.
+    def exitStat_goto(self, ctx:LuaParser.Stat_gotoContext):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#localassign.
-    def enterLocalassign(self, ctx:LuaParser.LocalassignContext):
+    # Enter a parse tree produced by LuaParser#stat_do.
+    def enterStat_do(self, ctx:LuaParser.Stat_doContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#localassign.
-    def exitLocalassign(self, ctx:LuaParser.LocalassignContext):
+    # Exit a parse tree produced by LuaParser#stat_do.
+    def exitStat_do(self, ctx:LuaParser.Stat_doContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_while.
+    def enterStat_while(self, ctx:LuaParser.Stat_whileContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_while.
+    def exitStat_while(self, ctx:LuaParser.Stat_whileContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_repeat.
+    def enterStat_repeat(self, ctx:LuaParser.Stat_repeatContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_repeat.
+    def exitStat_repeat(self, ctx:LuaParser.Stat_repeatContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_if.
+    def enterStat_if(self, ctx:LuaParser.Stat_ifContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_if.
+    def exitStat_if(self, ctx:LuaParser.Stat_ifContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_for.
+    def enterStat_for(self, ctx:LuaParser.Stat_forContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_for.
+    def exitStat_for(self, ctx:LuaParser.Stat_forContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_function.
+    def enterStat_function(self, ctx:LuaParser.Stat_functionContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_function.
+    def exitStat_function(self, ctx:LuaParser.Stat_functionContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_localfunction.
+    def enterStat_localfunction(self, ctx:LuaParser.Stat_localfunctionContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_localfunction.
+    def exitStat_localfunction(self, ctx:LuaParser.Stat_localfunctionContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#stat_local.
+    def enterStat_local(self, ctx:LuaParser.Stat_localContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_local.
+    def exitStat_local(self, ctx:LuaParser.Stat_localContext):
         pass
 
 
@@ -149,6 +167,15 @@ class LuaParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by LuaParser#attnamelist.
     def exitAttnamelist(self, ctx:LuaParser.AttnamelistContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#nameattrib.
+    def enterNameattrib(self, ctx:LuaParser.NameattribContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#nameattrib.
+    def exitNameattrib(self, ctx:LuaParser.NameattribContext):
         pass
 
 
@@ -242,12 +269,57 @@ class LuaParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#functioncall.
-    def enterFunctioncall(self, ctx:LuaParser.FunctioncallContext):
+    # Enter a parse tree produced by LuaParser#functioncall_exp.
+    def enterFunctioncall_exp(self, ctx:LuaParser.Functioncall_expContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#functioncall.
-    def exitFunctioncall(self, ctx:LuaParser.FunctioncallContext):
+    # Exit a parse tree produced by LuaParser#functioncall_exp.
+    def exitFunctioncall_exp(self, ctx:LuaParser.Functioncall_expContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#functioncall_expinvoke.
+    def enterFunctioncall_expinvoke(self, ctx:LuaParser.Functioncall_expinvokeContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#functioncall_expinvoke.
+    def exitFunctioncall_expinvoke(self, ctx:LuaParser.Functioncall_expinvokeContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#functioncall_invoke.
+    def enterFunctioncall_invoke(self, ctx:LuaParser.Functioncall_invokeContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#functioncall_invoke.
+    def exitFunctioncall_invoke(self, ctx:LuaParser.Functioncall_invokeContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#functioncall_nestedinvoke.
+    def enterFunctioncall_nestedinvoke(self, ctx:LuaParser.Functioncall_nestedinvokeContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#functioncall_nestedinvoke.
+    def exitFunctioncall_nestedinvoke(self, ctx:LuaParser.Functioncall_nestedinvokeContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#functioncall_name.
+    def enterFunctioncall_name(self, ctx:LuaParser.Functioncall_nameContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#functioncall_name.
+    def exitFunctioncall_name(self, ctx:LuaParser.Functioncall_nameContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#functioncall_nested.
+    def enterFunctioncall_nested(self, ctx:LuaParser.Functioncall_nestedContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#functioncall_nested.
+    def exitFunctioncall_nested(self, ctx:LuaParser.Functioncall_nestedContext):
         pass
 
 
@@ -269,12 +341,12 @@ class LuaParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by LuaParser#anonfunctiondef.
-    def enterAnonfunctiondef(self, ctx:LuaParser.AnonfunctiondefContext):
+    # Enter a parse tree produced by LuaParser#functiondef.
+    def enterFunctiondef(self, ctx:LuaParser.FunctiondefContext):
         pass
 
-    # Exit a parse tree produced by LuaParser#anonfunctiondef.
-    def exitAnonfunctiondef(self, ctx:LuaParser.AnonfunctiondefContext):
+    # Exit a parse tree produced by LuaParser#functiondef.
+    def exitFunctiondef(self, ctx:LuaParser.FunctiondefContext):
         pass
 
 
