@@ -4,6 +4,7 @@
 
     Contains all Ast Node definitions.
 """
+from __future__ import annotations
 from enum import Enum
 from typing import List, Optional
 
@@ -192,16 +193,32 @@ class Lhs(Expression):
     """Define a Lua Left Hand Side expression."""
 
 
+class Attribute(Node):
+    """Define a Lua attribute.
+
+    attrib ::= [‘<’ Name ‘>’]
+
+    Attributes:
+        id (`string`): Attribute id.
+    """
+
+    def __init__(self, id: str, **kwargs):
+        super(Attribute, self).__init__("Attribute", **kwargs)
+        self.id: str = id
+
+
 class Name(Lhs):
     """Define a Lua name expression.
 
     Attributes:
         id (`string`): Id.
+        attribute (`Attribute`): Optional attribute.
     """
 
-    def __init__(self, identifier: str, **kwargs):
+    def __init__(self, identifier: str, attribute: Optional[Attribute] = None, **kwargs):
         super(Name, self).__init__("Name", **kwargs)
         self.id: str = identifier
+        self.attribute: Optional[Attribute] = attribute
 
 
 class IndexNotation(Enum):
@@ -213,14 +230,14 @@ class Index(Lhs):
     """Define a Lua index expression.
 
     Attributes:
-        idx (`Expression`): Index expression.
-        value (`string`): Id.
+        idx (`Name`): Index expression.
+        value (`Expression`): Id.
     """
 
     def __init__(
             self,
-            idx: Expression,
-            value: Name,
+            idx: Name,
+            value: Expression,
             notation: IndexNotation = IndexNotation.DOT,
             **kwargs
     ):
@@ -254,11 +271,11 @@ class LocalAssign(Assign):
     """Lua local assignment statement.
 
     Attributes:
-        targets (`list<Node>`): List of targets.
+        targets (`list<Name>`): List of targets.
         values (`list<Node>`): List of values.
     """
 
-    def __init__(self, targets: List[Node], values: List[Node], **kwargs):
+    def __init__(self, targets: List[Name], values: List[Node], **kwargs):
         super().__init__(targets, values, **kwargs)
         self._name: str = "LocalAssign"
 

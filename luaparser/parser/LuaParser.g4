@@ -30,74 +30,33 @@ block
     ;
 
 stat
-    : ';'
-    | assign
-    | functioncall
-    | label
-    | 'break'
-    | goto
-    | do
-    | while
-    | repeat
-    | if
-    | for
-    | forin
-    | functiondef
-    | localfunction
-    | localassign
+    : ';'																			# stat_empty
+    | varlist '=' explist															# stat_assignment
+    | functioncall																	# stat_functioncall
+    | label																			# stat_label
+    | 'break'																		# stat_break
+    | 'goto' NAME																	# stat_goto
+    | 'do' block 'end'																# stat_do
+    | 'while' exp 'do' block 'end'													# stat_while
+    | 'repeat' block 'until' exp													# stat_repeat
+    | 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end'		# stat_if
+    | 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end'						# stat_for
+    | 'for' namelist 'in' explist 'do' block 'end'									# stat_for
+    | 'function' funcname funcbody													# stat_function
+    | 'local' 'function' NAME funcbody												# stat_localfunction
+    | 'local' attnamelist ('=' explist)?											# stat_local
     ;
-
-assign
-	: varlist '=' explist
-	;
-
-goto
-	: 'goto' NAME
-	;
-
-do
-	: 'do' block 'end'
-	;
-
-while
-	: 'while' exp 'do' block 'end'
-	;
-
-repeat
-	: 'repeat' block 'until' exp
-	;
-
-if
-	: 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end'
-	;
-
-for
-	: 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end'
-	;
-
-forin
-	: 'for' namelist 'in' explist 'do' block 'end'
-	;
-
-functiondef
-	: 'function' funcname funcbody
-	;
-
-localfunction
-	: 'local' 'function' NAME funcbody
-	;
-
-localassign
-	: 'local' namelist ('=' explist)?
-	;
-
 
 attnamelist
-    : NAME attrib (',' NAME attrib)*
+    : nameattrib (',' nameattrib)*
     ;
 
+nameattrib
+	: NAME attrib?
+	;
+
 attrib
-    : ('<' NAME '>')?
+    : ('<' NAME '>')
     ;
 
 retstat
@@ -134,15 +93,15 @@ exp
     | functiondef
     | prefixexp
     | tableconstructor
-    | <assoc = right> exp ('^') exp
-    | ('not' | '#' | '-' | '~') exp
-    | exp ('*' | '/' | '%' | '//') exp
-    | exp ('+' | '-') exp
-    | <assoc = right> exp ('..') exp
-    | exp ('<' | '>' | '<=' | '>=' | '~=' | '==') exp
-    | exp ('and') exp
-    | exp ('or') exp
-    | exp ('&' | '|' | '~' | '<<' | '>>') exp
+    | <assoc = right> exp (op = '^') exp
+    | unary_op = ('not' | '#' | '-' | '~') exp
+    | exp op = ('*' | '/' | '%' | '//') exp
+    | exp op = ('+' | '-') exp
+    | <assoc = right> exp (op = '..') exp
+    | exp op = ('<' | '>' | '<=' | '>=' | '~=' | '==') exp
+    | exp (op = 'and') exp
+    | exp (op = 'or') exp
+    | exp op = ('&' | '|' | '~' | '<<' | '>>') exp
     ;
 
 // var ::=  Name | prefixexp '[' exp ']' | prefixexp '.' Name
@@ -160,12 +119,12 @@ prefixexp
 
 // functioncall ::=  prefixexp args | prefixexp ':' Name args;
 functioncall
-    : NAME tail* args
-    | functioncall tail* args
-    | '(' exp ')' tail* args
-    | NAME tail* ':' NAME args
-    | functioncall tail* ':' NAME args
-    | '(' exp ')' tail* ':' NAME args
+    : NAME tail* args					# functioncall_name
+    | functioncall tail* args			# functioncall_nested
+    | '(' exp ')' tail* args			# functioncall_exp
+    | NAME tail* ':' NAME args			# functioncall_invoke
+    | functioncall tail* ':' NAME args	# functioncall_nestedinvoke
+    | '(' exp ')' tail* ':' NAME args	# functioncall_expinvoke
     ;
 
 tail
@@ -178,7 +137,7 @@ args
     | string
     ;
 
-anonfunctiondef
+functiondef
     : 'function' funcbody
     ;
 
