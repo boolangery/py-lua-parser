@@ -1751,6 +1751,8 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#stat_for.
     def visitStat_for(self, ctx: LuaParser.Stat_forContext):
+        if ctx.IN(): # forin
+        else: # fornum
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by LuaParser#stat_function.
