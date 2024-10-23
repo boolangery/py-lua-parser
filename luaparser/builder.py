@@ -1,19 +1,23 @@
 import ast
 import re
+from typing import Literal
+from typing import Tuple
 
 from antlr4 import InputStream, CommonTokenStream
+from antlr4.Token import Token
+from antlr4.tree.Tree import TerminalNodeImpl, ErrorNodeImpl
 
 from luaparser.astnodes import *
 from luaparser.parser.LuaLexer import LuaLexer
-from typing import List, Tuple, Literal
-from antlr4.Token import Token
+from luaparser.parser.LuaParser import LuaParser
+from luaparser.parser.LuaParserVisitor import LuaParserVisitor
 
 
 class SyntaxException(Exception):
     def __init__(self, user_msg, token=None):
         if token:
             message = (
-                    "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
+                "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
             )
         else:
             message = "Error: " + user_msg
@@ -268,7 +272,7 @@ class Builder:
         self._hidden_handled_stack.append(self._hidden_handled)
 
     def next_is_rc(
-            self, type_to_seek: int, hidden_right: bool = True
+        self, type_to_seek: int, hidden_right: bool = True
     ) -> Optional[Token]:
         token = self._stream.LT(1)
         tok_type: int = token.type
@@ -491,16 +495,16 @@ class Builder:
         comments = self.get_comments()
 
         stat = (
-                self.parse_assignment()
-                or self.parse_var(is_statement=True)
-                or self.parse_while_stat()
-                or self.parse_repeat_stat()
-                or self.parse_local()
-                or self.parse_goto_stat()
-                or self.parse_if_stat()
-                or self.parse_for_stat()
-                or self.parse_function()
-                or self.parse_label()
+            self.parse_assignment()
+            or self.parse_var(is_statement=True)
+            or self.parse_while_stat()
+            or self.parse_repeat_stat()
+            or self.parse_local()
+            or self.parse_goto_stat()
+            or self.parse_if_stat()
+            or self.parse_for_stat()
+            or self.parse_function()
+            or self.parse_label()
         )
 
         if stat:
@@ -897,7 +901,8 @@ class Builder:
                     body = self.parse_block()
                     if body:
                         self.success()
-                        return ElseIf(test, body, None, first_token=first_token, last_token=body.last_token)  # orelse will be set in parent
+                        return ElseIf(test, body, None, first_token=first_token,
+                                      last_token=body.last_token)  # orelse will be set in parent
         return self.failure()
 
     def parse_else_stat(self) -> Block or bool:
@@ -930,7 +935,7 @@ class Builder:
                             step = 1
                             # optional step
                             if self.next_is(Tokens.COMMA) and self.next_is_rc(
-                                    Tokens.COMMA
+                                Tokens.COMMA
                             ):
                                 step = self.parse_expr()
 
@@ -940,7 +945,8 @@ class Builder:
                                 return self.failure()
                             self.success()
                             self.success()
-                            return Fornum(target, start, stop, step, body, first_token=first_token, last_token=body.last_token)
+                            return Fornum(target, start, stop, step, body, first_token=first_token,
+                                          last_token=body.last_token)
 
             self.failure_save()
             target = self.parse_name_list()
@@ -1292,10 +1298,10 @@ class Builder:
             while True:
                 self.save()
                 if self.next_in_rc(
-                        [
-                            Tokens.BITRSHIFT,
-                            Tokens.BITRLEFT,
-                        ]
+                    [
+                        Tokens.BITRSHIFT,
+                        Tokens.BITRLEFT,
+                    ]
                 ):
                     op = self.type
                     right = self.parse_concat_expr()
@@ -1472,7 +1478,6 @@ class Builder:
         if self.next_is(Tokens.VARARGS) and self.next_is_rc(Tokens.VARARGS):
             return Varargs()
 
-
         if self.next_is(Tokens.NUMBER) and self.next_is_rc(Tokens.NUMBER):
             # TODO: optimize
             # using python number eval to parse lua number
@@ -1627,7 +1632,8 @@ class Builder:
                 last_token = value.last_token
                 if value:
                     self.success()
-                    return Field(key, value, comments=comments, first_token=first_token, last_token=last_token), comments
+                    return Field(key, value, comments=comments, first_token=first_token,
+                                 last_token=last_token), comments
 
         self.failure_save()
         comments = self.get_comments()
@@ -1647,3 +1653,527 @@ class Builder:
         if self.next_in_rc([Tokens.COMMA, Tokens.SEMCOL]):
             return self.success()
         return self.failure()
+
+
+class BuilderVisitor(LuaParserVisitor):
+    # Visit a parse tree produced by LuaParser#start_.
+    def visitStart_(self, ctx: LuaParser.Start_Context):
+        return self.visitChildren(ctx)
+
+    def visitTerminal(self, node: TerminalNodeImpl):
+        if node.symbol.type == LuaParser.EOF:
+            return None
+        elif node.symbol.type == LuaParser.NAME:
+            return Name(node.getText())
+        else:
+            return node.getText()
+
+    def visitErrorNode(self, node: ErrorNodeImpl):
+        return "error:" + node.getText()
+
+    def defaultResult(self):
+        return None
+
+    def aggregateResult(self, aggregate, nextResult):
+        if aggregate is None:
+            return nextResult
+        if type(nextResult) == list:
+            nextResult.append(aggregate)
+            return nextResult
+        if type(aggregate) == list:
+            aggregate.append(nextResult)
+            return aggregate
+        if nextResult == None:
+            return aggregate
+        return [nextResult, aggregate]
+
+    # Visit a parse tree produced by LuaParser#chunk.
+    def visitChunk(self, ctx: LuaParser.ChunkContext):
+        return Chunk(
+            body=self.visitChildren(ctx)
+        )
+
+    # Visit a parse tree produced by LuaParser#block.
+    def visitBlock(self, ctx: LuaParser.BlockContext):
+        statements = [self.visit(stat) for stat in ctx.stat()]
+        if ctx.retstat():
+            statements.append(self.visit(ctx.retstat()))
+        return Block(
+            body=statements
+        )
+
+    # Visit a parse tree produced by LuaParser#stat.
+    def visitStat(self, ctx: LuaParser.StatContext):
+        return self.visitChildren(ctx)
+
+    # Visit a parse tree produced by LuaParser#stat_empty.
+    def visitStat_empty(self, ctx: LuaParser.Stat_emptyContext):
+        return SemiColon()
+
+    # Visit a parse tree produced by LuaParser#stat_assignment.
+    def visitStat_assignment(self, ctx: LuaParser.Stat_assignmentContext):
+        return Assign(
+            targets=_listify(self.visit(ctx.varlist())),
+            values=_listify(self.visit(ctx.explist())),
+        )
+
+    # Visit a parse tree produced by LuaParser#stat_functioncall.
+    def visitStat_functioncall(self, ctx: LuaParser.Stat_functioncallContext):
+        return self.visitChildren(ctx)
+
+    # Visit a parse tree produced by LuaParser#stat_label.
+    def visitStat_label(self, ctx: LuaParser.Stat_labelContext):
+        return self.visitChildren(ctx)
+
+    # Visit a parse tree produced by LuaParser#stat_break.
+    def visitStat_break(self, ctx: LuaParser.Stat_breakContext):
+        return Break()
+
+    # Visit a parse tree produced by LuaParser#stat_goto.
+    def visitStat_goto(self, ctx: LuaParser.Stat_gotoContext):
+        return Goto(self.visit(ctx.NAME()))
+
+    # Visit a parse tree produced by LuaParser#stat_do.
+    def visitStat_do(self, ctx: LuaParser.Stat_doContext):
+        return Do(body=self.visit(ctx.block()))
+
+    # Visit a parse tree produced by LuaParser#stat_while.
+    def visitStat_while(self, ctx: LuaParser.Stat_whileContext):
+        return While(
+            test=self.visit(ctx.exp()),
+            body=self.visit(ctx.block()),
+        )
+
+    # Visit a parse tree produced by LuaParser#stat_repeat.
+    def visitStat_repeat(self, ctx: LuaParser.Stat_repeatContext):
+        return Repeat(
+            body=self.visit(ctx.block()),
+            test=self.visit(ctx.exp()),
+        )
+
+    # Visit a parse tree produced by LuaParser#stat_if.
+    def visitStat_if(self, ctx: LuaParser.Stat_ifContext):
+        expressions = ctx.exp()
+        blocks = ctx.block()
+        nb_else_if = len(ctx.ELSEIF())
+        if_stat = If(
+            test=self.visit(expressions[0]),
+            body=self.visit(blocks[0]),
+            orelse=None,
+        )
+
+        or_else_leaf = None
+        if nb_else_if > 0:
+            or_else_root = ElseIf(
+                test=self.visit(expressions[1]),
+                body=self.visit(blocks[1]),
+                orelse=None,
+            )
+
+            or_else_leaf = or_else_root
+            for i in range(nb_else_if - 1):
+                or_else_leaf.orelse = ElseIf(
+                    test=self.visit(expressions[i + 2]),
+                    body=self.visit(blocks[i + 2]),
+                    orelse=None,
+                )
+                or_else_leaf = or_else_leaf.orelse
+
+            if_stat.orelse = or_else_root
+
+        if ctx.ELSE():
+            block = self.visit(blocks[len(blocks) - 1])
+            if if_stat.orelse is None:
+                if_stat.orelse = block
+            else:
+                or_else_leaf.orelse = block
+
+        return if_stat
+
+    # Visit a parse tree produced by LuaParser#stat_for.
+    def visitStat_for(self, ctx: LuaParser.Stat_forContext):
+        if ctx.IN():  # forin
+            return Forin(
+                body=self.visit(ctx.block()),
+                iter=self.visit(ctx.explist()),
+                targets=self.visit(ctx.namelist()),
+            )
+        else:  # fornum
+            return Fornum(
+                target=self.visit(ctx.NAME()),
+                start=self.visit(ctx.exp(0)),
+                stop=self.visit(ctx.exp(1)),
+                step=self.visit(ctx.exp(2)) if ctx.exp(2) else None,
+                body=self.visit(ctx.block()),
+            )
+
+    # Visit a parse tree produced by LuaParser#stat_function.
+    def visitStat_function(self, ctx: LuaParser.Stat_functionContext):
+        func_name = self.visitFuncname(ctx.funcname())
+        param_list, block = self.visitFuncbody(ctx.funcbody())
+        return Function(func_name, param_list, block)
+
+    # Visit a parse tree produced by LuaParser#stat_localfunction.
+    def visitStat_localfunction(self, ctx: LuaParser.Stat_localfunctionContext):
+        func_name = self.visit(ctx.NAME())
+        param_list, block = self.visitFuncbody(ctx.funcbody())
+        return LocalFunction(func_name, param_list, block)
+
+    # Visit a parse tree produced by LuaParser#stat_local.
+    def visitStat_local(self, ctx: LuaParser.Stat_localContext):
+        att_name_list = self.visitAttnamelist(ctx.attnamelist())
+
+        if ctx.EQ():
+            exp_list = self.visitExplist(ctx.explist())
+        else:
+            exp_list = []
+
+        return LocalAssign(targets=att_name_list, values=exp_list)
+
+    # Visit a parse tree produced by LuaParser#functiondef.
+    def visitFunctiondef(self, ctx: LuaParser.FunctiondefContext) -> AnonymousFunction:
+        param_list, block = self.visitFuncbody(ctx.funcbody())
+        return AnonymousFunction(param_list, block)
+
+    # Visit a parse tree produced by LuaParser#attnamelist.
+    def visitAttnamelist(self, ctx: LuaParser.AttnamelistContext):
+        return [self.visit(a) for a in ctx.nameattrib()]
+
+    def visitNameattrib(self, ctx: LuaParser.NameattribContext):
+        name = self.visit(ctx.NAME())
+        if ctx.attrib():
+            attrib = self.visit(ctx.attrib())
+            name.attribute = attrib
+        return name
+
+    # Visit a parse tree produced by LuaParser#attrib.
+    def visitAttrib(self, ctx: LuaParser.AttribContext):
+        return Attribute(self.visit(ctx.NAME()))
+
+    # Visit a parse tree produced by LuaParser#retstat.
+    def visitRetstat(self, ctx: LuaParser.RetstatContext):
+        if ctx.RETURN():
+            return Return(
+                values=self.visit(ctx.explist())
+            )
+        elif ctx.BREAK():
+            return Break()
+        else:
+            return Continue()
+
+    # Visit a parse tree produced by LuaParser#label.
+    def visitLabel(self, ctx: LuaParser.LabelContext):
+        return Label(label_id=self.visit(ctx.NAME()))
+
+    # Visit a parse tree produced by LuaParser#funcname.
+    def visitFuncname(self, ctx: LuaParser.FuncnameContext):
+        names = ctx.NAME()
+        has_invoke = ctx.COL() is not None
+        root = self.visit(names[0])
+        until = len(names) - 1 if has_invoke else len(names)
+        for i in range(1, until):
+            root = Index(
+                idx=self.visit(names[i]),
+                value=root,
+                notation=IndexNotation.DOT,
+            )
+
+        if has_invoke:
+            return Invoke(root, self.visit(names[-1]), [])
+
+        return root
+
+    # Visit a parse tree produced by LuaParser#varlist.
+    def visitVarlist(self, ctx: LuaParser.VarlistContext):
+        return [self.visit(v) for v in ctx.var()]
+
+    # Visit a parse tree produced by LuaParser#namelist.
+    def visitNamelist(self, ctx: LuaParser.NamelistContext) -> List[Name]:
+        return [self.visit(n) for n in ctx.NAME()]
+
+    # Visit a parse tree produced by LuaParser#explist.
+    def visitExplist(self, ctx: LuaParser.ExplistContext):
+        return [self.visit(exp) for exp in ctx.exp()]
+
+    # Visit a parse tree produced by LuaParser#exp.
+    def visitExp(self, ctx: LuaParser.ExpContext) -> Expression:
+        if ctx.NIL():
+            return Nil()
+        elif ctx.FALSE():
+            return FalseExpr()
+        elif ctx.TRUE():
+            return TrueExpr()
+        elif ctx.number():
+            return self.visit(ctx.number())
+        elif ctx.string():
+            return self.visit(ctx.string())
+        elif ctx.DDD():
+            return Dots()
+        elif ctx.functiondef():
+            return self.visit(ctx.functiondef())
+        elif ctx.prefixexp():
+            return self.visit(ctx.prefixexp())
+        elif ctx.tableconstructor():
+            return self.visit(ctx.tableconstructor())
+        elif ctx.unary_op:
+            if ctx.unary_op.type == LuaParser.NOT:
+                return ULNotOp(self.visit(ctx.exp(0)))
+            elif ctx.unary_op.type == LuaParser.POUND:
+                return ULengthOP(self.visit(ctx.exp(0)))
+            elif ctx.unary_op.type == LuaParser.MINUS:
+                return UMinusOp(self.visit(ctx.exp(0)))
+            elif ctx.unary_op.type == LuaParser.SQUIG:
+                return UBNotOp(self.visit(ctx.exp(0)))
+
+        elif ctx.op:
+            left = self.visit(ctx.exp(0))
+            right = self.visit(ctx.exp(1))
+
+            if ctx.op.type == LuaParser.CARET:
+                return ExpoOp(left, right)
+            elif ctx.op.type == LuaParser.STAR:
+                return MultOp(left, right)
+            elif ctx.op.type == LuaParser.SLASH:
+                return FloatDivOp(left, right)
+            elif ctx.op.type == LuaParser.PER:
+                return ModOp(left, right)
+            elif ctx.op.type == LuaParser.SS:
+                return FloorDivOp(left, right)
+            elif ctx.op.type == LuaParser.PLUS:
+                return AddOp(left, right)
+            elif ctx.op.type == LuaParser.MINUS:
+                return SubOp(left, right)
+            elif ctx.op.type == LuaParser.DD:
+                return Concat(left, right)
+            elif ctx.op.type == LuaParser.LT:
+                return LessThanOp(left, right)
+            elif ctx.op.type == LuaParser.GT:
+                return GreaterThanOp(left, right)
+            elif ctx.op.type == LuaParser.LE:
+                return LessOrEqThanOp(left, right)
+            elif ctx.op.type == LuaParser.GE:
+                return GreaterOrEqThanOp(left, right)
+            elif ctx.op.type == LuaParser.SQEQ:
+                return NotEqToOp(left, right)
+            elif ctx.op.type == LuaParser.EE:
+                return EqToOp(left, right)
+            elif ctx.op.type == LuaParser.AND:
+                return AndLoOp(left, right)
+            elif ctx.op.type == LuaParser.OR:
+                return OrLoOp(left, right)
+            elif ctx.op.type == LuaParser.AMP:
+                return BAndOp(left, right)
+            elif ctx.op.type == LuaParser.PIPE:
+                return BOrOp(left, right)
+            elif ctx.op.type == LuaParser.SQUIG:
+                return BXorOp(left, right)
+            elif ctx.op.type == LuaParser.LL:
+                return BShiftLOp(left, right)
+            elif ctx.op.type == LuaParser.GG:
+                return BShiftROp(left, right)
+
+        else:
+            return self.visitChildren(ctx)
+
+    # Visit a parse tree produced by LuaParser#var.
+    def visitVar(self, ctx: LuaParser.VarContext):
+        if ctx.NAME():
+            return Name(ctx.NAME().getText())
+        else:  # prefixexp tail
+            root = self.visit(ctx.prefixexp())
+            return self.visitAllTails(root, [ctx.tail()])
+
+    # Visit a parse tree produced by LuaParser#prefixexp.
+    def visitPrefixexp(self, ctx: LuaParser.PrefixexpContext):
+        if ctx.NAME():  # NAME tail*
+            root = self.visit(ctx.NAME())
+        elif ctx.functioncall():  # functioncall tail*
+            root = self.visit(ctx.functioncall())
+        else:  # '(' exp ')' tail*
+            root: Expression = self.visit(ctx.exp())
+            root.wrapped = True
+
+        tail = self.visitAllTails(root, ctx.tail())
+        return tail
+
+    # Visit a parse tree produced by LuaParser#functioncall_name.
+    def visitFunctioncall_name(self, ctx: LuaParser.Functioncall_nameContext):
+        name = self.visit(ctx.NAME())
+        tail = self.visitAllTails(name, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Call(tail, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
+
+    # Visit a parse tree produced by LuaParser#functioncall_nested.
+    def visitFunctioncall_nested(self, ctx: LuaParser.Functioncall_nestedContext):
+        call = self.visit(ctx.functioncall())
+        tail = self.visitAllTails(call, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Call(tail, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
+
+    # Visit a parse tree produced by LuaParser#functioncall_exp.
+    def visitFunctioncall_exp(self, ctx: LuaParser.Functioncall_expContext):
+        exp = self.visitExp(ctx.exp())
+        exp.wrapped = True
+        tail = self.visitAllTails(exp, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Call(tail, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
+
+    # Visit a parse tree produced by LuaParser#functioncall_expinvoke.
+    def visitFunctioncall_expinvoke(self, ctx: LuaParser.Functioncall_expinvokeContext):
+        exp = self.visitExp(ctx.exp())
+        exp.wrapped = True
+        tail = self.visitAllTails(exp, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        func = self.visit(ctx.NAME())
+        return Invoke(tail, func, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
+
+    # Visit a parse tree produced by LuaParser#functioncall_invoke.
+    def visitFunctioncall_invoke(self, ctx: LuaParser.Functioncall_invokeContext):
+        source = self.visit(ctx.NAME(0))
+        func = self.visit(ctx.NAME(1))
+        tail = self.visitAllTails(source, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Invoke(tail, func, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
+
+    # Visit a parse tree produced by LuaParser#functioncall_nestedinvoke.
+    def visitFunctioncall_nestedinvoke(self, ctx: LuaParser.Functioncall_nestedinvokeContext):
+        call = self.visit(ctx.functioncall())
+        func = self.visit(ctx.NAME())
+        tail = self.visitAllTails(call, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Invoke(tail, func, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
+
+    def visitAllTails(self, root_exp: Expression, tails: List[LuaParser.TailContext]):
+        if not tails:
+            return root_exp
+
+        root = root_exp  # parent root will be set in caller
+        tail: Index = self.visitTail(tails[0])  # root tail
+        i = 1
+        while tail:
+            tail.value = root
+            root = tail
+
+            if i >= len(tails):
+                break
+
+            tail = self.visit(tails[i])
+            i += 1
+        return root
+
+    def visitTail(self, ctx: LuaParser.TailContext):
+        if ctx.OB() and ctx.CB():
+            return Index(
+                idx=self.visit(ctx.exp()),
+                value=Name(""),  # value must be set in parent
+                notation=IndexNotation.SQUARE,
+            )
+        else:
+            return Index(
+                idx=self.visit(ctx.NAME()),
+                value=Name(""),  # value must be set in parent
+                notation=IndexNotation.DOT,
+            )
+
+    # Visit a parse tree produced by LuaParser#args.
+    def visitArgs(self, ctx: LuaParser.ArgsContext):
+        if ctx.OP() and ctx.CP():  # '(' explist? ')'
+            exp_list = []
+            if ctx.explist():
+                exp_list = self.visit(ctx.explist())
+
+            return True, exp_list
+        elif ctx.tableconstructor():  # tableconstructor
+            return False, self.visit(ctx.tableconstructor())
+        else:  # string
+            return False, self.visit(ctx.string())
+
+    # Visit a parse tree produced by LuaParser#funcbody.
+    def visitFuncbody(self, ctx: LuaParser.FuncbodyContext) -> Tuple[List[Expression], Block]:
+        par_list = self.visitParlist(ctx.parlist())
+        block = self.visit(ctx.block())
+        return par_list, block
+
+    # Visit a parse tree produced by LuaParser#parlist.
+    def visitParlist(self, ctx: LuaParser.ParlistContext) -> List[Expression]:
+        if ctx.namelist():
+            name_list: List[Expression] = self.visitNamelist(ctx.namelist())
+        else:
+            name_list = []
+
+        if ctx.DDD():
+            name_list.append(Varargs())
+        return name_list
+
+    # Visit a parse tree produced by LuaParser#tableconstructor.
+    def visitTableconstructor(self, ctx: LuaParser.TableconstructorContext):
+        if ctx.fieldlist():
+            fields = self.visit(ctx.fieldlist())
+
+            array_like_index = 1
+            if fields:  # optional
+                for field in fields:
+                    if field.key is None:
+                        field.key = Number(array_like_index)
+                        field.between_brackets = True
+                        array_like_index += 1
+            return Table(fields)
+        return Table([])
+
+    # Visit a parse tree produced by LuaParser#fieldlist.
+    def visitFieldlist(self, ctx: LuaParser.FieldlistContext):
+        return [self.visit(f) for f in ctx.field()]
+
+    # Visit a parse tree produced by LuaParser#field.
+    def visitField(self, ctx: LuaParser.FieldContext):
+        if ctx.OB():  # '[' exp ']' '=' exp
+            key = self.visit(ctx.exp(0))
+            value = self.visit(ctx.exp(1))
+            return Field(key, value, between_brackets=True)
+        elif ctx.NAME():  # NAME '=' exp
+            key = Name(ctx.NAME().getText())
+            value = self.visit(ctx.exp(0))
+            return Field(key, value)
+        else:  # exp
+            # Key will be set in parent call:
+            return Field(None, self.visit(ctx.exp(0)))
+
+    # Visit a parse tree produced by LuaParser#fieldsep.
+    def visitFieldsep(self, ctx: LuaParser.FieldsepContext):
+        return self.visitChildren(ctx)
+
+    # Visit a parse tree produced by LuaParser#number.
+    def visitNumber(self, ctx: LuaParser.NumberContext):
+        number_text = self.visitChildren(ctx)
+        try:
+            number = ast.literal_eval(number_text)
+        except:
+            # exception occurs with leading zero number: 002
+            number = float(number_text)
+        return Number(
+            number,
+        )
+
+    # Visit a parse tree produced by LuaParser#string.
+    def visitString(self, ctx: LuaParser.StringContext):
+        lua_str = ctx.getText()
+
+        delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
+        p = re.compile(r"^\[=+\[(.*)]=+]")  # nested quote pattern
+        # try remove double quote:
+        if lua_str.startswith('"') and lua_str.endswith('"'):
+            lua_str = lua_str[1:-1]
+            delimiter = StringDelimiter.DOUBLE_QUOTE
+        # try remove single quote:
+        elif lua_str.startswith("'") and lua_str.endswith("'"):
+            lua_str = lua_str[1:-1]
+            delimiter = StringDelimiter.SINGLE_QUOTE
+        # try remove double square bracket:
+        elif lua_str.startswith("[[") and lua_str.endswith("]]"):
+            lua_str = lua_str[2:-2]
+            delimiter = StringDelimiter.DOUBLE_SQUARE
+        # nested quote
+        elif p.match(lua_str):
+            lua_str = p.search(lua_str).group(1)
+
+        return String(lua_str, delimiter)

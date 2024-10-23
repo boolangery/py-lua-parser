@@ -154,8 +154,8 @@ class IntegrationTestCase(tests.TestCase):
                         0: {} 1 key          
                           LocalFunction: {} 5 keys
                             wrapped: False
-                            name: {} 3 keys
-                              Name: {} 3 keys
+                            name: {} 4 keys
+                              Name: {} 4 keys
                                 wrapped: False
                                 id: 'sayHello'
                             args: [] 0 item
@@ -163,10 +163,10 @@ class IntegrationTestCase(tests.TestCase):
                               Block: {} 2 keys
                                 body: [] 1 item
                                   0: {} 1 key                    
-                                    Call: {} 4 keys
+                                    Call: {} 5 keys
                                       wrapped: False
-                                      func: {} 3 keys
-                                        Name: {} 3 keys
+                                      func: {} 4 keys
+                                        Name: {} 4 keys
                                           wrapped: False
                                           id: 'print'
                                       args: [] 1 item
@@ -175,14 +175,16 @@ class IntegrationTestCase(tests.TestCase):
                                             wrapped: False
                                             s: 'hello world !'
                                             delimiter: SINGLE_QUOTE
+                                      style: DEFAULT
                         1: {} 1 key          
-                          Call: {} 4 keys
+                          Call: {} 5 keys
                             wrapped: False
-                            func: {} 3 keys
-                              Name: {} 3 keys
+                            func: {} 4 keys
+                              Name: {} 4 keys
                                 wrapped: False
                                 id: 'sayHello'
-                            args: [] 0 item"""
+                            args: [] 0 item
+                            style: DEFAULT"""
         )
         self.assertEqual(exp, pretty_str)
         ast.to_xml_str(tree)

@@ -650,6 +650,54 @@ class ExpressionsTestCase(tests.TestCase):
         )
         self.assertEqual(exp, tree)
 
+    def test_function_exp(self):
+        tree = ast.parse(r'a = (foo + bar)[42][43](1, 2)')
+        exp = Chunk(
+            Block([
+                Assign(
+                    targets=[Name("a")],
+                    values=[
+                        Call(
+                            func=Index(
+                                idx=Number(43),
+                                value=Index(
+                                    idx=Number(42),
+                                    value=AddOp(Name("foo"), Name("bar"), wrapped=True),
+                                    notation=IndexNotation.SQUARE
+                                ),
+                                notation=IndexNotation.SQUARE
+                            ),
+                            args=[Number(1), Number(2)]
+                        )
+                    ]
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)
+
+    def test_function_exp_invoke(self):
+        tree = ast.parse(r'a = (foo + bar)[42]:hello "ok"')
+        exp = Chunk(
+            Block([
+                Assign(
+                    targets=[Name("a")],
+                    values=[
+                        Invoke(
+                            source=Index(
+                                idx=Number(42),
+                                value=AddOp(Name("foo"), Name("bar"), wrapped=True),
+                                notation=IndexNotation.SQUARE
+                            ),
+                            func=Name("hello"),
+                            args=[String("ok", delimiter=StringDelimiter.DOUBLE_QUOTE)],
+                            style=CallStyle.NO_PARENTHESIS,
+                        )
+                    ]
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)
+
     """ ----------------------------------------------------------------------- """
     """ 3.4.11 – Function Definitions                                           """
     """ ----------------------------------------------------------------------- """
@@ -665,7 +713,7 @@ class ExpressionsTestCase(tests.TestCase):
                             AnonymousFunction(
                                 args=[],
                                 body=Block(
-                                    [LocalAssign(targets=[Name("a", attribute=Attribute("const"))], values=[])]
+                                    [LocalAssign(targets=[Name("a", attribute=Attribute(Name("const")))], values=[])]
                                 ),
                             )
                         ],

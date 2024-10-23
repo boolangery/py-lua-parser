@@ -1,7 +1,6 @@
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
-from luaparser.builder import SyntaxException
 import textwrap
 
 
@@ -513,6 +512,17 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([Break()]))
         self.assertEqual(exp, tree)
 
+    def test_continue(self):
+        tree = ast.parse(
+            textwrap.dedent(
+                """
+            continue
+            """
+            )
+        )
+        exp = Chunk(Block([Continue()]))
+        self.assertEqual(exp, tree)
+
     def test_return(self):
         tree = ast.parse(r"return nil")
         exp = Chunk(Block([Return([Nil()])]))
@@ -534,15 +544,6 @@ class StatementsTestCase(tests.TestCase):
             )
         )
         self.assertEqual(exp, tree)
-
-    def test_ambiguous_syntax(self):
-        src = textwrap.dedent(
-            """
-            local a = b
-            (print)('foo')
-            """
-        )
-        self.assertRaises(SyntaxException, ast.parse, src)
 
     def test_index(self):
         tree = ast.parse(
@@ -571,8 +572,15 @@ class StatementsTestCase(tests.TestCase):
             )
         )
         exp = Chunk(
-            Block(
-
-            )
+            Block([
+                LocalAssign(
+                    targets=[
+                        Name("x", attribute=Attribute(Name("const")))
+                    ],
+                    values=[
+                        Number(42)
+                    ]
+                )
+            ])
         )
         self.assertEqual(exp, tree)
