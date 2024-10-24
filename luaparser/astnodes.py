@@ -28,11 +28,11 @@ class Node:
     """Base class for AST node."""
 
     def __init__(
-            self,
-            name: str,
-            comments: Comments = None,
-            first_token: Optional[CommonToken] = None,
-            last_token: Optional[CommonToken] = None,
+        self,
+        name: str,
+        comments: Comments = None,
+        first_token: Optional[CommonToken] = None,
+        last_token: Optional[CommonToken] = None,
     ):
         """
 
@@ -147,10 +147,10 @@ class Expression(Node):
     wrapped: bool
 
     def __init__(
-            self,
-            name: str,
-            wrapped=False,
-            **kwargs,
+        self,
+        name: str,
+        wrapped=False,
+        **kwargs,
     ):
         super(Expression, self).__init__(name, **kwargs)
         self.wrapped = wrapped
@@ -199,12 +199,12 @@ class Attribute(Node):
     attrib ::= [‘<’ Name ‘>’]
 
     Attributes:
-        id (`string`): Attribute id.
+        name (`Name`): Attribute name.
     """
 
-    def __init__(self, id: str, **kwargs):
+    def __init__(self, name: Name, **kwargs):
         super(Attribute, self).__init__("Attribute", **kwargs)
-        self.id: str = id
+        self.name: Name = name
 
 
 class Name(Lhs):
@@ -230,19 +230,19 @@ class Index(Lhs):
     """Define a Lua index expression.
 
     Attributes:
-        idx (`Name`): Index expression.
+        idx (`Expression`): Index expression.
         value (`Expression`): Id.
     """
 
     def __init__(
-            self,
-            idx: Name,
-            value: Expression,
-            notation: IndexNotation = IndexNotation.DOT,
-            **kwargs
+        self,
+        idx: Expression,
+        value: Expression,
+        notation: IndexNotation = IndexNotation.DOT,
+        **kwargs
     ):
         super(Index, self).__init__("Index", **kwargs)
-        self.idx: Name = idx
+        self.idx: Expression = idx
         self.value: Expression = value
         self.notation: IndexNotation = notation
 
@@ -346,7 +346,7 @@ class If(Statement):
     """
 
     def __init__(
-            self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
+        self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
     ):
         super().__init__("If", **kwargs)
         self.test: Expression = test
@@ -392,6 +392,13 @@ class Break(Statement):
         super(Break, self).__init__("Break", **kwargs)
 
 
+class Continue(Statement):
+    """Define the continue lua statement."""
+
+    def __init__(self, **kwargs):
+        super(Continue, self).__init__("Continue", **kwargs)
+
+
 class Return(Statement):
     """Define the Lua return statement.
 
@@ -416,13 +423,13 @@ class Fornum(Statement):
     """
 
     def __init__(
-            self,
-            target: Name,
-            start: Expression,
-            stop: Expression,
-            step: Expression,
-            body: Block,
-            **kwargs
+        self,
+        target: Name,
+        start: Expression,
+        stop: Expression,
+        step: Expression,
+        body: Block,
+        **kwargs
     ):
         super(Fornum, self).__init__("Fornum", **kwargs)
         self.target: Name = target
@@ -442,7 +449,7 @@ class Forin(Statement):
     """
 
     def __init__(
-            self, body: Block, iter: List[Expression], targets: List[Name], **kwargs
+        self, body: Block, iter: List[Expression], targets: List[Name], **kwargs
     ):
         super(Forin, self).__init__("Forin", **kwargs)
         self.body: Block = body
@@ -482,15 +489,20 @@ class Invoke(Statement):
         source (`Expression`): Source expression where function is invoked.
         func (`Expression`): Function to call.
         args (`list<Expression>`): Function call arguments.
+        style (`CallStyle`): Call style.
     """
 
-    def __init__(
-            self, source: Expression, func: Expression, args: List[Expression], **kwargs
-    ):
+    def __init__(self,
+                 source: Expression,
+                 func: Expression,
+                 args: List[Expression],
+                 style: CallStyle = CallStyle.DEFAULT,
+                 **kwargs):
         super(Invoke, self).__init__("Invoke", **kwargs)
         self.source: Expression = source
         self.func: Expression = func
         self.args: List[Expression] = args
+        self.style: CallStyle = style
 
 
 class Function(Statement):
@@ -536,12 +548,12 @@ class Method(Statement):
     """
 
     def __init__(
-            self,
-            source: Expression,
-            name: Expression,
-            args: List[Expression],
-            body: Block,
-            **kwargs
+        self,
+        source: Expression,
+        name: Expression,
+        args: List[Expression],
+        body: Block,
+        **kwargs
     ):
         super(Method, self).__init__("Method", **kwargs)
         self.source: Expression = source
@@ -617,10 +629,10 @@ class String(Expression):
     """
 
     def __init__(
-            self,
-            s: str,
-            delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
-            **kwargs
+        self,
+        s: str,
+        delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
+        **kwargs
     ):
         super(String, self).__init__("String", **kwargs)
         self.s: str = s
@@ -636,11 +648,11 @@ class Field(Expression):
     """
 
     def __init__(
-            self,
-            key: Expression,
-            value: Expression,
-            between_brackets: bool = False,
-            **kwargs
+        self,
+        key: Expression,
+        value: Expression,
+        between_brackets: bool = False,
+        **kwargs
     ):
         super().__init__("Field", **kwargs)
         self.key: Expression = key

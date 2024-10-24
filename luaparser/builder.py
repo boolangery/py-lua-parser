@@ -17,7 +17,7 @@ class SyntaxException(Exception):
     def __init__(self, user_msg, token=None):
         if token:
             message = (
-                    "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
+                "(" + str(token.line) + "," + str(token.start) + "): Error: " + user_msg
             )
         else:
             message = "Error: " + user_msg
@@ -272,7 +272,7 @@ class Builder:
         self._hidden_handled_stack.append(self._hidden_handled)
 
     def next_is_rc(
-            self, type_to_seek: int, hidden_right: bool = True
+        self, type_to_seek: int, hidden_right: bool = True
     ) -> Optional[Token]:
         token = self._stream.LT(1)
         tok_type: int = token.type
@@ -495,16 +495,16 @@ class Builder:
         comments = self.get_comments()
 
         stat = (
-                self.parse_assignment()
-                or self.parse_var(is_statement=True)
-                or self.parse_while_stat()
-                or self.parse_repeat_stat()
-                or self.parse_local()
-                or self.parse_goto_stat()
-                or self.parse_if_stat()
-                or self.parse_for_stat()
-                or self.parse_function()
-                or self.parse_label()
+            self.parse_assignment()
+            or self.parse_var(is_statement=True)
+            or self.parse_while_stat()
+            or self.parse_repeat_stat()
+            or self.parse_local()
+            or self.parse_goto_stat()
+            or self.parse_if_stat()
+            or self.parse_for_stat()
+            or self.parse_function()
+            or self.parse_label()
         )
 
         if stat:
@@ -935,7 +935,7 @@ class Builder:
                             step = 1
                             # optional step
                             if self.next_is(Tokens.COMMA) and self.next_is_rc(
-                                    Tokens.COMMA
+                                Tokens.COMMA
                             ):
                                 step = self.parse_expr()
 
@@ -1298,10 +1298,10 @@ class Builder:
             while True:
                 self.save()
                 if self.next_in_rc(
-                        [
-                            Tokens.BITRSHIFT,
-                            Tokens.BITRLEFT,
-                        ]
+                    [
+                        Tokens.BITRSHIFT,
+                        Tokens.BITRLEFT,
+                    ]
                 ):
                     op = self.type
                     right = self.parse_concat_expr()
@@ -1731,29 +1731,81 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#stat_goto.
     def visitStat_goto(self, ctx: LuaParser.Stat_gotoContext):
-        return self.visitChildren(ctx)
+        return Goto(self.visit(ctx.NAME()))
 
     # Visit a parse tree produced by LuaParser#stat_do.
     def visitStat_do(self, ctx: LuaParser.Stat_doContext):
-        return self.visitChildren(ctx)
+        return Do(body=self.visit(ctx.block()))
 
     # Visit a parse tree produced by LuaParser#stat_while.
     def visitStat_while(self, ctx: LuaParser.Stat_whileContext):
-        return self.visitChildren(ctx)
+        return While(
+            test=self.visit(ctx.exp()),
+            body=self.visit(ctx.block()),
+        )
 
     # Visit a parse tree produced by LuaParser#stat_repeat.
     def visitStat_repeat(self, ctx: LuaParser.Stat_repeatContext):
-        return self.visitChildren(ctx)
+        return Repeat(
+            body=self.visit(ctx.block()),
+            test=self.visit(ctx.exp()),
+        )
 
     # Visit a parse tree produced by LuaParser#stat_if.
     def visitStat_if(self, ctx: LuaParser.Stat_ifContext):
-        return self.visitChildren(ctx)
+        expressions = ctx.exp()
+        blocks = ctx.block()
+        nb_else_if = len(ctx.ELSEIF())
+        if_stat = If(
+            test=self.visit(expressions[0]),
+            body=self.visit(blocks[0]),
+            orelse=None,
+        )
+
+        or_else_leaf = None
+        if nb_else_if > 0:
+            or_else_root = ElseIf(
+                test=self.visit(expressions[1]),
+                body=self.visit(blocks[1]),
+                orelse=None,
+            )
+
+            or_else_leaf = or_else_root
+            for i in range(nb_else_if - 1):
+                or_else_leaf.orelse = ElseIf(
+                    test=self.visit(expressions[i + 2]),
+                    body=self.visit(blocks[i + 2]),
+                    orelse=None,
+                )
+                or_else_leaf = or_else_leaf.orelse
+
+            if_stat.orelse = or_else_root
+
+        if ctx.ELSE():
+            block = self.visit(blocks[len(blocks) - 1])
+            if if_stat.orelse is None:
+                if_stat.orelse = block
+            else:
+                or_else_leaf.orelse = block
+
+        return if_stat
 
     # Visit a parse tree produced by LuaParser#stat_for.
     def visitStat_for(self, ctx: LuaParser.Stat_forContext):
-        if ctx.IN(): # forin
-        else: # fornum
-        return self.visitChildren(ctx)
+        if ctx.IN():  # forin
+            return Forin(
+                body=self.visit(ctx.block()),
+                iter=self.visit(ctx.explist()),
+                targets=self.visit(ctx.namelist()),
+            )
+        else:  # fornum
+            return Fornum(
+                target=self.visit(ctx.NAME()),
+                start=self.visit(ctx.exp(0)),
+                stop=self.visit(ctx.exp(1)),
+                step=self.visit(ctx.exp(2)) if ctx.exp(2) else None,
+                body=self.visit(ctx.block()),
+            )
 
     # Visit a parse tree produced by LuaParser#stat_function.
     def visitStat_function(self, ctx: LuaParser.Stat_functionContext):
@@ -1796,15 +1848,22 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#attrib.
     def visitAttrib(self, ctx: LuaParser.AttribContext):
-        return Attribute(ctx.NAME().getText())
+        return Attribute(self.visit(ctx.NAME()))
 
     # Visit a parse tree produced by LuaParser#retstat.
     def visitRetstat(self, ctx: LuaParser.RetstatContext):
-        return self.visitChildren(ctx)
+        if ctx.RETURN():
+            return Return(
+                values=self.visit(ctx.explist())
+            )
+        elif ctx.BREAK():
+            return Break()
+        else:
+            return Continue()
 
     # Visit a parse tree produced by LuaParser#label.
     def visitLabel(self, ctx: LuaParser.LabelContext):
-        return self.visitChildren(ctx)
+        return Label(label_id=self.visit(ctx.NAME()))
 
     # Visit a parse tree produced by LuaParser#funcname.
     def visitFuncname(self, ctx: LuaParser.FuncnameContext):
@@ -1837,7 +1896,7 @@ class BuilderVisitor(LuaParserVisitor):
         return [self.visit(exp) for exp in ctx.exp()]
 
     # Visit a parse tree produced by LuaParser#exp.
-    def visitExp(self, ctx: LuaParser.ExpContext):
+    def visitExp(self, ctx: LuaParser.ExpContext) -> Expression:
         if ctx.NIL():
             return Nil()
         elif ctx.FALSE():
@@ -1937,10 +1996,6 @@ class BuilderVisitor(LuaParserVisitor):
         tail = self.visitAllTails(root, ctx.tail())
         return tail
 
-    # Visit a parse tree produced by LuaParser#functioncall.
-    def visitFunctioncall(self, ctx: LuaParser.FunctioncallContext):
-        return self.visitChildren(ctx)
-
     # Visit a parse tree produced by LuaParser#functioncall_name.
     def visitFunctioncall_name(self, ctx: LuaParser.Functioncall_nameContext):
         name = self.visit(ctx.NAME())
@@ -1950,15 +2005,27 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#functioncall_nested.
     def visitFunctioncall_nested(self, ctx: LuaParser.Functioncall_nestedContext):
-        return self.visitChildren(ctx)
+        call = self.visit(ctx.functioncall())
+        tail = self.visitAllTails(call, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Call(tail, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
 
     # Visit a parse tree produced by LuaParser#functioncall_exp.
     def visitFunctioncall_exp(self, ctx: LuaParser.Functioncall_expContext):
-        return self.visitChildren(ctx)
+        exp = self.visitExp(ctx.exp())
+        exp.wrapped = True
+        tail = self.visitAllTails(exp, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return Call(tail, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
 
     # Visit a parse tree produced by LuaParser#functioncall_expinvoke.
     def visitFunctioncall_expinvoke(self, ctx: LuaParser.Functioncall_expinvokeContext):
-        return self.visitChildren(ctx)
+        exp = self.visitExp(ctx.exp())
+        exp.wrapped = True
+        tail = self.visitAllTails(exp, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        func = self.visit(ctx.NAME())
+        return Invoke(tail, func, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
 
     # Visit a parse tree produced by LuaParser#functioncall_invoke.
     def visitFunctioncall_invoke(self, ctx: LuaParser.Functioncall_invokeContext):
@@ -1966,7 +2033,7 @@ class BuilderVisitor(LuaParserVisitor):
         func = self.visit(ctx.NAME(1))
         tail = self.visitAllTails(source, ctx.tail())
         par, args = self.visitArgs(ctx.args())
-        return Invoke(tail, func, _listify(args))
+        return Invoke(tail, func, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
 
     # Visit a parse tree produced by LuaParser#functioncall_nestedinvoke.
     def visitFunctioncall_nestedinvoke(self, ctx: LuaParser.Functioncall_nestedinvokeContext):
@@ -1974,7 +2041,7 @@ class BuilderVisitor(LuaParserVisitor):
         func = self.visit(ctx.NAME())
         tail = self.visitAllTails(call, ctx.tail())
         par, args = self.visitArgs(ctx.args())
-        return Invoke(tail, func, _listify(args))
+        return Invoke(tail, func, _listify(args), style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS)
 
     def visitAllTails(self, root_exp: Expression, tails: List[LuaParser.TailContext]):
         if not tails:
