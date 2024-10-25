@@ -57,7 +57,7 @@ class Node:
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
             return _equal_dicts(
-                self.__dict__, other.__dict__, ["_first_token", "_last_token"]
+                self.__dict__, other.__dict__, ["_tokens"]
             )
         return False
 

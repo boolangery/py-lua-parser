@@ -584,3 +584,29 @@ class StatementsTestCase(tests.TestCase):
             ])
         )
         self.assertEqual(exp, tree)
+
+    def test_method(self):
+        tree = ast.parse(
+            textwrap.dedent(
+                """       
+            function foo.bar:print(arg)
+            end
+            """
+            )
+        )
+        exp = Chunk(
+            Block(
+                [
+                    Method(
+                        source=Index(
+                            idx=Name("bar"),
+                            value=Name("foo"),
+                        ),
+                        name=Name("print"),
+                        args=[Name("arg")],
+                        body=Block([]),
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)
