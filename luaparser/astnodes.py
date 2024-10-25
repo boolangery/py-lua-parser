@@ -1,13 +1,9 @@
 """
-    ``astnodes`` module
-    ===================
-
-    Contains all Ast Node definitions.
+This module defines the AST nodes for the Lua language.
 """
 from __future__ import annotations
 from enum import Enum
 from typing import List, Optional
-
 from antlr4.Token import CommonToken
 
 Comments = Optional[List["Comment"]]
@@ -25,40 +21,34 @@ def _equal_dicts(d1, d2, ignore_keys):
 
 
 class Node:
-    """Base class for AST node."""
+    """Base class for AST node.
+    """
 
     def __init__(
         self,
         name: str,
         comments: Comments = None,
-        first_token: Optional[CommonToken] = None,
-        last_token: Optional[CommonToken] = None,
+        tokens: Optional[List[CommonToken]] = None,
     ):
         """
-
         Args:
-            name: Node display name
-            comments: Optional comments
-            first_token: First Antlr token
-            last_token: Last Antlr token
+            name: The name of the node.
+            comments: Optional comments.
+            tokens: List of Antlr4 tokens composing the node.
         """
         if comments is None:
             comments = []
         self._name: str = name
         self.comments: Comments = comments
-        self._first_token: Optional[CommonToken] = first_token
-        self._last_token: Optional[CommonToken] = last_token
+        self._tokens: Optional[List[CommonToken]] = tokens
 
         # We want to have nodes be serializable with pickle.
         # To allow that we must not have mutable fields such as streams.
         # Tokens have streams, create a stream-less copy of tokens.
-        if self._first_token is not None:
-            self._first_token = self._first_token.clone()
-            self._first_token.source = CommonToken.EMPTY_SOURCE
-
-        if self._last_token is not None:
-            self._last_token = self._last_token.clone()
-            self._last_token.source = CommonToken.EMPTY_SOURCE
+        if self._tokens:
+            self._tokens = [t.clone() for t in self._tokens]
+            for t in self._tokens:
+                t.source = CommonToken.EMPTY_SOURCE
 
     @property
     def display_name(self) -> str:
@@ -72,47 +62,48 @@ class Node:
         return False
 
     @property
-    def first_token(self) -> Optional[CommonToken]:
+    def tokens(self) -> Optional[List[CommonToken]]:
+        """List of Antlr4 tokens composing the node.
+
+        Note: Tokens are disconnected from underline source streams.
         """
-        First token of a node.
+        return self._tokens
+
+    @tokens.setter
+    def tokens(self, tokens: Optional[List[CommonToken]]):
+        if tokens:
+            self._tokens = [t.clone() for t in tokens]
+            for t in self._tokens:
+                t.source = CommonToken.EMPTY_SOURCE
+
+    @property
+    def first_token(self) -> Optional[CommonToken]:
+        """First token of a node.
 
         Note: Token is disconnected from underline source streams.
         """
-        return self._first_token
-
-    @first_token.setter
-    def first_token(self, val: Optional[CommonToken]):
-        if val is not None:
-            self._first_token = val.clone()
-            self._first_token.source = CommonToken.EMPTY_SOURCE
+        return self._tokens[0] if self._tokens else None
 
     @property
     def last_token(self) -> Optional[CommonToken]:
-        """
-        Last token of a node.
+        """Last token of a node.
 
         Note: Token is disconnected from underline source streams.
         """
-        return self._last_token
-
-    @last_token.setter
-    def last_token(self, val: Optional[CommonToken]):
-        if val is not None:
-            self._last_token = val.clone()
-            self._last_token.source = CommonToken.EMPTY_SOURCE
+        return self._tokens[-1] if self._tokens else None
 
     @property
     def start_char(self) -> Optional[int]:
-        return self._first_token.start if self._first_token else None
+        return self.first_token.start if self.first_token else None
 
     @property
     def stop_char(self) -> Optional[int]:
-        return self._last_token.stop if self._last_token else None
+        return self.last_token.stop if self.last_token else None
 
     @property
     def line(self) -> Optional[int]:
         """Line number."""
-        return self._first_token.line if self._first_token else None
+        return self._tokens[0].line if self._tokens else None
 
     def to_json(self) -> any:
         return {
@@ -132,6 +123,13 @@ class Node:
 
 
 class Comment(Node):
+    """Define a Lua comment.
+
+    Attributes:
+        s: Comment string.
+        is_multi_line: True if comment is multi-line.
+    """
+
     def __init__(self, s: str, is_multi_line: bool = False, **kwargs):
         super().__init__("Comment", **kwargs)
         self.s: str = s
@@ -142,9 +140,8 @@ class Expression(Node):
     """Define a Lua expression.
 
     Attributes:
-        wrapped (`bool`): True if expression is between parentheses
+        wrapped: True if expression is between parentheses
     """
-    wrapped: bool
 
     def __init__(
         self,
@@ -161,7 +158,11 @@ class Statement(Expression):
 
 
 class Block(Node):
-    """Define a Lua Block."""
+    """Define a Lua Block.
+
+    Attributes:
+        body: Block content.
+    """
 
     def __init__(self, body: List[Statement], **kwargs):
         super().__init__("Block", **kwargs)
@@ -172,7 +173,7 @@ class Chunk(Node):
     """Define a Lua chunk.
 
     Attributes:
-        body (`Block`): Chunk body.
+        body: Chunk body.
     """
 
     def __init__(self, body: Block, **kwargs):
@@ -184,11 +185,6 @@ class Chunk(Node):
         return to_pretty_str(self)
 
 
-"""
-Left Hand Side expression.
-"""
-
-
 class Lhs(Expression):
     """Define a Lua Left Hand Side expression."""
 
@@ -198,8 +194,11 @@ class Attribute(Node):
 
     attrib ::= [‘<’ Name ‘>’]
 
+    References:
+        https://www.lua.org/manual/5.4/manual.html#3.3.7
+
     Attributes:
-        name (`Name`): Attribute name.
+        name: Attribute name.
     """
 
     def __init__(self, name: Name, **kwargs):
@@ -211,8 +210,8 @@ class Name(Lhs):
     """Define a Lua name expression.
 
     Attributes:
-        id (`string`): Id.
-        attribute (`Attribute`): Optional attribute.
+        id: Id.
+        attribute: Optional attribute.
     """
 
     def __init__(self, identifier: str, attribute: Optional[Attribute] = None, **kwargs):
@@ -230,8 +229,8 @@ class Index(Lhs):
     """Define a Lua index expression.
 
     Attributes:
-        idx (`Expression`): Index expression.
-        value (`Expression`): Id.
+        idx: Index expression.
+        value: Id.
     """
 
     def __init__(
@@ -256,8 +255,8 @@ class Assign(Statement):
     """Lua global assignment statement.
 
     Attributes:
-        targets (`list<Node>`): List of targets.
-        values (`list<Node>`): List of values.
+        targets: List of targets.
+        values: List of values.
 
     """
 
@@ -271,8 +270,8 @@ class LocalAssign(Assign):
     """Lua local assignment statement.
 
     Attributes:
-        targets (`list<Name>`): List of targets.
-        values (`list<Node>`): List of values.
+        targets: List of targets.
+        values: List of values.
     """
 
     def __init__(self, targets: List[Name], values: List[Node], **kwargs):
@@ -284,8 +283,8 @@ class While(Statement):
     """Lua while statement.
 
     Attributes:
-        test (`Node`): Expression to test.
-        body (`Block`): List of statements to execute.
+        test: Expression to test.
+        body: List of statements to execute.
     """
 
     def __init__(self, test: Expression, body: Block, **kwargs):
@@ -298,7 +297,7 @@ class Do(Statement):
     """Lua do end statement.
 
     Attributes:
-        body (`Block`): List of statements to execute.
+        body: List of statements to execute.
     """
 
     def __init__(self, body: Block, **kwargs):
@@ -310,8 +309,8 @@ class Repeat(Statement):
     """Lua repeat until statement.
 
     Attributes:
-        test (`Node`): Expression to test.
-        body (`Block`): List of statements to execute.
+        test: Expression to test.
+        body: List of statements to execute.
     """
 
     def __init__(self, body: Block, test: Expression, **kwargs):
@@ -324,9 +323,9 @@ class ElseIf(Statement):
     """Define the elseif lua statement.
 
     Attributes:
-        test (`Node`): Expression to test.
-        body (`list<Statement>`): List of statements to execute if test is true.
-        orelse (`list<Statement> or ElseIf`): List of statements or ElseIf if test if false.
+        test: Expression to test.
+        body: List of statements to execute if test is true.
+        orelse: List of statements or ElseIf if test if false.
     """
 
     def __init__(self, test: Node, body: Block, orelse, **kwargs):
@@ -340,9 +339,9 @@ class If(Statement):
     """Lua if statement.
 
     Attributes:
-        test (`Node`): Expression to test.
-        body (`Block`): List of statements to execute if test is true.
-        orelse (`list<Statement> or ElseIf`): List of statements or ElseIf if test if false.
+        test: Expression to test.
+        body: List of statements to execute if test is true.
+        orelse: List of statements or ElseIf if test if false.
     """
 
     def __init__(
@@ -358,7 +357,7 @@ class Label(Statement):
     """Define the label lua statement.
 
     Attributes:
-        id (`Name`): Label name.
+        id: Label name.
     """
 
     def __init__(self, label_id: Name, **kwargs):
@@ -370,7 +369,7 @@ class Goto(Statement):
     """Define the goto lua statement.
 
     Attributes:
-        label (`Name`): Label node.
+        label: Label node.
     """
 
     def __init__(self, label: Name, **kwargs):
@@ -403,7 +402,7 @@ class Return(Statement):
     """Define the Lua return statement.
 
     Attributes:
-        values (`list<Expression>`): Values to return.
+        values: Values to return.
     """
 
     def __init__(self, values, **kwargs):
@@ -415,11 +414,11 @@ class Fornum(Statement):
     """Define the numeric for lua statement.
 
     Attributes:
-        target (`Name`): Target name.
-        start (`Expression`): Start index value.
-        stop (`Expression`): Stop index value.
-        step (`Expression`): Step value.
-        body (`Block`): List of statements to execute.
+        target: Target name.
+        start: Start index value.
+        stop: Stop index value.
+        step: Step value.
+        body: List of statements to execute.
     """
 
     def __init__(
@@ -443,9 +442,9 @@ class Forin(Statement):
     """Define the for in lua statement.
 
     Attributes:
-        body (`Block`): List of statements to execute.
-        iter (`list<Expression>`): Iterable expressions.
-        targets (`list<Name>`): Start index value.
+        body: List of statements to execute.
+        iter: Iterable expressions.
+        targets: Start index value.
     """
 
     def __init__(
@@ -466,9 +465,9 @@ class Call(Statement):
     """Define the function call lua statement.
 
     Attributes:
-        func (`Expression`): Function to call.
-        args (`list<Expression>`): Function call arguments.
-        style (`CallStyle`): Call style.
+        func: Function to call.
+        args: Function call arguments.
+        style: Call style.
     """
 
     def __init__(self,
@@ -486,10 +485,10 @@ class Invoke(Statement):
     """Define the invoke function call lua statement (magic syntax with ':').
 
     Attributes:
-        source (`Expression`): Source expression where function is invoked.
-        func (`Expression`): Function to call.
-        args (`list<Expression>`): Function call arguments.
-        style (`CallStyle`): Call style.
+        source: Source expression where function is invoked.
+        func: Function to call.
+        args: Function call arguments.
+        style: Call style.
     """
 
     def __init__(self,
@@ -509,9 +508,9 @@ class Function(Statement):
     """Define the Lua function declaration statement.
 
     Attributes:
-        name (`Expression`): Function name.
-        args (`list<Expression>`): Function arguments.
-        body (`Block`): List of statements to execute.
+        name: Function name.
+        args: Function arguments.
+        body: List of statements to execute.
     """
 
     def __init__(self, name: Expression, args: List[Expression], body: Block, **kwargs):
@@ -525,9 +524,9 @@ class LocalFunction(Statement):
     """Define the Lua local function declaration statement.
 
     Attributes:
-        name (`Expression`): Function name.
-        args (`list<Expression>`): Function arguments.
-        body (`list<Statement>`): List of statements to execute.
+        name: Function name.
+        args: Function arguments.
+        body: List of statements to execute.
     """
 
     def __init__(self, name: Expression, args: List[Expression], body: Block, **kwargs):
@@ -541,10 +540,10 @@ class Method(Statement):
     """Define the Lua Object Oriented function statement.
 
     Attributes:
-        source (`Expression`): Source expression where method is defined.
-        name (`Expression`): Function name.
-        args (`list<Expression>`): Function arguments.
-        body (`Block`): List of statements to execute.
+        source: Source expression where method is defined.
+        name: Function name.
+        args: Function arguments.
+        body: List of statements to execute.
     """
 
     def __init__(
@@ -599,7 +598,7 @@ class Number(Expression):
     """Define the Lua number expression.
 
     Attributes:
-        n (`int|float`): Numeric value.
+        n: Numeric value.
     """
 
     def __init__(self, n: NumberType, **kwargs):
@@ -624,8 +623,8 @@ class String(Expression):
     """Define the Lua string expression.
 
     Attributes:
-        s (`string`): String value.
-        delimiter (`StringDelimiter`): The string delimiter
+        s: String value.
+        delimiter: The string delimiter
     """
 
     def __init__(
@@ -643,8 +642,8 @@ class Field(Expression):
     """Define a lua table field expression
 
     Attributes:
-        key (`Expression`): Key.
-        value (`Expression`): Value.
+        key: Key.
+        value: Value.
     """
 
     def __init__(
@@ -664,7 +663,7 @@ class Table(Expression):
     """Define the Lua table expression.
 
     Attributes:
-        fields (`list<Field>`): Table fields.
+        fields: Table fields.
     """
 
     def __init__(self, fields: List[Field], **kwargs):
@@ -683,8 +682,8 @@ class AnonymousFunction(Expression):
     """Define the Lua anonymous function expression.
 
     Attributes:
-        args (`list<Expression>`): Function arguments.
-        body (`Block`): List of statements to execute.
+        args: Function arguments.
+        body: List of statements to execute.
     """
 
     def __init__(self, args: List[Expression], body: Block, **kwargs):
@@ -706,8 +705,8 @@ class BinaryOp(Op):
     """Base class for Lua 'Left Op Right' Operators.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, name, left: Expression, right: Expression, **kwargs):
@@ -729,8 +728,8 @@ class AddOp(AriOp):
     """Add expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -741,8 +740,8 @@ class SubOp(AriOp):
     """Substract expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -753,8 +752,8 @@ class MultOp(AriOp):
     """Multiplication expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -765,8 +764,8 @@ class FloatDivOp(AriOp):
     """Float division expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -777,8 +776,8 @@ class FloorDivOp(AriOp):
     """Floor division expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -789,8 +788,8 @@ class ModOp(AriOp):
     """Modulo expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -801,8 +800,8 @@ class ExpoOp(AriOp):
     """Exponent expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -822,8 +821,8 @@ class BAndOp(BitOp):
     """Bitwise and expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -834,8 +833,8 @@ class BOrOp(BitOp):
     """Bitwise or expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -846,8 +845,8 @@ class BXorOp(BitOp):
     """Bitwise xor expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -858,8 +857,8 @@ class BShiftROp(BitOp):
     """Bitwise right shift expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -870,8 +869,8 @@ class BShiftLOp(BitOp):
     """Bitwise left shift expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -891,8 +890,8 @@ class LessThanOp(RelOp):
     """Less than expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -903,8 +902,8 @@ class GreaterThanOp(RelOp):
     """Greater than expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -915,8 +914,8 @@ class LessOrEqThanOp(RelOp):
     """Less or equal expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -927,8 +926,8 @@ class GreaterOrEqThanOp(RelOp):
     """Greater or equal expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -939,8 +938,8 @@ class EqToOp(RelOp):
     """Equal to expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -951,8 +950,8 @@ class NotEqToOp(RelOp):
     """Not equal to expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -972,8 +971,8 @@ class AndLoOp(LoOp):
     """Logical and expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -984,8 +983,8 @@ class OrLoOp(LoOp):
     """Logical or expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -1001,8 +1000,8 @@ class Concat(BinaryOp):
     """Concat expression.
 
     Attributes:
-        left (`Expression`): Left expression.
-        right (`Expression`): Right expression.
+        left: Left expression.
+        right: Right expression.
     """
 
     def __init__(self, left: Expression, right: Expression, **kwargs):
@@ -1018,7 +1017,7 @@ class UnaryOp(Expression):
     """Base class for Lua unitary operator.
 
     Attributes:
-        operand (`Expression`): Operand.
+        operand: Operand.
     """
 
     def __init__(self, name: str, operand: Expression, **kwargs):
@@ -1030,7 +1029,7 @@ class UMinusOp(UnaryOp):
     """Lua minus unitary operator.
 
     Attributes:
-        operand (`Expression`): Operand.
+        operand: Operand.
     """
 
     def __init__(self, operand: Expression, **kwargs):
@@ -1041,7 +1040,7 @@ class UBNotOp(UnaryOp):
     """Lua binary not unitary operator.
 
     Attributes:
-        operand (`Expression`): Operand.
+        operand: Operand.
     """
 
     def __init__(self, operand: Expression, **kwargs):
@@ -1052,7 +1051,7 @@ class ULNotOp(UnaryOp):
     """Logical not operator.
 
     Attributes:
-        operand (`Expression`): Operand.
+        operand: Operand.
     """
 
     def __init__(self, operand: Expression, **kwargs):

@@ -1,7 +1,7 @@
 import json
 from typing import Generator
 
-from antlr4 import InputStream, CommonTokenStream
+from antlr4 import InputStream, CommonTokenStream, Token
 from antlr4.error.ErrorListener import ErrorListener, ConsoleErrorListener
 
 from luaparser import printers
@@ -18,7 +18,8 @@ def parse(source: str) -> Chunk:
     lexer.removeErrorListeners()
     lexer.addErrorListener(ConsoleErrorListener())
 
-    token_stream = CommonTokenStream(lexer)
+    token_stream = CommonTokenStream(lexer, channel=Token.DEFAULT_CHANNEL)
+    comments_token_stream = CommonTokenStream(lexer, channel=Token.DEFAULT_CHANNEL)
     parser = LuaParser(token_stream)
     parser.addErrorListener(ConsoleErrorListener())
     tree = parser.start_()
@@ -26,7 +27,7 @@ def parse(source: str) -> Chunk:
     if parser.getNumberOfSyntaxErrors() > 0:
         raise SyntaxException("syntax errors")
     else:
-        v = BuilderVisitor()
+        v = BuilderVisitor(token_stream)
         val = v.visit(tree)
         print(val)
         return val

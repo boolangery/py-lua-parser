@@ -114,10 +114,22 @@ fragment HexDigit: [0-9a-fA-F];
 
 fragment SingleLineInputCharacter: ~[\r\n\u0085\u2028\u2029];
 
-COMMENT: '--' { this.HandleComment(); } -> channel(HIDDEN);
+COMMENT
+    : '--[' NESTED_STR ']' -> channel(2)
+    ;
+
+LINE_COMMENT
+    : '--'
+    (                                               // --
+    | '[' '='*                                      // --[==
+    | '[' '='* ~('='|'['|'\r'|'\n') ~('\r'|'\n')*   // --[==AA
+    | ~('['|'\r'|'\n') ~('\r'|'\n')*                // --AAA
+    )
+    -> channel(2)
+    ;
 
 WS: [ \t\u000C\r]+ -> channel(HIDDEN);
 
-NL: [\n] -> channel(2);
+NL: [\n] -> channel(1);
 
 SHEBANG: '#' { this.IsLine1Col0() }? '!'? SingleLineInputCharacter* -> channel(HIDDEN);
