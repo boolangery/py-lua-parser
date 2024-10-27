@@ -318,7 +318,7 @@ class BuilderVisitor(LuaParserVisitor):
     def visitRetstat(self, ctx: LuaParser.RetstatContext):
         if ctx.RETURN():
             return self.add_context(ctx, Return(
-                values=self.visit(ctx.explist())
+                values=self.visit(ctx.explist()) if ctx.explist() else [],
             ))
         elif ctx.BREAK():
             return self.add_context(ctx, Break())

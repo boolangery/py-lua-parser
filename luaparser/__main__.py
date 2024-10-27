@@ -2,7 +2,7 @@ import sys
 from optparse import OptionParser, OptionGroup
 import luaparser
 from luaparser import ast
-from luaparser.builder import SyntaxException
+from luaparser.ast import SyntaxException
 
 
 def abort(msg):
