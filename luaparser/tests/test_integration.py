@@ -312,3 +312,21 @@ class IntegrationTestCase(tests.TestCase):
             ])
         )
         self.assertEqual(exp, tree)
+
+    # ULengthOp not correctly parsed #54
+    def test_cont_int_10(self):
+        tree = ast.parse(textwrap.dedent("""
+            if #setting >10 and setting_name == "user" then return 100 end
+        """))
+        exp = Chunk(
+            Block([
+                If(
+                    test=AndLoOp(left=GreaterThanOp(left=ULengthOP(Name("setting")), right=Number(10)), right=EqToOp(left=Name("setting_name"), right=String("user", StringDelimiter.DOUBLE_QUOTE))),
+                    body=Block([
+                        Return([Number(100)])
+                    ]),
+                    orelse=None,
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)
