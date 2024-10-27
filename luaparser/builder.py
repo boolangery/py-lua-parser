@@ -659,4 +659,9 @@ class BuilderVisitor(LuaParserVisitor):
         elif p.match(lua_str):
             lua_str = p.search(lua_str).group(1)
 
+        # Eval string to unescape:
+        try:
+            lua_str = ast.literal_eval(F'"{lua_str}"')
+        except:
+            pass
         return String(lua_str, delimiter)

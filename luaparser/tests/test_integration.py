@@ -321,12 +321,26 @@ class IntegrationTestCase(tests.TestCase):
         exp = Chunk(
             Block([
                 If(
-                    test=AndLoOp(left=GreaterThanOp(left=ULengthOP(Name("setting")), right=Number(10)), right=EqToOp(left=Name("setting_name"), right=String("user", StringDelimiter.DOUBLE_QUOTE))),
+                    test=AndLoOp(left=GreaterThanOp(left=ULengthOP(Name("setting")), right=Number(10)),
+                                 right=EqToOp(left=Name("setting_name"),
+                                              right=String("user", StringDelimiter.DOUBLE_QUOTE))),
                     body=Block([
                         Return([Number(100)])
                     ]),
                     orelse=None,
                 )
+            ])
+        )
+        self.assertEqual(exp, tree)
+
+    # Strings are not being parsed #43
+    def test_cont_int_12(self):
+        tree = ast.parse(textwrap.dedent("""
+            a='\\0\\n\\ta'
+        """))
+        exp = Chunk(
+            Block([
+                Assign([Name("a")], [String("\x00\n\ta", StringDelimiter.SINGLE_QUOTE)])
             ])
         )
         self.assertEqual(exp, tree)

@@ -81,7 +81,7 @@ class TypesValuesTestCase(tests.TestCase):
                         targets=[Name("b")],
                         values=[
                             String(
-                                r"one line\nnext line\n\"in quotes\", 'in quotes'",
+                                "one line\nnext line\n\"in quotes\", 'in quotes'",
                                 StringDelimiter.DOUBLE_QUOTE,
                             )
                         ],
