@@ -1,8 +1,8 @@
 py-lua-parser
 ===============================================================================
 
-.. image:: https://travis-ci.org/boolangery/py-lua-parser.svg?branch=master
-    :target: https://travis-ci.org/boolangery/py-lua-parser
+.. image:: https://github.com/boolangery/py-lua-parser/actions/workflows/python-package.yml/badge.svg
+    :target: https://github.com/boolangery/py-lua-parser/actions/workflows/python-package.yml
 .. image:: https://img.shields.io/pypi/v/luaparser.svg
     :target: https://pypi.python.org/pypi/luaparser/
 .. image:: https://img.shields.io/pypi/pyversions/luaparser.svg
