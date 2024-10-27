@@ -344,3 +344,31 @@ class IntegrationTestCase(tests.TestCase):
             ])
         )
         self.assertEqual(exp, tree)
+
+    # Comments with Chinese characters are discarded #39
+    def test_cont_int_13(self):
+        tree = ast.parse(textwrap.dedent("""
+               function setupRichText()
+                    richText.fitArea = false	    -- 是否根据内容自适应高度
+                    richText.fitPerHeight = nil     -- 自适应的单行高度
+                    return richText
+                end
+        """))
+        exp = Chunk(
+            Block([
+                Function(
+                    name=Name("setupRichText"),
+                    args=[],
+                    body=Block([
+                        Assign([Index(Name("fitArea"), Name("richText"))], [FalseExpr()], comments=[
+                            Comment('-- 是否根据内容自适应高度')
+                        ]),
+                        Assign([Index(Name("fitPerHeight"), Name("richText"))], [Nil()], comments=[
+                            Comment('-- 自适应的单行高度')
+                        ]),
+                        Return([Name("richText")])
+                    ])
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)

@@ -173,7 +173,7 @@ class BuilderVisitor(LuaParserVisitor):
         return self.add_context(ctx, Assign(
             targets=_listify(self.visit(ctx.varlist())),
             values=_listify(self.visit(ctx.explist())),
-        ))
+        ), allow_right_ctx=True)
 
     # Visit a parse tree produced by LuaParser#stat_functioncall.
     def visitStat_functioncall(self, ctx: LuaParser.Stat_functioncallContext):
@@ -185,7 +185,7 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#stat_break.
     def visitStat_break(self, ctx: LuaParser.Stat_breakContext):
-        return self.add_context(ctx, Break())
+        return self.add_context(ctx, Break(), allow_right_ctx=True)
 
     # Visit a parse tree produced by LuaParser#stat_goto.
     def visitStat_goto(self, ctx: LuaParser.Stat_gotoContext):
