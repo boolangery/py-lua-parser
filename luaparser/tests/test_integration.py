@@ -194,13 +194,13 @@ class IntegrationTestCase(tests.TestCase):
         tree = ast.parse(
             textwrap.dedent(
                 """
-            function table.pack(...)
-                repeat
-                   print("value of a:", a)
-                   a = a + 1;
-                until( a > 15 )
-            end
-            """
+                    function table.pack(...)
+                        repeat
+                           print("value of a:", a)
+                           a = a + 1;
+                        until( a > 15 )
+                    end
+                """
             )
         )
         nodes = ast.walk(tree)
@@ -292,3 +292,23 @@ class IntegrationTestCase(tests.TestCase):
     def test_cont_int_8(self):
         source = r"result = (a + b) / (c + d)"
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    # Failure to parse chained comparisons #56
+    def test_cont_int_9(self):
+        tree = ast.parse(textwrap.dedent("""
+            if false == false == false then 
+                x = 2
+            end
+        """))
+        exp = Chunk(
+            Block([
+                If(
+                    test=EqToOp(left=EqToOp(left=FalseExpr(), right=FalseExpr()), right=FalseExpr()),
+                    body=Block([
+                        Assign([Name("x")], [Number(2)])
+                    ]),
+                    orelse=None,
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)
