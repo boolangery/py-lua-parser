@@ -19,7 +19,6 @@ def parse(source: str) -> Chunk:
     lexer.addErrorListener(ConsoleErrorListener())
 
     token_stream = CommonTokenStream(lexer, channel=Token.DEFAULT_CHANNEL)
-    comments_token_stream = CommonTokenStream(lexer, channel=Token.DEFAULT_CHANNEL)
     parser = LuaParser(token_stream)
     parser.addErrorListener(ConsoleErrorListener())
     tree = parser.start_()
@@ -360,6 +359,14 @@ class WalkVisitor:
         self.visit(node.test)
 
     @visitor(SemiColon)
+    def visit(self, node):
+        self._nodes.append(node)
+
+    @visitor(Comment)
+    def visit(self, node):
+        self._nodes.append(node)
+
+    @visitor(Attribute)
     def visit(self, node):
         self._nodes.append(node)
 

@@ -25,30 +25,36 @@ class Node:
     """
 
     def __init__(
-        self,
-        name: str,
-        comments: Comments = None,
-        tokens: Optional[List[CommonToken]] = None,
+            self,
+            name: str,
+            comments: Comments = None,
+            first_token: Optional[CommonToken] = None,
+            last_token: Optional[CommonToken] = None,
     ):
         """
         Args:
             name: The name of the node.
             comments: Optional comments.
-            tokens: List of Antlr4 tokens composing the node.
+            first_token: First Antlr token
+            last_token: Last Antlr token
         """
         if comments is None:
             comments = []
         self._name: str = name
         self.comments: Comments = comments
-        self._tokens: Optional[List[CommonToken]] = tokens
+        self._first_token: Optional[CommonToken] = first_token
+        self._last_token: Optional[CommonToken] = last_token
 
         # We want to have nodes be serializable with pickle.
         # To allow that we must not have mutable fields such as streams.
         # Tokens have streams, create a stream-less copy of tokens.
-        if self._tokens:
-            self._tokens = [t.clone() for t in self._tokens]
-            for t in self._tokens:
-                t.source = CommonToken.EMPTY_SOURCE
+        if self._first_token is not None:
+            self._first_token = self._first_token.clone()
+            self._first_token.source = CommonToken.EMPTY_SOURCE
+
+        if self._last_token is not None:
+            self._last_token = self._last_token.clone()
+            self._last_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def display_name(self) -> str:
@@ -57,40 +63,39 @@ class Node:
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
             return _equal_dicts(
-                self.__dict__, other.__dict__, ["_tokens"]
+                self.__dict__, other.__dict__, ["_first_token", "_last_token"]
             )
         return False
 
     @property
-    def tokens(self) -> Optional[List[CommonToken]]:
-        """List of Antlr4 tokens composing the node.
-
-        Note: Tokens are disconnected from underline source streams.
-        """
-        return self._tokens
-
-    @tokens.setter
-    def tokens(self, tokens: Optional[List[CommonToken]]):
-        if tokens:
-            self._tokens = [t.clone() for t in tokens]
-            for t in self._tokens:
-                t.source = CommonToken.EMPTY_SOURCE
-
-    @property
     def first_token(self) -> Optional[CommonToken]:
-        """First token of a node.
+        """
+        First token of a node.
 
         Note: Token is disconnected from underline source streams.
         """
-        return self._tokens[0] if self._tokens else None
+        return self._first_token
+
+    @first_token.setter
+    def first_token(self, val: Optional[CommonToken]):
+        if val is not None:
+            self._first_token = val.clone()
+            self._first_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def last_token(self) -> Optional[CommonToken]:
-        """Last token of a node.
+        """
+        Last token of a node.
 
         Note: Token is disconnected from underline source streams.
         """
-        return self._tokens[-1] if self._tokens else None
+        return self._last_token
+
+    @last_token.setter
+    def last_token(self, val: Optional[CommonToken]):
+        if val is not None:
+            self._last_token = val.clone()
+            self._last_token.source = CommonToken.EMPTY_SOURCE
 
     @property
     def start_char(self) -> Optional[int]:
@@ -144,10 +149,10 @@ class Expression(Node):
     """
 
     def __init__(
-        self,
-        name: str,
-        wrapped=False,
-        **kwargs,
+            self,
+            name: str,
+            wrapped=False,
+            **kwargs,
     ):
         super(Expression, self).__init__(name, **kwargs)
         self.wrapped = wrapped
@@ -234,11 +239,11 @@ class Index(Lhs):
     """
 
     def __init__(
-        self,
-        idx: Expression,
-        value: Expression,
-        notation: IndexNotation = IndexNotation.DOT,
-        **kwargs
+            self,
+            idx: Expression,
+            value: Expression,
+            notation: IndexNotation = IndexNotation.DOT,
+            **kwargs
     ):
         super(Index, self).__init__("Index", **kwargs)
         self.idx: Expression = idx
@@ -345,7 +350,7 @@ class If(Statement):
     """
 
     def __init__(
-        self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
+            self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
     ):
         super().__init__("If", **kwargs)
         self.test: Expression = test
@@ -422,13 +427,13 @@ class Fornum(Statement):
     """
 
     def __init__(
-        self,
-        target: Name,
-        start: Expression,
-        stop: Expression,
-        step: Expression,
-        body: Block,
-        **kwargs
+            self,
+            target: Name,
+            start: Expression,
+            stop: Expression,
+            step: Expression,
+            body: Block,
+            **kwargs
     ):
         super(Fornum, self).__init__("Fornum", **kwargs)
         self.target: Name = target
@@ -448,7 +453,7 @@ class Forin(Statement):
     """
 
     def __init__(
-        self, body: Block, iter: List[Expression], targets: List[Name], **kwargs
+            self, body: Block, iter: List[Expression], targets: List[Name], **kwargs
     ):
         super(Forin, self).__init__("Forin", **kwargs)
         self.body: Block = body
@@ -547,12 +552,12 @@ class Method(Statement):
     """
 
     def __init__(
-        self,
-        source: Expression,
-        name: Expression,
-        args: List[Expression],
-        body: Block,
-        **kwargs
+            self,
+            source: Expression,
+            name: Expression,
+            args: List[Expression],
+            body: Block,
+            **kwargs
     ):
         super(Method, self).__init__("Method", **kwargs)
         self.source: Expression = source
@@ -628,10 +633,10 @@ class String(Expression):
     """
 
     def __init__(
-        self,
-        s: str,
-        delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
-        **kwargs
+            self,
+            s: str,
+            delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
+            **kwargs
     ):
         super(String, self).__init__("String", **kwargs)
         self.s: str = s
@@ -647,11 +652,11 @@ class Field(Expression):
     """
 
     def __init__(
-        self,
-        key: Expression,
-        value: Expression,
-        between_brackets: bool = False,
-        **kwargs
+            self,
+            key: Expression,
+            value: Expression,
+            between_brackets: bool = False,
+            **kwargs
     ):
         super().__init__("Field", **kwargs)
         self.key: Expression = key

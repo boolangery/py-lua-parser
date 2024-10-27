@@ -1,6 +1,4 @@
-import textwrap
-
-from luaparser.builder import SyntaxException
+from luaparser.ast import SyntaxException
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -14,6 +12,8 @@ class VariablesTestCase(tests.TestCase):
 
     def test_global_var_unassigned(self):
         src = "var"
+        with self.assertRaises(SyntaxException):
+            ast.parse(src)
         self.assertRaises(SyntaxException, ast.parse, src)
         src = "var.foo"
         self.assertRaises(SyntaxException, ast.parse, src)

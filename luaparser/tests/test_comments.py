@@ -220,10 +220,12 @@ class CommentsTestCase(tests.TestCase):
             """
             )
         )
-        exp = Chunk(Block(
-            [LocalAssign(targets=[Name("x")], values=[Number(n=1)])],
+        exp = Chunk(
+            Block(
+                [LocalAssign(targets=[Name("x")], values=[Number(n=1)])],
+            ),
             comments=[Comment("-- comments should be visited")]
-        ))
+        )
         self.assertEqual(exp, tree)
 
     def test_comment_function_tail(self):
@@ -244,7 +246,8 @@ class CommentsTestCase(tests.TestCase):
                     args=[],
                     body=Block([], comments=[Comment("-- comments should be visited")])
                 )
-            ], comments=[Comment("-- another comment")])
+            ]),
+            comments=[Comment("-- another comment")]
         )
         self.assertEqual(exp, tree)
 
