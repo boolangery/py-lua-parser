@@ -359,8 +359,8 @@ class ExpressionsTestCase(tests.TestCase):
     """ 3.4.6 – Concatenation                                                   """
     """ ----------------------------------------------------------------------- """
 
-    def test_concatenation(self):
-        tree = ast.parse(r'str = "begin".."end"')
+    def test_string_concatenation(self):
+        tree = ast.parse(r'str = "begin" .. "end"')
         exp = Chunk(
             Block(
                 [
@@ -370,6 +370,25 @@ class ExpressionsTestCase(tests.TestCase):
                             Concat(
                                 left=String("begin", StringDelimiter.DOUBLE_QUOTE),
                                 right=String("end", StringDelimiter.DOUBLE_QUOTE),
+                            )
+                        ],
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)
+
+    def test_number_concatenation(self):
+        tree = ast.parse(r'str = 1 .. 2')
+        exp = Chunk(
+            Block(
+                [
+                    Assign(
+                        targets=[Name("str")],
+                        values=[
+                            Concat(
+                                left=Number(1),
+                                right=Number(2),
                             )
                         ],
                     )

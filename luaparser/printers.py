@@ -539,7 +539,7 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: Concat) -> str:
-        return self.do_visit(node.left) + ".." + self.do_visit(node.right)
+        return self.do_visit(node.left) + " .. " + self.do_visit(node.right)
 
     @visit.register
     def visit(self, node: UMinusOp) -> str:
