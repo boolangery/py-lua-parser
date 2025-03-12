@@ -372,3 +372,15 @@ class IntegrationTestCase(tests.TestCase):
             ])
         )
         self.assertEqual(exp, tree)
+
+    # Bitwise operators mis-parsed #59
+    def test_cont_int_14(self):
+        source = "x = h1 >> 6 | h2 << 20"
+        tree = ast.parse(source)
+        exp = Chunk(
+            Block([
+                Assign([Name("x")], [BOrOp(left=BShiftROp(Name("h1"), Number(6)), right=BShiftLOp(Name("h2"), Number(20)))]),
+            ])
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+        self.assertEqual(exp, tree)

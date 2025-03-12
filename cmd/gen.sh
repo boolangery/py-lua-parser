@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+java -jar ~/Downloads/antlr-4.13.2-complete.jar -visitor -Dlanguage=Python3 luaparser/parser/LuaParser.g4
