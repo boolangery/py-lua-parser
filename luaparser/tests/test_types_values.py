@@ -137,3 +137,10 @@ class TypesValuesTestCase(tests.TestCase):
             Block([Assign(targets=[Name("b")], values=[String("one [[two]] one")])])
         )
         self.assertEqual(exp, tree)
+
+    def test_string_literal(self):
+        tree = ast.parse(r'a="\u{9}"')
+        exp = Chunk(
+            Block([Assign(targets=[Name("a")], values=[String(r"\u{9}", delimiter=StringDelimiter.DOUBLE_QUOTE)])])
+        )
+        self.assertEqual(exp, tree)
