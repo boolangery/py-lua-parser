@@ -28,7 +28,6 @@ def parse(source: str) -> Chunk:
     else:
         v = BuilderVisitor(token_stream)
         val = v.visit(tree)
-        print(val)
         return val
 
 
