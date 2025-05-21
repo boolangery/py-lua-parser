@@ -628,18 +628,21 @@ class String(Expression):
     """Define the Lua string expression.
 
     Attributes:
-        s: String value.
+        s: String value in bytes.
+        raw: Unescaped string
         delimiter: The string delimiter
     """
 
     def __init__(
             self,
-            s: str,
+            s: bytes,
+            raw: str,
             delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
             **kwargs
     ):
         super(String, self).__init__("String", **kwargs)
-        self.s: str = s
+        self.s: bytes = s
+        self.raw: str = raw
         self.delimiter: StringDelimiter = delimiter
 
 

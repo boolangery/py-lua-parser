@@ -34,7 +34,7 @@ class IntegrationTestCase(tests.TestCase):
                     Call(
                         Name("describe"),
                         [
-                            String("", StringDelimiter.DOUBLE_QUOTE),
+                            String(b"", "", StringDelimiter.DOUBLE_QUOTE),
                             AnonymousFunction(
                                 [],
                                 Block(
@@ -119,7 +119,7 @@ class IntegrationTestCase(tests.TestCase):
         tree = ast.parse(textwrap.dedent(r"""print(x['a'])"""))
         exp = Chunk(Block([Call(
             func=Name("print"),
-            args=[Index(idx=String("a"), value=Name("x"), notation=IndexNotation.SQUARE)],
+            args=[Index(idx=String(b"a", "a"), value=Name("x"), notation=IndexNotation.SQUARE)],
         )]))
         self.assertEqual(exp, tree)
 
@@ -171,9 +171,10 @@ class IntegrationTestCase(tests.TestCase):
                                           id: 'print'
                                       args: [] 1 item
                                         0: {} 1 key                          
-                                          String: {} 4 keys
+                                          String: {} 5 keys
                                             wrapped: False
-                                            s: 'hello world !'
+                                            s: b'hello world !'
+                                            raw: 'hello world !'
                                             delimiter: SINGLE_QUOTE
                                       style: DEFAULT
                         1: {} 1 key          
@@ -255,6 +256,7 @@ class IntegrationTestCase(tests.TestCase):
                                     Field(
                                         Name("mykey"),
                                         String(
+                                            b"myvalue",
                                             "myvalue",
                                             delimiter=StringDelimiter.DOUBLE_QUOTE,
                                         ),
@@ -323,7 +325,7 @@ class IntegrationTestCase(tests.TestCase):
                 If(
                     test=AndLoOp(left=GreaterThanOp(left=ULengthOP(Name("setting")), right=Number(10)),
                                  right=EqToOp(left=Name("setting_name"),
-                                              right=String("user", StringDelimiter.DOUBLE_QUOTE))),
+                                              right=String(b"user", "user", StringDelimiter.DOUBLE_QUOTE))),
                     body=Block([
                         Return([Number(100)])
                     ]),
@@ -340,7 +342,7 @@ class IntegrationTestCase(tests.TestCase):
         """))
         exp = Chunk(
             Block([
-                Assign([Name("a")], [String("\x00\n\ta", StringDelimiter.SINGLE_QUOTE)])
+                Assign([Name("a")], [String(b"\x00\n\ta", "\\0\\n\\ta", StringDelimiter.SINGLE_QUOTE)])
             ])
         )
         self.assertEqual(exp, tree)

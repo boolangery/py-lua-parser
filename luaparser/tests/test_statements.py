@@ -44,7 +44,7 @@ class StatementsTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("i")],
-                        values=[String("foo bar \\u{41}", StringDelimiter.DOUBLE_QUOTE)],
+                        values=[String(b"foo bar A", "foo bar \\u{41}", StringDelimiter.DOUBLE_QUOTE)],
                     )
                 ]
             )
@@ -317,7 +317,7 @@ class StatementsTestCase(tests.TestCase):
                 [
                     Do(
                         body=Block(
-                            [LocalAssign(targets=[Name("foo")], values=[String("bar")])]
+                            [LocalAssign(targets=[Name("foo")], values=[String(b"bar", "bar")])]
                         )
                     )
                 ]
@@ -340,7 +340,7 @@ class StatementsTestCase(tests.TestCase):
                     While(
                         test=TrueExpr(),
                         body=Block(
-                            [Call(func=Name("print"), args=[String("hello world")])]
+                            [Call(func=Name("print"), args=[String(b"hello world", "hello world")])]
                         ),
                     )
                 ]
@@ -536,7 +536,7 @@ class StatementsTestCase(tests.TestCase):
                     Return(
                         [
                             Nil(),
-                            String("error", StringDelimiter.DOUBLE_QUOTE),
+                            String(b"error", "error", StringDelimiter.DOUBLE_QUOTE),
                             Number(42),
                         ]
                     )
@@ -558,7 +558,7 @@ class StatementsTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Index(idx=Name("bar"), value=Name("foo"))],
-                        values=[String("bar")],
+                        values=[String(b"bar", "bar")],
                     )
                 ]
             )

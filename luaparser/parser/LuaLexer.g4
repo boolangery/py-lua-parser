@@ -102,11 +102,30 @@ fragment EscapeSequence:
     | UtfEscape
 ;
 
-fragment DecimalEscape: '\\' Digit | '\\' Digit Digit | '\\' [0-2] Digit Digit;
+fragment DecimalEscape:
+    '\\'
+    ( Digit
+    | Digit Digit
+    | [0-1] Digit Digit
+    | '2' ('5' [0-5] | [0-4] Digit)
+    )
+;
 
 fragment HexEscape: '\\' 'x' HexDigit HexDigit;
 
-fragment UtfEscape: '\\' 'u{' HexDigit+ '}';
+fragment UtfEscape:
+    '\\' 'u{'
+    ( HexDigit
+    | HexDigit HexDigit
+    | HexDigit HexDigit HexDigit
+    | HexDigit HexDigit HexDigit HexDigit
+    | HexDigit HexDigit HexDigit HexDigit HexDigit
+    | HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
+    | HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
+    | [0-7] HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
+    )
+    '}'
+;
 
 fragment Digit: [0-9];
 
