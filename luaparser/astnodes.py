@@ -650,19 +650,19 @@ class Field(Expression):
     """Define a lua table field expression
 
     Attributes:
-        key: Key.
+        key: Key expression, optional.
         value: Value.
     """
 
     def __init__(
             self,
-            key: Expression,
+            key: Optional[Expression],
             value: Expression,
             between_brackets: bool = False,
             **kwargs
     ):
         super().__init__("Field", **kwargs)
-        self.key: Expression = key
+        self.key: Optional[Expression] = key
         self.value: Expression = value
         self.between_brackets: bool = between_brackets
 

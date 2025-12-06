@@ -416,7 +416,7 @@ class LuaOutputVisitor:
         output = "[" if node.between_brackets else ""
         output += self.do_visit(node.key)
         output += "]" if node.between_brackets else ""
-        output += " = "
+        output += " = " if node.key else ""
         output += self.do_visit(node.value)
         return output
 

@@ -593,8 +593,6 @@ class BuilderVisitor(LuaParserVisitor):
             if fields:  # optional
                 for field in fields:
                     if field.key is None:
-                        field.key = Number(array_like_index)
-                        field.between_brackets = True
                         array_like_index += 1
             return self.add_context(ctx, Table(fields))
         return self.add_context(ctx, Table([]))

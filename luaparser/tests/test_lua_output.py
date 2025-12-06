@@ -170,3 +170,12 @@ class LuaOutputTestCase(tests.TestCase):
     def test_unicode_string_literal(self):
         source = 's = "🖥️"'
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_table_pack(self):
+        source = textwrap.dedent(
+            '''\
+                b = {
+                    a(),
+                }'''
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))

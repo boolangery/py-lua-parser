@@ -506,18 +506,18 @@ class ExpressionsTestCase(tests.TestCase):
                         values=[
                             Table(
                                 [
-                                    Field(Number(1), Number(1), between_brackets=True),
-                                    Field(Number(2), Number(2), between_brackets=True),
-                                    Field(Number(3), Number(4), between_brackets=True),
-                                    Field(Number(4), Number(8), between_brackets=True),
-                                    Field(Number(5), Number(16), between_brackets=True),
-                                    Field(Number(6), Number(32), between_brackets=True),
-                                    Field(Number(7), Number(64), between_brackets=True),
-                                    Field(Number(8), Number(128), between_brackets=True),
-                                    Field(Number(9), Number(256), between_brackets=True),
-                                    Field(Number(10), Number(512), between_brackets=True),
-                                    Field(Number(11), Number(1024), between_brackets=True),
-                                    Field(Number(12), Number(2048), between_brackets=True),
+                                    Field(None, Number(1)),
+                                    Field(None, Number(2)),
+                                    Field(None, Number(4)),
+                                    Field(None, Number(8)),
+                                    Field(None, Number(16)),
+                                    Field(None, Number(32)),
+                                    Field(None, Number(64)),
+                                    Field(None, Number(128)),
+                                    Field(None, Number(256)),
+                                    Field(None, Number(512)),
+                                    Field(None, Number(1024)),
+                                    Field(None, Number(2048)),
                                 ]
                             )
                         ],
@@ -554,11 +554,10 @@ class ExpressionsTestCase(tests.TestCase):
                                         Table([Field(Name("radio"), TrueExpr())]),
                                     ),
                                     Field(
-                                        Number(1),
+                                        None,
                                         String(b"enabled", "enabled", StringDelimiter.DOUBLE_QUOTE),
-                                        between_brackets=True,
                                     ),
-                                    Field(Number(2), Number(157), between_brackets=True),
+                                    Field(None, Number(157)),
                                     Field(
                                         TrueExpr(), FalseExpr(), between_brackets=True
                                     ),
