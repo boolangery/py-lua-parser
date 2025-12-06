@@ -325,8 +325,6 @@ class BuilderVisitor(LuaParserVisitor):
             ))
         elif ctx.BREAK():
             return self.add_context(ctx, Break())
-        else:
-            return self.add_context(ctx, Continue())
 
     # Visit a parse tree produced by LuaParser#label.
     def visitLabel(self, ctx: LuaParser.LabelContext):

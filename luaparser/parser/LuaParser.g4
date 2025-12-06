@@ -60,7 +60,7 @@ attrib
     ;
 
 retstat
-    : ('return' explist? | 'break' | 'continue') ';'?
+    : ('return' explist? | 'break' ) ';'?
     ;
 
 label

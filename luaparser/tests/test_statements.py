@@ -513,17 +513,6 @@ class StatementsTestCase(tests.TestCase):
         exp = Chunk(Block([Break()]))
         self.assertEqual(exp, tree)
 
-    def test_continue(self):
-        tree = ast.parse(
-            textwrap.dedent(
-                """
-            continue
-            """
-            )
-        )
-        exp = Chunk(Block([Continue()]))
-        self.assertEqual(exp, tree)
-
     def test_return(self):
         tree = ast.parse(r"return nil")
         exp = Chunk(Block([Return([Nil()])]))
@@ -614,3 +603,28 @@ class StatementsTestCase(tests.TestCase):
 
     def test_exceptions(self):
         self.assertRaises(SyntaxException, ast.parse, 'print(!h!)')
+
+    def test_integration_can_use_continue_name(self):
+        tree = ast.parse(
+            textwrap.dedent(
+                """       
+                continue = "hello world"
+                print(continue)
+                """
+            )
+        )
+        exp = Chunk(
+            Block(
+                [
+                    Assign(
+                        targets=[Name("continue")],
+                        values=[String(b"hello world", "hello world", StringDelimiter.DOUBLE_QUOTE)],
+                    ),
+                    Call(
+                        func=Name("print"),
+                        args=[Name("continue")],
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)

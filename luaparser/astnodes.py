@@ -395,14 +395,6 @@ class Break(Statement):
     def __init__(self, **kwargs):
         super(Break, self).__init__("Break", **kwargs)
 
-
-class Continue(Statement):
-    """Define the continue lua statement."""
-
-    def __init__(self, **kwargs):
-        super(Continue, self).__init__("Continue", **kwargs)
-
-
 class Return(Statement):
     """Define the Lua return statement.
 
