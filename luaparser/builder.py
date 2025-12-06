@@ -15,6 +15,8 @@ from luaparser.utils.string_literals import unescape_lua_string
 TNode = TypeVar("TNode", bound=Node)
 
 
+LUA_DOUBLE_SQUARE_RE = re.compile(r'^\[(?P<eq>=*)\[(?P<body>[\s\S]*?)\]\1\]$')
+
 def _listify(obj):
     if not isinstance(obj, list):
         return [obj]
@@ -643,22 +645,19 @@ class BuilderVisitor(LuaParserVisitor):
         lua_str = ctx.getText()
 
         delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
-        p = re.compile(r"^\[=+\[(.*)]=+]")  # nested quote pattern
-        # try remove double quote:
+
+        # try to remove double quote:
         if lua_str.startswith('"') and lua_str.endswith('"'):
             lua_str = lua_str[1:-1]
             delimiter = StringDelimiter.DOUBLE_QUOTE
-        # try remove single quote:
+        # try to remove single quote:
         elif lua_str.startswith("'") and lua_str.endswith("'"):
             lua_str = lua_str[1:-1]
             delimiter = StringDelimiter.SINGLE_QUOTE
-        # try remove double square bracket:
-        elif lua_str.startswith("[[") and lua_str.endswith("]]"):
-            lua_str = lua_str[2:-2]
+        # double square brackets notation:
+        elif m := LUA_DOUBLE_SQUARE_RE.match(lua_str):
+            lua_str = m.group("body")
             delimiter = StringDelimiter.DOUBLE_SQUARE
-        # nested quote
-        elif p.match(lua_str):
-            lua_str = p.search(lua_str).group(1)
 
         if delimiter == StringDelimiter.DOUBLE_QUOTE or delimiter == StringDelimiter.SINGLE_QUOTE:
             unescaped_str = unescape_lua_string(lua_str)

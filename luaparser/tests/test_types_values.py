@@ -136,7 +136,28 @@ class TypesValuesTestCase(tests.TestCase):
     def test_string_dbl_square_equal(self):
         tree = ast.parse(r"b = [=[one [[two]] one]=]")
         exp = Chunk(
-            Block([Assign(targets=[Name("b")], values=[String(b"one [[two]] one", "one [[two]] one")])])
+            Block([Assign(targets=[Name("b")], values=[String(b"one [[two]] one", "one [[two]] one", delimiter=StringDelimiter.DOUBLE_SQUARE)])])
+        )
+        self.assertEqual(exp, tree)
+
+    def test_string_dbl_square_equal_newlines(self):
+        tree = ast.parse(
+            textwrap.dedent(
+            r"""
+                a = [=[
+                four
+                ]=]
+                b = [===[
+                five
+                ]===]
+            """
+            )
+        )
+        exp = Chunk(
+            Block([
+                Assign(targets=[Name("a")], values=[String(b"\nfour\n", "\nfour\n", delimiter=StringDelimiter.DOUBLE_SQUARE)]),
+                Assign(targets=[Name("b")], values=[String(b"\nfive\n", "\nfive\n", delimiter=StringDelimiter.DOUBLE_SQUARE)]),
+            ])
         )
         self.assertEqual(exp, tree)
 
