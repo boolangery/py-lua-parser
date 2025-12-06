@@ -3,6 +3,7 @@ from typing import Generator
 
 from antlr4 import InputStream, CommonTokenStream, Token
 from antlr4.error.ErrorListener import ErrorListener, ConsoleErrorListener
+from antlr4.error.Errors import ParseCancellationException
 
 from luaparser import printers
 from luaparser.astnodes import *
@@ -10,18 +11,35 @@ from luaparser.builder import BuilderVisitor
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaParser import LuaParser
 from luaparser.utils.visitor import *
+from antlr4.error.ErrorStrategy import BailErrorStrategy
+
+class BailErrorListener(ErrorListener):
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+        raise ParseCancellationException(f"line {line}:{column}: {msg}")
 
 
 def parse(source: str) -> Chunk:
     """Parse Lua source to a Chunk."""
     lexer = LuaLexer(InputStream(source))
     lexer.removeErrorListeners()
+
+    # Remove default error listeners and add bail listener for LEXER
+    lexer.removeErrorListeners()
     lexer.addErrorListener(ConsoleErrorListener())
+    lexer.addErrorListener(BailErrorListener())
 
     token_stream = CommonTokenStream(lexer, channel=Token.DEFAULT_CHANNEL)
     parser = LuaParser(token_stream)
-    parser.addErrorListener(ConsoleErrorListener())
-    tree = parser.start_()
+
+    # Remove default error listeners and add bail listener for PARSER
+    parser.removeErrorListeners()
+    parser.addErrorListener(BailErrorListener())
+    parser._errHandler = BailErrorStrategy()
+
+    try:
+        tree = parser.start_()
+    except ParseCancellationException as e:
+        raise SyntaxException(f"syntax errors: {e}")
 
     if parser.getNumberOfSyntaxErrors() > 0:
         raise SyntaxException("syntax errors")

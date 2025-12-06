@@ -1,3 +1,4 @@
+from luaparser.ast import SyntaxException
 from luaparser.utils import tests
 from luaparser import ast
 from luaparser.astnodes import *
@@ -610,3 +611,6 @@ class StatementsTestCase(tests.TestCase):
             )
         )
         self.assertEqual(exp, tree)
+
+    def test_exceptions(self):
+        self.assertRaises(SyntaxException, ast.parse, 'print(!h!)')
