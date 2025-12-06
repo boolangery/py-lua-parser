@@ -60,7 +60,7 @@ def main():
         if options.source:
             tree = ast.parse(options.source)
         else:
-            with open(args[0], "r") as content_file:
+            with open(args[0], encoding="utf-8") as content_file:
                 content = content_file.read()
             tree = ast.parse(content)
 
