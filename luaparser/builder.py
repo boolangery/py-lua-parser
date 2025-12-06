@@ -10,6 +10,7 @@ from luaparser.astnodes import *
 from luaparser.parser.LuaLexer import LuaLexer
 from luaparser.parser.LuaParser import LuaParser
 from luaparser.parser.LuaParserVisitor import LuaParserVisitor
+from luaparser.utils.string_literals import unescape_lua_string
 
 TNode = TypeVar("TNode", bound=Node)
 
@@ -659,9 +660,8 @@ class BuilderVisitor(LuaParserVisitor):
         elif p.match(lua_str):
             lua_str = p.search(lua_str).group(1)
 
-        # Eval string to unescape:
-        try:
-            lua_str = ast.literal_eval(F'"{lua_str}"')
-        except:
-            pass
-        return String(lua_str, delimiter)
+        if delimiter == StringDelimiter.DOUBLE_QUOTE or delimiter == StringDelimiter.SINGLE_QUOTE:
+            unescaped_str = unescape_lua_string(lua_str)
+        else:
+            unescaped_str = lua_str.encode("utf-8")
+        return String(unescaped_str, lua_str, delimiter)

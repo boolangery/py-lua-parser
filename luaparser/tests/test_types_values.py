@@ -58,7 +58,7 @@ class TypesValuesTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("a")],
-                        values=[String("a line", StringDelimiter.DOUBLE_QUOTE)],
+                        values=[String(b"a line", "a line", StringDelimiter.DOUBLE_QUOTE)],
                     )
                 ]
             )
@@ -68,7 +68,7 @@ class TypesValuesTestCase(tests.TestCase):
     def test_string_quote(self):
         tree = ast.parse(r"b = 'another line'")
         exp = Chunk(
-            Block([Assign(targets=[Name("b")], values=[String("another line")])])
+            Block([Assign(targets=[Name("b")], values=[String(b"another line", "another line")])])
         )
         self.assertEqual(exp, tree)
 
@@ -81,7 +81,8 @@ class TypesValuesTestCase(tests.TestCase):
                         targets=[Name("b")],
                         values=[
                             String(
-                                "one line\nnext line\n\"in quotes\", 'in quotes'",
+                                b"one line\nnext line\n\"in quotes\", 'in quotes'",
+                                "one line\\nnext line\\n\\\"in quotes\\\", 'in quotes'",
                                 StringDelimiter.DOUBLE_QUOTE,
                             )
                         ],
@@ -98,7 +99,7 @@ class TypesValuesTestCase(tests.TestCase):
                 [
                     Assign(
                         targets=[Name("b")],
-                        values=[String("hello", StringDelimiter.DOUBLE_SQUARE)],
+                        values=[String(b"hello", "hello", StringDelimiter.DOUBLE_SQUARE)],
                     )
                 ]
             )
@@ -121,6 +122,7 @@ class TypesValuesTestCase(tests.TestCase):
                         targets=[Name("b")],
                         values=[
                             String(
+                                b"Multiple lines of text\ncan be enclosed in double square\nbrackets.",
                                 "Multiple lines of text\ncan be enclosed in double square\nbrackets.",
                                 StringDelimiter.DOUBLE_SQUARE,
                             )
@@ -134,13 +136,13 @@ class TypesValuesTestCase(tests.TestCase):
     def test_string_dbl_square_equal(self):
         tree = ast.parse(r"b = [=[one [[two]] one]=]")
         exp = Chunk(
-            Block([Assign(targets=[Name("b")], values=[String("one [[two]] one")])])
+            Block([Assign(targets=[Name("b")], values=[String(b"one [[two]] one", "one [[two]] one")])])
         )
         self.assertEqual(exp, tree)
 
     def test_string_literal(self):
         tree = ast.parse(r'a="\u{9}"')
         exp = Chunk(
-            Block([Assign(targets=[Name("a")], values=[String(r"\u{9}", delimiter=StringDelimiter.DOUBLE_QUOTE)])])
+            Block([Assign(targets=[Name("a")], values=[String(b"\x09", r"\u{9}", StringDelimiter.DOUBLE_QUOTE)])])
         )
         self.assertEqual(exp, tree)

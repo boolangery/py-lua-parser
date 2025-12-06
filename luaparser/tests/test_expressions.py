@@ -368,8 +368,8 @@ class ExpressionsTestCase(tests.TestCase):
                         targets=[Name("str")],
                         values=[
                             Concat(
-                                left=String("begin", StringDelimiter.DOUBLE_QUOTE),
-                                right=String("end", StringDelimiter.DOUBLE_QUOTE),
+                                left=String(b"begin", "begin", StringDelimiter.DOUBLE_QUOTE),
+                                right=String(b"end", "end", StringDelimiter.DOUBLE_QUOTE),
                             )
                         ],
                     )
@@ -429,11 +429,11 @@ class ExpressionsTestCase(tests.TestCase):
                                 [
                                     Field(
                                         Name("foo"),
-                                        String("bar", StringDelimiter.DOUBLE_QUOTE),
+                                        String(b"bar", "bar", StringDelimiter.DOUBLE_QUOTE),
                                     ),
                                     Field(
                                         Name("bar"),
-                                        String("foo", StringDelimiter.DOUBLE_QUOTE),
+                                        String(b"foo", "foo", StringDelimiter.DOUBLE_QUOTE),
                                     ),
                                 ]
                             )
@@ -467,7 +467,7 @@ class ExpressionsTestCase(tests.TestCase):
                                 [
                                     Field(
                                         Name("car"),
-                                        Table([Field(Name("name"), String("bmw"))]),
+                                        Table([Field(Name("name"), String(b"bmw", "bmw"))]),
                                     ),
                                     Field(
                                         Name("options"),
@@ -555,7 +555,7 @@ class ExpressionsTestCase(tests.TestCase):
                                     ),
                                     Field(
                                         Number(1),
-                                        String("enabled", StringDelimiter.DOUBLE_QUOTE),
+                                        String(b"enabled", "enabled", StringDelimiter.DOUBLE_QUOTE),
                                         between_brackets=True,
                                     ),
                                     Field(Number(2), Number(157), between_brackets=True),
@@ -563,7 +563,7 @@ class ExpressionsTestCase(tests.TestCase):
                                         TrueExpr(), FalseExpr(), between_brackets=True
                                     ),
                                     Field(
-                                        String("true"),
+                                        String(b"true", "true"),
                                         TrueExpr(),
                                         between_brackets=True,
                                     ),
@@ -588,7 +588,7 @@ class ExpressionsTestCase(tests.TestCase):
                 [
                     Call(
                         func=Name("print"),
-                        args=[String("hello", StringDelimiter.DOUBLE_QUOTE)],
+                        args=[String(b"hello", "hello", StringDelimiter.DOUBLE_QUOTE)],
                     )
                 ]
             )
@@ -602,7 +602,7 @@ class ExpressionsTestCase(tests.TestCase):
                 [
                     Call(
                         func=Name("print"),
-                        args=[String("hello", StringDelimiter.DOUBLE_QUOTE)],
+                        args=[String(b"hello", "hello", StringDelimiter.DOUBLE_QUOTE)],
                         style=CallStyle.NO_PARENTHESIS,
                     )
                 ]
@@ -630,7 +630,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Invoke(
                         source=Name("foo"),
                         func=Name("print"),
-                        args=[String("hello", StringDelimiter.DOUBLE_QUOTE)],
+                        args=[String(b"hello", "hello", StringDelimiter.DOUBLE_QUOTE)],
                     )
                 ]
             )
@@ -645,7 +645,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Invoke(
                         source=Invoke(source=Name("foo"), func=Name("bar"), args=[]),
                         func=Name("print"),
-                        args=[String("hello", StringDelimiter.DOUBLE_QUOTE)],
+                        args=[String(b"hello", "hello", StringDelimiter.DOUBLE_QUOTE)],
                     )
                 ]
             )
@@ -660,7 +660,7 @@ class ExpressionsTestCase(tests.TestCase):
                     Call(
                         func=Name("print"),
                         args=[
-                            String("hello", StringDelimiter.DOUBLE_QUOTE),
+                            String(b"hello", "hello", StringDelimiter.DOUBLE_QUOTE),
                             Number(n=42),
                         ],
                     )
@@ -708,7 +708,7 @@ class ExpressionsTestCase(tests.TestCase):
                                 notation=IndexNotation.SQUARE
                             ),
                             func=Name("hello"),
-                            args=[String("ok", delimiter=StringDelimiter.DOUBLE_QUOTE)],
+                            args=[String(b"ok", "ok", delimiter=StringDelimiter.DOUBLE_QUOTE)],
                             style=CallStyle.NO_PARENTHESIS,
                         )
                     ]

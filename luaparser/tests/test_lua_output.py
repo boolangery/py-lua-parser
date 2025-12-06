@@ -140,3 +140,33 @@ class LuaOutputTestCase(tests.TestCase):
     def test_parenthesis(self):
         source = "a = (1 * 2) + 3"
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_escapes(self):
+        escapes = [
+            r"\a",
+            r"\b",
+            r"\f",
+            r"\n",
+            r"\r",
+            r"\t",
+            r"\v",
+            r"\\",
+            r"\"",
+            r"\'",
+            r"\z",
+            r"\x0A",
+            r"\1",
+            r"\12",
+            r"\123",
+            r"\u{13AA}",
+            r"\u{1F34B}",
+            r"\u{7FFFFFFF}",
+        ]
+        for escape in escapes:
+            with self.subTest(escape=escape):
+                source = rf's = "{escape}"'
+                self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_unicode_string_literal(self):
+        source = 's = "🖥️"'
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))

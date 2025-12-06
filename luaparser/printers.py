@@ -28,6 +28,10 @@ class PythonStyleVisitor:
     def visit(self, node):
         return repr(node)
 
+    @visitor(bytes)
+    def visit(self, node):
+        return repr(node)
+
     @visitor(float)
     def visit(self, node):
         return str(node)
@@ -124,41 +128,6 @@ class PythonStyleVisitor:
         return res
 
 
-escape_dict = {
-    "\a": r"\a",
-    "\b": r"\b",
-    "\c": r"\c",
-    "\f": r"\f",
-    "\n": r"\n",
-    "\r": r"\r",
-    "\t": r"\t",
-    "\v": r"\v",
-    "'": r"\'",
-    '"': r"\"",
-    "\0": r"\0",
-    "\1": r"\1",
-    "\2": r"\2",
-    "\3": r"\3",
-    "\4": r"\4",
-    "\5": r"\5",
-    "\6": r"\6",
-    "\7": r"\7",
-    "\8": r"\8",
-    "\9": r"\9",
-}
-
-
-def raw(text):
-    """Returns a raw string representation of text"""
-    new_string = ""
-    for char in text:
-        try:
-            new_string += escape_dict[char]
-        except KeyError:
-            new_string += char
-    return new_string
-
-
 class HTMLStyleVisitor:
     def __init__(self):
         pass
@@ -171,6 +140,12 @@ class HTMLStyleVisitor:
         doc.append(xml)
 
         return minidom.parseString(ElementTree.tostring(doc)).toprettyxml(indent="   ")
+
+    @visitor(bytes)
+    def visit(self, node):
+        if node.startswith(b'"') and node.endswith(b'"'):
+            node = node[1:-1]
+        return node
 
     @visitor(str)
     def visit(self, node):
@@ -208,6 +183,8 @@ class HTMLStyleVisitor:
                 child_node = self.visit(attrValue)
                 if type(child_node) is str:
                     xml_attr.text = child_node
+                elif type(child_node) is bytes:
+                    pass
                 elif type(child_node) is list:
                     xml_attr.extend(child_node)
                 else:
@@ -420,11 +397,11 @@ class LuaOutputVisitor:
     @visit.register
     def visit(self, node: String) -> str:
         if node.delimiter == StringDelimiter.SINGLE_QUOTE:
-            return "'" + self.do_visit(node.s) + "'"
+            return "'" + self.do_visit(node.raw) + "'"
         elif node.delimiter == StringDelimiter.DOUBLE_QUOTE:
-            return '"' + self.do_visit(node.s) + '"'
+            return '"' + self.do_visit(node.raw) + '"'
         else:
-            return "[[" + self.do_visit(node.s) + "]]"
+            return "[[" + self.do_visit(node.raw) + "]]"
 
     @visit.register
     def visit(self, node: Table):

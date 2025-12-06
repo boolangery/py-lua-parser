@@ -141,7 +141,7 @@ class CommentsTestCase(tests.TestCase):
                                     ),
                                     Field(
                                         Number(1),
-                                        String("foo", StringDelimiter.DOUBLE_QUOTE),
+                                        String(b"foo", "foo", StringDelimiter.DOUBLE_QUOTE),
                                         comments=[Comment("-- just a value")],
                                         between_brackets=True,
                                     ),
