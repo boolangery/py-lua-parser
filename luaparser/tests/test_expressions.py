@@ -651,6 +651,51 @@ class ExpressionsTestCase(tests.TestCase):
         )
         self.assertEqual(exp, tree)
 
+    def test_function_chain_1(self):
+        tree = ast.parse(r'local result = p1.p2(arg2).p3(arg3)')
+        exp = Chunk(
+            Block([
+                LocalAssign(
+                    targets=[Name("result")],
+                    values=[
+                        Call(
+                            func=Index(
+                                value=Call(
+                                    func=Index(value=Name("p1"), idx=Name("p2")),
+                                    args=[Name("arg2")]
+                                ),
+                                idx=Name("p3")
+                            ),
+                            args=[Name("arg3")]
+                        ),
+                    ]
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)
+
+    def test_function_chain_2(self):
+        tree = ast.parse(r'ttl = stat.display_attr("title")(plr)')
+        exp = Chunk(
+            Block([
+                Assign(
+                    targets=[Name("ttl")],
+                    values=[
+                        Call(
+                            func=Call(
+                                func=Index(
+                                    idx=Name("display_attr"),
+                                    value=Name("stat")
+                                ),
+                                args=[String(b"title", "title", delimiter=StringDelimiter.DOUBLE_QUOTE)]),
+                            args=[Name("plr")]
+                        ),
+                    ]
+                )
+            ])
+        )
+        self.assertEqual(exp, tree)
+
     def test_function_call_args(self):
         tree = ast.parse(r'print("hello",  42)')
         exp = Chunk(

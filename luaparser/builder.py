@@ -14,8 +14,8 @@ from luaparser.utils.string_literals import unescape_lua_string
 
 TNode = TypeVar("TNode", bound=Node)
 
-
 LUA_DOUBLE_SQUARE_RE = re.compile(r'^\[(?P<eq>=*)\[(?P<body>[\s\S]*?)\]\1\]$')
+
 
 def _listify(obj):
     if not isinstance(obj, list):
@@ -79,7 +79,7 @@ class BuilderVisitor(LuaParserVisitor):
 
             if ((token.channel is LuaLexer.DEFAULT_TOKEN_CHANNEL and
                  (token.type is not LuaLexer.COMMA) or (token.type is LuaLexer.COMMA and not ignore_left_comma)) or
-                    ((token.type is LuaLexer.NL) and (token_next.type is LuaLexer.NL) and not ignore_left_double_nl)):
+                ((token.type is LuaLexer.NL) and (token_next.type is LuaLexer.NL) and not ignore_left_double_nl)):
                 break
 
             if token.channel == self.COMMENT_CHANNEL:
@@ -105,7 +105,7 @@ class BuilderVisitor(LuaParserVisitor):
                 next_right_token += 1
 
                 if ((token.channel is LuaLexer.DEFAULT_TOKEN_CHANNEL and token.type is not LuaLexer.COMMA) or
-                        (token.type is LuaLexer.NL and not ignore_right_nl)):
+                    (token.type is LuaLexer.NL and not ignore_right_nl)):
                     break
 
                 if token.channel == self.COMMENT_CHANNEL:
@@ -452,51 +452,42 @@ class BuilderVisitor(LuaParserVisitor):
             return Name(ctx.NAME().getText())
         else:  # prefixexp tail
             root = self.visit(ctx.prefixexp())
-            return self.visitAllTails(root, [ctx.tail()])
+            return self.visit_tail_chain(root, [ctx.tail()])
 
     # Visit a parse tree produced by LuaParser#prefixexp.
     def visitPrefixexp(self, ctx: LuaParser.PrefixexpContext):
-        if ctx.NAME():  # NAME tail*
-            root = self.visit(ctx.NAME())
-        elif ctx.functioncall():  # functioncall tail*
+        if ctx.functioncall():  # functioncall tail*
             root = self.visit(ctx.functioncall())
+        elif ctx.NAME():  # NAME tail*
+            root = self.visit(ctx.NAME())
         else:  # '(' exp ')' tail*
             root: Expression = self.visit(ctx.exp())
             root.wrapped = True
 
-        tail = self.visitAllTails(root, ctx.tail())
+        tail = self.visit_tail_chain(root, ctx.tail())
         return tail
 
     # Visit a parse tree produced by LuaParser#functioncall_name.
     def visitFunctioncall_name(self, ctx: LuaParser.Functioncall_nameContext):
         name = self.visit(ctx.NAME())
-        tail = self.visitAllTails(name, ctx.tail())
-        par, args = self.visitArgs(ctx.args())
-        return self.add_context(ctx, Call(tail, _listify(args),
-                                          style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS))
+        return self.visit_call_chain(name, ctx.call())
 
     # Visit a parse tree produced by LuaParser#functioncall_nested.
     def visitFunctioncall_nested(self, ctx: LuaParser.Functioncall_nestedContext):
         call = self.visit(ctx.functioncall())
-        tail = self.visitAllTails(call, ctx.tail())
-        par, args = self.visitArgs(ctx.args())
-        return self.add_context(ctx, Call(tail, _listify(args),
-                                          style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS))
+        return self.visit_call_chain(call, ctx.call())
 
     # Visit a parse tree produced by LuaParser#functioncall_exp.
     def visitFunctioncall_exp(self, ctx: LuaParser.Functioncall_expContext):
         exp = self.visitExp(ctx.exp())
         exp.wrapped = True
-        tail = self.visitAllTails(exp, ctx.tail())
-        par, args = self.visitArgs(ctx.args())
-        return self.add_context(ctx, Call(tail, _listify(args),
-                                          style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS))
+        return self.visit_call_chain(exp, ctx.call())
 
     # Visit a parse tree produced by LuaParser#functioncall_expinvoke.
     def visitFunctioncall_expinvoke(self, ctx: LuaParser.Functioncall_expinvokeContext):
         exp = self.visitExp(ctx.exp())
         exp.wrapped = True
-        tail = self.visitAllTails(exp, ctx.tail())
+        tail = self.visit_tail_chain(exp, ctx.tail())
         par, args = self.visitArgs(ctx.args())
         func = self.visit(ctx.NAME())
         return self.add_context(ctx, Invoke(tail, func, _listify(args),
@@ -506,26 +497,61 @@ class BuilderVisitor(LuaParserVisitor):
     def visitFunctioncall_invoke(self, ctx: LuaParser.Functioncall_invokeContext):
         source = self.visit(ctx.NAME(0))
         func = self.visit(ctx.NAME(1))
-        tail = self.visitAllTails(source, ctx.tail())
+        tail = self.visit_tail_chain(source, ctx.tail())
         par, args = self.visitArgs(ctx.args())
-        return self.add_context(ctx, Invoke(tail, func, _listify(args),
-                                            style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS))
+        invoke = self.add_context(ctx, Invoke(
+            tail,
+            func,
+            _listify(args),
+            style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS
+        ))
+        return self.visit_call_chain(invoke, ctx.call())
 
     # Visit a parse tree produced by LuaParser#functioncall_nestedinvoke.
     def visitFunctioncall_nestedinvoke(self, ctx: LuaParser.Functioncall_nestedinvokeContext):
         call = self.visit(ctx.functioncall())
         func = self.visit(ctx.NAME())
-        tail = self.visitAllTails(call, ctx.tail())
+        tail = self.visit_tail_chain(call, ctx.tail())
         par, args = self.visitArgs(ctx.args())
-        return self.add_context(ctx, Invoke(tail, func, _listify(args),
-                                            style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS))
+        invoke = self.add_context(ctx, Invoke(
+            tail,
+            func,
+            _listify(args),
+            style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS
+        ))
+        return self.visit_call_chain(invoke, ctx.call())
 
-    def visitAllTails(self, root_exp: Expression, tails: List[LuaParser.TailContext]):
+    def visit_call_chain(self, root_exp: Optional[Expression], calls: List[LuaParser.CallContext]):
+        if not calls:
+            return root_exp
+
+        root = root_exp  # parent root will be set in caller
+        call: Call = self.visit_call(root, calls[0])  # root tail
+        i = 1
+        while call:
+            root = call
+            if i >= len(calls):
+                break
+
+            call = self.visit_call(root, calls[i])
+            i += 1
+        return root
+
+    def visit_call(self, root_exp: Optional[Expression], ctx: LuaParser.CallContext):
+        tail = self.visit_tail_chain(root_exp, ctx.tail())
+        par, args = self.visitArgs(ctx.args())
+        return self.add_context(ctx, Call(
+            tail,
+            _listify(args),
+            style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS
+        ))
+
+    def visit_tail_chain(self, root_exp: Optional[Expression], tails: List[LuaParser.TailContext]):
         if not tails:
             return root_exp
 
         root = root_exp  # parent root will be set in caller
-        tail: Index = self.visitTail(tails[0])  # root tail
+        tail: Index = self.visit(tails[0])  # root tail
         i = 1
         while tail:
             tail.value = root

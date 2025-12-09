@@ -184,6 +184,11 @@ class LuaParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#call.
+    def visitCall(self, ctx:LuaParser.CallContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#tail.
     def visitTail(self, ctx:LuaParser.TailContext):
         return self.visitChildren(ctx)

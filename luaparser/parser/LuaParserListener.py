@@ -323,6 +323,15 @@ class LuaParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LuaParser#call.
+    def enterCall(self, ctx:LuaParser.CallContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#call.
+    def exitCall(self, ctx:LuaParser.CallContext):
+        pass
+
+
     # Enter a parse tree produced by LuaParser#tail.
     def enterTail(self, ctx:LuaParser.TailContext):
         pass
