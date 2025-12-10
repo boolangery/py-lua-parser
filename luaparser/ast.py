@@ -110,15 +110,16 @@ class ASTReplaceVisitor:
                     new_node = tree_visitor(node)
                     if new_node != None:
                         for key in parent.__dict__.keys():
-                            if key == 'values' or key == 'args':
+                            # if key == 'values' or key == 'args':
                                 obj_list = getattr(parent, key, None)
-                                for i, item in enumerate(obj_list):
-                                    # print(item)
-                                    if item is node:
-                                        obj_list[i] = new_node
+                                if isinstance(obj_list, list):
+                                    for i, item in enumerate(obj_list):
+                                        # print(item)
+                                        if item is node:
+                                            obj_list[i] = new_node
 
-                            elif getattr(parent, key, None) is node:
-                                setattr(parent, key, new_node)
+                                elif getattr(parent, key, None) is node:
+                                    setattr(parent, key, new_node)
 
                 children = [
                     attr for attr in node.__dict__.keys() if not attr.startswith("_")
