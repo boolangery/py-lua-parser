@@ -111,14 +111,14 @@ class ASTReplaceVisitor:
                     if new_node != None:
                         for key in parent.__dict__.keys():
                             # if key == 'values' or key == 'args':
-                                obj_list = getattr(parent, key, None)
-                                if isinstance(obj_list, list):
+                                obj = getattr(parent, key, None)
+                                if isinstance(obj, list):
                                     for i, item in enumerate(obj_list):
                                         # print(item)
                                         if item is node:
                                             obj_list[i] = new_node
 
-                                elif getattr(parent, key, None) is node:
+                                elif obj is node:
                                     setattr(parent, key, new_node)
 
                 children = [
