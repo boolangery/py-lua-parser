@@ -113,10 +113,10 @@ class ASTReplaceVisitor:
                             # if key == 'values' or key == 'args':
                                 obj = getattr(parent, key, None)
                                 if isinstance(obj, list):
-                                    for i, item in enumerate(obj_list):
+                                    for i, item in enumerate(obj):
                                         # print(item)
                                         if item is node:
-                                            obj_list[i] = new_node
+                                            obj[i] = new_node
 
                                 elif obj is node:
                                     setattr(parent, key, new_node)
