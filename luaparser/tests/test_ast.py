@@ -99,3 +99,43 @@ class AstTestCase(tests.TestCase):
         ]
         for node, exp in zip(nodes, expected_cls):
             self.assertIsInstance(node, exp)
+
+    def test_to_pretty_json(self):
+        src = textwrap.dedent(
+            """\
+            local a = "foo"\
+            """
+        )
+        exp = textwrap.dedent(
+            """\
+            {
+                "comments": [],
+                "body": {
+                    "comments": [],
+                    "body": [
+                        {
+                            "comments": [],
+                            "wrapped": false,
+                            "targets": [
+                                {
+                                    "comments": [],
+                                    "wrapped": false,
+                                    "id": "a",
+                                    "attribute": null
+                                }
+                            ],
+                            "values": [
+                                {
+                                    "comments": [],
+                                    "wrapped": false,
+                                    "s": "foo",
+                                    "raw": "foo",
+                                    "delimiter": {}
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }"""
+        )
+        self.assertEqual(ast.to_pretty_json(ast.parse(src)), exp)

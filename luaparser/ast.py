@@ -82,6 +82,9 @@ def to_xml_str(tree):
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
+        if isinstance(o, bytes):
+            return o.decode()
+
         try:
             to_json = getattr(o, "to_json")
             if callable(to_json):
