@@ -617,6 +617,10 @@ class BuilderVisitor(LuaParserVisitor):
             if fields:  # optional
                 for field in fields:
                     if field.key is None:
+                        # Assign the implicit numeric index for array-like fields (see issue #75). It is exposed through the
+                        # read-only Field.index property and intentionally does not set `key`/`between_brackets`, so the Lua
+                        # output is left untouched (see issue #70).
+                        field._index = array_like_index
                         array_like_index += 1
             return self.add_context(ctx, Table(fields))
         return self.add_context(ctx, Table([]))

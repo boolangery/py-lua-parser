@@ -63,7 +63,9 @@ class Node:
     def __eq__(self, other) -> bool:
         if isinstance(self, other.__class__):
             return _equal_dicts(
-                self.__dict__, other.__dict__, ["_first_token", "_last_token"]
+                self.__dict__,
+                other.__dict__,
+                ["_first_token", "_last_token", "_index"],
             )
         return False
 
@@ -642,7 +644,9 @@ class Field(Expression):
     """Define a lua table field expression
 
     Attributes:
-        key: Key expression, optional.
+        key: Key expression, optional. ``None`` for array-like (positional)
+            fields, e.g. the ``"a"`` in ``{"a"}``. For those fields the
+            implicit numeric index is available through :attr:`index`.
         value: Value.
     """
 
@@ -657,6 +661,21 @@ class Field(Expression):
         self.key: Optional[Expression] = key
         self.value: Expression = value
         self.between_brackets: bool = between_brackets
+        # Implicit 1-based index for array-like fields (key is None).
+        # Stored as a private attribute so it does not affect equality or
+        # JSON serialization (see Node.__eq__ / Node.to_json).
+        self._index: Optional[int] = None
+
+    @property
+    def index(self) -> Optional[int]:
+        """Implicit numeric index of an array-like field.
+
+        For a positional field (``key is None``) this returns its 1-based
+        index within the enclosing table, e.g. ``1`` and ``2`` for the two
+        fields of ``{"a", "b"}``. Returns ``None`` for fields that have an
+        explicit key.
+        """
+        return self._index
 
 
 class Table(Expression):

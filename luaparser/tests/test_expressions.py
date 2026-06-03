@@ -527,6 +527,21 @@ class ExpressionsTestCase(tests.TestCase):
         )
         self.assertEqual(exp, tree)
 
+    def test_array_field_index(self):
+        # Issue #75: array-like fields keep key=None but expose their
+        # implicit 1-based numeric index through Field.index.
+        tree = ast.parse(r'a = {foo = "bar", "x", [10] = "z", "y"}')
+        fields = tree.body.body[0].values[0].fields
+        # keyed fields are not array-like:
+        self.assertIsNone(fields[0].index)  # foo = "bar"
+        self.assertIsNone(fields[2].index)  # [10] = "z"
+        # positional fields get a 1-based index, skipping keyed fields:
+        self.assertEqual(1, fields[1].index)  # "x"
+        self.assertEqual(2, fields[3].index)  # "y"
+        # key is still None for positional fields (non-breaking):
+        self.assertIsNone(fields[1].key)
+        self.assertIsNone(fields[3].key)
+
     def test_mix_dict_array(self):
         tree = ast.parse(
             textwrap.dedent(
