@@ -118,12 +118,14 @@ class Node:
                 **{
                     k: v
                     for k, v in self.__dict__.items()
-                    if not k.startswith("_") and v
+                    if not k.startswith("_")
+                    and v is not None
+                    and v != []
                 },
                 **{
                     "start_char": self.start_char,
                     "stop_char": self.stop_char,
-                    "line": self.line,
+                    "line": self.line if hasattr(self, "_tokens") else None,
                 },
             }
         }
@@ -581,6 +583,7 @@ class TrueExpr(Expression):
 
     def __init__(self, **kwargs):
         super(TrueExpr, self).__init__("True", **kwargs)
+        self.value = True
 
 
 class FalseExpr(Expression):
@@ -588,6 +591,7 @@ class FalseExpr(Expression):
 
     def __init__(self, **kwargs):
         super(FalseExpr, self).__init__("False", **kwargs)
+        self.value = False
 
 
 NumberType = int or float

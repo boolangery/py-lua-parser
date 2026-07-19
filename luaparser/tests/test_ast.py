@@ -109,32 +109,51 @@ class AstTestCase(tests.TestCase):
         exp = textwrap.dedent(
             """\
             {
-                "comments": [],
-                "body": {
-                    "comments": [],
-                    "body": [
-                        {
-                            "comments": [],
-                            "wrapped": false,
-                            "targets": [
+                "Chunk": {
+                    "body": {
+                        "Block": {
+                            "body": [
                                 {
-                                    "comments": [],
-                                    "wrapped": false,
-                                    "id": "a",
-                                    "attribute": null
+                                    "LocalAssign": {
+                                        "wrapped": false,
+                                        "targets": [
+                                            {
+                                                "Name": {
+                                                    "wrapped": false,
+                                                    "id": "a",
+                                                    "start_char": null,
+                                                    "stop_char": null,
+                                                    "line": null
+                                                }
+                                            }
+                                        ],
+                                        "values": [
+                                            {
+                                                "String": {
+                                                    "wrapped": false,
+                                                    "s": "foo",
+                                                    "raw": "foo",
+                                                    "delimiter": {},
+                                                    "start_char": 10,
+                                                    "stop_char": 14,
+                                                    "line": null
+                                                }
+                                            }
+                                        ],
+                                        "start_char": 0,
+                                        "stop_char": 14,
+                                        "line": null
+                                    }
                                 }
                             ],
-                            "values": [
-                                {
-                                    "comments": [],
-                                    "wrapped": false,
-                                    "s": "foo",
-                                    "raw": "foo",
-                                    "delimiter": {}
-                                }
-                            ]
+                            "start_char": 0,
+                            "stop_char": 14,
+                            "line": null
                         }
-                    ]
+                    },
+                    "start_char": 0,
+                    "stop_char": 14,
+                    "line": null
                 }
             }"""
         )
