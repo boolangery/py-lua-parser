@@ -386,3 +386,16 @@ class IntegrationTestCase(tests.TestCase):
         )
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
         self.assertEqual(exp, tree)
+
+    # Boolean values serialize with value field #76
+    def test_cont_int_15(self):
+        source = "local a, b = true, false"
+        tree = ast.parse(source)
+        json_output = ast.to_pretty_json(tree)
+
+        # Verify true/false values are present in JSON
+        self.assertIn('"value": true', json_output)
+        self.assertIn('"value": false', json_output)
+
+        # Verify round-trip preserves boolean values
+        self.assertEqual(source, ast.to_lua_source(tree))
