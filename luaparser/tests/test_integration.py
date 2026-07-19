@@ -391,11 +391,71 @@ class IntegrationTestCase(tests.TestCase):
     def test_cont_int_15(self):
         source = "local a, b = true, false"
         tree = ast.parse(source)
-        json_output = ast.to_pretty_json(tree)
-
-        # Verify true/false values are present in JSON
-        self.assertIn('"value": true', json_output)
-        self.assertIn('"value": false', json_output)
-
-        # Verify round-trip preserves boolean values
-        self.assertEqual(source, ast.to_lua_source(tree))
+        exp = textwrap.dedent(
+            """\
+            {
+                "Chunk": {
+                    "body": {
+                        "Block": {
+                            "body": [
+                                {
+                                    "LocalAssign": {
+                                        "wrapped": false,
+                                        "targets": [
+                                            {
+                                                "Name": {
+                                                    "wrapped": false,
+                                                    "id": "a",
+                                                    "start_char": null,
+                                                    "stop_char": null,
+                                                    "line": null
+                                                }
+                                            },
+                                            {
+                                                "Name": {
+                                                    "wrapped": false,
+                                                    "id": "b",
+                                                    "start_char": null,
+                                                    "stop_char": null,
+                                                    "line": null
+                                                }
+                                            }
+                                        ],
+                                        "values": [
+                                            {
+                                                "True": {
+                                                    "wrapped": false,
+                                                    "value": true,
+                                                    "start_char": 13,
+                                                    "stop_char": 16,
+                                                    "line": null
+                                                }
+                                            },
+                                            {
+                                                "False": {
+                                                    "wrapped": false,
+                                                    "value": false,
+                                                    "start_char": 19,
+                                                    "stop_char": 23,
+                                                    "line": null
+                                                }
+                                            }
+                                        ],
+                                        "start_char": 0,
+                                        "stop_char": 23,
+                                        "line": null
+                                    }
+                                }
+                            ],
+                            "start_char": 0,
+                            "stop_char": 23,
+                            "line": null
+                        }
+                    },
+                    "start_char": 0,
+                    "stop_char": 23,
+                    "line": null
+                }
+            }"""
+        )
+        self.assertEqual(ast.to_pretty_json(tree), exp)
