@@ -681,9 +681,11 @@ class BuilderVisitor(LuaParserVisitor):
             lua_str = lua_str[1:-1]
             delimiter = StringDelimiter.SINGLE_QUOTE
         # double square brackets notation:
-        elif m := LUA_DOUBLE_SQUARE_RE.match(lua_str):
-            lua_str = m.group("body")
-            delimiter = StringDelimiter.DOUBLE_SQUARE
+        else:
+            m = LUA_DOUBLE_SQUARE_RE.match(lua_str)
+            if m:
+                lua_str = m.group("body")
+                delimiter = StringDelimiter.DOUBLE_SQUARE
 
         if delimiter == StringDelimiter.DOUBLE_QUOTE or delimiter == StringDelimiter.SINGLE_QUOTE:
             unescaped_str = unescape_lua_string(lua_str)
