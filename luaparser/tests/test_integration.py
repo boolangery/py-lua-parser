@@ -386,3 +386,76 @@ class IntegrationTestCase(tests.TestCase):
         )
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
         self.assertEqual(exp, tree)
+
+    # Boolean values serialize with value field #76
+    def test_cont_int_15(self):
+        source = "local a, b = true, false"
+        tree = ast.parse(source)
+        exp = textwrap.dedent(
+            """\
+            {
+                "Chunk": {
+                    "body": {
+                        "Block": {
+                            "body": [
+                                {
+                                    "LocalAssign": {
+                                        "wrapped": false,
+                                        "targets": [
+                                            {
+                                                "Name": {
+                                                    "wrapped": false,
+                                                    "id": "a",
+                                                    "start_char": null,
+                                                    "stop_char": null,
+                                                    "line": null
+                                                }
+                                            },
+                                            {
+                                                "Name": {
+                                                    "wrapped": false,
+                                                    "id": "b",
+                                                    "start_char": null,
+                                                    "stop_char": null,
+                                                    "line": null
+                                                }
+                                            }
+                                        ],
+                                        "values": [
+                                            {
+                                                "True": {
+                                                    "wrapped": false,
+                                                    "value": true,
+                                                    "start_char": 13,
+                                                    "stop_char": 16,
+                                                    "line": null
+                                                }
+                                            },
+                                            {
+                                                "False": {
+                                                    "wrapped": false,
+                                                    "value": false,
+                                                    "start_char": 19,
+                                                    "stop_char": 23,
+                                                    "line": null
+                                                }
+                                            }
+                                        ],
+                                        "start_char": 0,
+                                        "stop_char": 23,
+                                        "line": null
+                                    }
+                                }
+                            ],
+                            "start_char": 0,
+                            "stop_char": 23,
+                            "line": null
+                        }
+                    },
+                    "start_char": 0,
+                    "stop_char": 23,
+                    "line": null
+                }
+            }"""
+        )
+        self.assertEqual(ast.to_pretty_json(tree), exp)
