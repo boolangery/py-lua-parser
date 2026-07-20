@@ -98,6 +98,82 @@ def to_pretty_json(root: Node) -> str:
     return json.dumps(root, cls=JSONEncoder, indent=4)
 
 
+
+class ASTTransformer:
+    """An iterative depth-first AST visitor that supports in-place node replacement.
+
+    Subclass and override visit_<NodeType>(node) methods. Each method receives
+    the current node and may return:
+
+    - A new :class:`~luaparser.astnodes.Node` instance to replace the current node
+    - ``None`` or the same node to leave it unchanged
+
+    The transformer propagates replacements up to the parent (or returns a new
+    root from :meth:`visit`). After a replacement, children of the *new* node
+    are visited -- not the original.
+
+    Example::
+
+        class NumberDoubler(ASTTransformer):
+            def visit_Number(self, node):
+                return Number(node.value * 2)
+
+        tree = ast.parse("x = 5")
+        new_tree = NumberDoubler().visit(tree)
+    """
+
+    def visit(self, root):
+        """Transform *root* and return the (possibly new) root node.
+
+        Returns None if *root* is None.
+        """
+        if root is None:
+            return None
+
+        # Each stack entry is (node, parent_info) where parent_info is either
+        # None (for root) or (key, container) -- container is a Node or list.
+        node_stack = [(root, None)]
+
+        while node_stack:
+            node, parent_info = node_stack.pop()
+
+            if isinstance(node, Node):
+                # --- call visitor ---
+                name = "visit_" + node.__class__.__name__
+                visitor_method = getattr(self, name, None)
+                if visitor_method is not None:
+                    replacement = visitor_method(node)
+                    if replacement is not None and replacement is not node:
+                        # Replace node in parent (or update root)
+                        if parent_info is not None:
+                            parent_key, parent_container = parent_info
+                            if isinstance(parent_container, list):
+                                parent_container[parent_key] = replacement
+                            else:
+                                setattr(parent_container, parent_key, replacement)
+                        else:
+                            root = replacement
+                        node = replacement  # visit replacement's children
+
+                # --- push children (reverse order for correct DFS) ---
+                children = [
+                    attr for attr in node.__dict__.keys()
+                    if not attr.startswith("_")
+                ]
+                for child_key in reversed(children):
+                    child = node.__dict__[child_key]
+                    if isinstance(child, list):
+                        for i in reversed(range(len(child))):
+                            node_stack.append((child[i], (i, child)))
+                    elif isinstance(child, Node):
+                        node_stack.append((child, (child_key, node)))
+
+            elif isinstance(node, list):
+                for n in reversed(node):
+                    node_stack.append((n, parent_info))
+
+        return root
+
 class ASTVisitor:
     def visit(self, root):
         # base case:
