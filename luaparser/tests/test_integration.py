@@ -428,7 +428,7 @@ class IntegrationTestCase(tests.TestCase):
                                                     "value": true,
                                                     "start_char": 13,
                                                     "stop_char": 16,
-                                                    "line": null
+                                                    "line": 1
                                                 }
                                             },
                                             {
@@ -437,24 +437,24 @@ class IntegrationTestCase(tests.TestCase):
                                                     "value": false,
                                                     "start_char": 19,
                                                     "stop_char": 23,
-                                                    "line": null
+                                                    "line": 1
                                                 }
                                             }
                                         ],
                                         "start_char": 0,
                                         "stop_char": 23,
-                                        "line": null
+                                        "line": 1
                                     }
                                 }
                             ],
                             "start_char": 0,
                             "stop_char": 23,
-                            "line": null
+                            "line": 1
                         }
                     },
                     "start_char": 0,
                     "stop_char": 23,
-                    "line": null
+                    "line": 1
                 }
             }"""
         )

@@ -1,9 +1,11 @@
 import ast
 import re
+from typing import Any
 from typing import Tuple
 from typing import TypeVar
+from typing import Union
 
-from antlr4 import CommonTokenStream, ParserRuleContext
+from antlr4 import CommonTokenStream, ParserRuleContext, Token
 from antlr4.tree.Tree import TerminalNodeImpl, ErrorNodeImpl
 
 from luaparser.astnodes import *
@@ -14,7 +16,7 @@ from luaparser.utils.string_literals import unescape_lua_string
 
 TNode = TypeVar("TNode", bound=Node)
 
-LUA_DOUBLE_SQUARE_RE = re.compile(r'^\[(?P<eq>=*)\[(?P<body>[\s\S]*?)\]\1\]$')
+LUA_DOUBLE_SQUARE_RE = re.compile(r'^\[(?P<eq>=*)\[(?P<body>[\s\S]*?)]\1]$')
 
 
 def _listify(obj):
@@ -31,6 +33,17 @@ class BuilderVisitor(LuaParserVisitor):
     def __init__(self, comment_token_stream: CommonTokenStream):
         super().__init__()
         self.comment_token_stream = comment_token_stream
+
+    def visit(self, tree) -> Any:
+        # ParseTreeVisitor.visit() has no return type of its own; the type
+        # checker infers one from defaultResult()/visitChildren(), which
+        # includes None. That leaks a spurious None into every call site
+        # below, even though the grammar guarantees a concrete node there.
+        return super().visit(tree)
+
+    def visitChildren(self, node) -> Any:
+        # Same rationale as visit() above.
+        return super().visitChildren(node)
 
     # Visit a parse tree produced by LuaParser#start_.
     def visitStart_(self, ctx: LuaParser.Start_Context):
@@ -50,20 +63,20 @@ class BuilderVisitor(LuaParserVisitor):
     def defaultResult(self):
         return None
 
-    def aggregateResult(self, aggregate, nextResult):
+    def aggregateResult(self, aggregate: Any, next_result: Any) -> Any:
         if aggregate is None:
-            return nextResult
-        if type(nextResult) is list:
-            nextResult.append(aggregate)
-            return nextResult
+            return next_result
+        if type(next_result) is list:
+            next_result.append(aggregate)
+            return next_result
         if type(aggregate) is list:
-            aggregate.append(nextResult)
+            aggregate.append(next_result)
             return aggregate
-        if nextResult is None:
+        if next_result is None:
             return aggregate
-        return [nextResult, aggregate]
+        return [next_result, aggregate]
 
-    def add_comments(self, start, stop: CommonToken, node: TNode,
+    def add_comments(self, start: Token, stop: Optional[Token], node: TNode,
                      allow_right_ctx: bool = False, ignore_right_nl: bool = False, ignore_left_comma: bool = False,
                      ignore_left_double_nl: bool = False) -> TNode:
         """Add comments to a node.
@@ -95,12 +108,12 @@ class BuilderVisitor(LuaParserVisitor):
             # Reverse the comments to get the correct order:
             node.comments.extend(reversed(left_comments))
 
-        if allow_right_ctx:
+        if allow_right_ctx and stop is not None:
             # Get right comment until a new line is found
             # A newline indicates the end of the comment and the next one should be assigned to next node.
             # We do not use getHiddenTokensToRight because we want to ignore COMMAs.
-            next_right_token = stop.tokenIndex + 1 if stop else None
-            while next_right_token:
+            next_right_token = stop.tokenIndex + 1
+            while True:
                 token = self.comment_token_stream.get(next_right_token)
                 next_right_token += 1
 
@@ -119,7 +132,8 @@ class BuilderVisitor(LuaParserVisitor):
 
         return node
 
-    def add_context(self, parser_nodes: ParserRuleContext or List[ParserRuleContext or TerminalNodeImpl], node: TNode,
+    def add_context(self, parser_nodes: Union[ParserRuleContext, List[Union[ParserRuleContext, TerminalNodeImpl]]],
+                    node: TNode,
                     allow_right_ctx: bool = False, ignore_right_nl: bool = False, ignore_left_comma: bool = False,
                     ignore_left_double_nl: bool = False, without_start_stop_tokens: bool = False) -> TNode:
         """Add comments and tokens to a node.
@@ -142,6 +156,9 @@ class BuilderVisitor(LuaParserVisitor):
         stop_obj = parser_nodes[-1] if isinstance(parser_nodes, list) else parser_nodes
         start = start_obj.start if isinstance(start_obj, ParserRuleContext) else start_obj.symbol
         stop = stop_obj.stop if isinstance(stop_obj, ParserRuleContext) else stop_obj.symbol
+        # A fully parsed context always has its start token set; only an
+        # in-progress (not yet parsed) context could leave it unset.
+        assert start is not None
 
         node = self.add_comments(start, stop, node, allow_right_ctx, ignore_right_nl, ignore_left_comma,
                                  ignore_left_double_nl)
@@ -168,7 +185,7 @@ class BuilderVisitor(LuaParserVisitor):
             body=statements
         ), allow_right_ctx=allow_right_ctx, ignore_right_nl=ignore_right_nl)
 
-    def visitBlockEnd(self, ctx: LuaParser.BlockContext):
+    def visit_block_end(self, ctx: LuaParser.BlockContext):
         """Visit a block that is immediately followed by a closing keyword
         (end/until/else/elseif), capturing standalone comments that sit
         between the last statement and that keyword instead of losing them.
@@ -204,19 +221,19 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#stat_do.
     def visitStat_do(self, ctx: LuaParser.Stat_doContext):
-        return self.add_context(ctx, Do(body=self.visitBlockEnd(ctx.block())))
+        return self.add_context(ctx, Do(body=self.visit_block_end(ctx.block())))
 
     # Visit a parse tree produced by LuaParser#stat_while.
     def visitStat_while(self, ctx: LuaParser.Stat_whileContext):
         return self.add_context(ctx, While(
             test=self.visit(ctx.exp()),
-            body=self.visitBlockEnd(ctx.block()),
+            body=self.visit_block_end(ctx.block()),
         ))
 
     # Visit a parse tree produced by LuaParser#stat_repeat.
     def visitStat_repeat(self, ctx: LuaParser.Stat_repeatContext):
         return self.add_context(ctx, Repeat(
-            body=self.visitBlockEnd(ctx.block()),
+            body=self.visit_block_end(ctx.block()),
             test=self.visit(ctx.exp()),
         ))
 
@@ -227,7 +244,7 @@ class BuilderVisitor(LuaParserVisitor):
         nb_else_if = len(ctx.ELSEIF())
         if_stat = self.add_context(ctx, If(
             test=self.visit(expressions[0]),
-            body=self.visitBlockEnd(blocks[0]),
+            body=self.visit_block_end(blocks[0]),
             orelse=None,
         ))
 
@@ -235,7 +252,7 @@ class BuilderVisitor(LuaParserVisitor):
         if nb_else_if > 0:
             or_else_root = self.add_context([ctx.ELSEIF(0), blocks[1]], ElseIf(
                 test=self.visit(expressions[1]),
-                body=self.visitBlockEnd(blocks[1]),
+                body=self.visit_block_end(blocks[1]),
                 orelse=None,
             ))
 
@@ -243,7 +260,7 @@ class BuilderVisitor(LuaParserVisitor):
             for i in range(nb_else_if - 1):
                 or_else_leaf.orelse = self.add_context([ctx.ELSEIF(i + 1), blocks[i + 2]], ElseIf(
                     test=self.visit(expressions[i + 2]),
-                    body=self.visitBlockEnd(blocks[i + 2]),
+                    body=self.visit_block_end(blocks[i + 2]),
                     orelse=None,
                 ))
                 or_else_leaf = or_else_leaf.orelse
@@ -251,7 +268,7 @@ class BuilderVisitor(LuaParserVisitor):
             if_stat.orelse = or_else_root
 
         if ctx.ELSE():
-            block = self.visitBlockEnd(blocks[len(blocks) - 1])
+            block = self.visit_block_end(blocks[len(blocks) - 1])
             if if_stat.orelse is None:
                 if_stat.orelse = block
             else:
@@ -263,7 +280,7 @@ class BuilderVisitor(LuaParserVisitor):
     def visitStat_for(self, ctx: LuaParser.Stat_forContext):
         if ctx.IN():  # forin
             return self.add_context(ctx, Forin(
-                body=self.visitBlockEnd(ctx.block()),
+                body=self.visit_block_end(ctx.block()),
                 iter=self.visit(ctx.explist()),
                 targets=self.visit(ctx.namelist()),
             ))
@@ -273,7 +290,7 @@ class BuilderVisitor(LuaParserVisitor):
                 start=self.visit(ctx.exp(0)),
                 stop=self.visit(ctx.exp(1)),
                 step=self.visit(ctx.exp(2)) if ctx.exp(2) else 1,
-                body=self.visitBlockEnd(ctx.block()),
+                body=self.visit_block_end(ctx.block()),
             ))
 
     # Visit a parse tree produced by LuaParser#stat_function.
@@ -333,6 +350,7 @@ class BuilderVisitor(LuaParserVisitor):
             ))
         elif ctx.BREAK():
             return self.add_context(ctx, Break())
+        return None
 
     # Visit a parse tree produced by LuaParser#label.
     def visitLabel(self, ctx: LuaParser.LabelContext):
@@ -529,7 +547,7 @@ class BuilderVisitor(LuaParserVisitor):
         ))
         return self.visit_call_chain(invoke, ctx.call())
 
-    def visit_call_chain(self, root_exp: Optional[Expression], calls: List[LuaParser.CallContext]):
+    def visit_call_chain(self, root_exp: Expression, calls: List[LuaParser.CallContext]):
         if not calls:
             return root_exp
 
@@ -545,7 +563,7 @@ class BuilderVisitor(LuaParserVisitor):
             i += 1
         return root
 
-    def visit_call(self, root_exp: Optional[Expression], ctx: LuaParser.CallContext):
+    def visit_call(self, root_exp: Expression, ctx: LuaParser.CallContext):
         tail = self.visit_tail_chain(root_exp, ctx.tail())
         par, args = self.visitArgs(ctx.args())
         return self.add_context(ctx, Call(
@@ -554,7 +572,7 @@ class BuilderVisitor(LuaParserVisitor):
             style=CallStyle.DEFAULT if par else CallStyle.NO_PARENTHESIS
         ))
 
-    def visit_tail_chain(self, root_exp: Optional[Expression], tails: List[LuaParser.TailContext]):
+    def visit_tail_chain(self, root_exp: Expression, tails: List[LuaParser.TailContext]):
         if not tails:
             return root_exp
 
@@ -602,7 +620,7 @@ class BuilderVisitor(LuaParserVisitor):
     # Visit a parse tree produced by LuaParser#funcbody.
     def visitFuncbody(self, ctx: LuaParser.FuncbodyContext) -> Tuple[List[Expression], Block]:
         par_list = self.visitParlist(ctx.parlist())
-        block = self.visitBlockEnd(ctx.block())
+        block = self.visit_block_end(ctx.block())
         return par_list, block
 
     # Visit a parse tree produced by LuaParser#parlist.
@@ -667,7 +685,7 @@ class BuilderVisitor(LuaParserVisitor):
         number_text = self.visitChildren(ctx)
         try:
             number = ast.literal_eval(number_text)
-        except:
+        except (ValueError, SyntaxError):
             # exception occurs with leading zero number: 002
             number = float(number_text)
         return Number(

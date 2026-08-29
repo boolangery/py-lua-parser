@@ -3,7 +3,7 @@ This module defines the AST nodes for the Lua language.
 """
 from __future__ import annotations
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional, Union
 from antlr4.Token import CommonToken
 
 Comments = Optional[List["Comment"]]
@@ -41,7 +41,7 @@ class Node:
         if comments is None:
             comments = []
         self._name: str = name
-        self.comments: Comments = comments
+        self.comments: List["Comment"] = comments
         self._first_token: Optional[CommonToken] = first_token
         self._last_token: Optional[CommonToken] = last_token
 
@@ -101,18 +101,20 @@ class Node:
 
     @property
     def start_char(self) -> Optional[int]:
-        return self.first_token.start if self.first_token else None
+        first_token = self.first_token
+        return first_token.start if first_token else None
 
     @property
     def stop_char(self) -> Optional[int]:
-        return self.last_token.stop if self.last_token else None
+        last_token = self.last_token
+        return last_token.stop if last_token else None
 
     @property
     def line(self) -> Optional[int]:
         """Line number."""
-        return self._tokens[0].line if self._tokens else None
+        return self._first_token.line if self._first_token else None
 
-    def to_json(self) -> any:
+    def to_json(self) -> Any:
         return {
             self._name: {
                 **{
@@ -125,7 +127,7 @@ class Node:
                 **{
                     "start_char": self.start_char,
                     "stop_char": self.stop_char,
-                    "line": self.line if hasattr(self, "_tokens") else None,
+                    "line": self.line,
                 },
             }
         }
@@ -354,7 +356,7 @@ class If(Statement):
     """
 
     def __init__(
-            self, test: Expression, body: Block, orelse: List[Statement] or ElseIf, **kwargs
+            self, test: Expression, body: Block, orelse: Optional[Union["Block", "ElseIf"]], **kwargs
     ):
         super().__init__("If", **kwargs)
         self.test: Expression = test
@@ -427,7 +429,7 @@ class Fornum(Statement):
             target: Name,
             start: Expression,
             stop: Expression,
-            step: Expression,
+            step: Union[Expression, int],
             body: Block,
             **kwargs
     ):
@@ -435,7 +437,9 @@ class Fornum(Statement):
         self.target: Name = target
         self.start: Expression = start
         self.stop: Expression = stop
-        self.step: Expression = step
+        # Defaults to the Python int 1 (not a Number node) when the Lua
+        # source has no explicit step; see printers.py's `step != 1` check.
+        self.step: Union[Expression, int] = step
         self.body: Block = body
 
 
@@ -594,7 +598,7 @@ class FalseExpr(Expression):
         self.value = False
 
 
-NumberType = int or float
+NumberType = Union[int, float]
 
 
 class Number(Expression):

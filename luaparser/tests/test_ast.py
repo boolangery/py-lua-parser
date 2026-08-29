@@ -136,24 +136,24 @@ class AstTestCase(tests.TestCase):
                                                     "delimiter": {},
                                                     "start_char": 10,
                                                     "stop_char": 14,
-                                                    "line": null
+                                                    "line": 1
                                                 }
                                             }
                                         ],
                                         "start_char": 0,
                                         "stop_char": 14,
-                                        "line": null
+                                        "line": 1
                                     }
                                 }
                             ],
                             "start_char": 0,
                             "stop_char": 14,
-                            "line": null
+                            "line": 1
                         }
                     },
                     "start_char": 0,
                     "stop_char": 14,
-                    "line": null
+                    "line": 1
                 }
             }"""
         )
