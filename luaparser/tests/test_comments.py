@@ -249,6 +249,39 @@ class CommentsTestCase(tests.TestCase):
         )
         self.assertEqual(exp, tree)
 
+    def test_comment_before_end_of_for_loop(self):
+        # Regression test for https://github.com/boolangery/py-lua-parser/issues/81
+        # Standalone comments right before the closing "end" of a for-loop body
+        # used to be silently dropped.
+        tree = ast.parse(
+            textwrap.dedent(
+                """
+            for i=1,2 do
+              p=i
+              -- 4
+              -- 5
+            end
+            """
+            )
+        )
+        exp = Chunk(
+            Block(
+                [
+                    Fornum(
+                        target=Name("i"),
+                        start=Number(1),
+                        stop=Number(2),
+                        step=1,
+                        body=Block(
+                            [Assign([Name("p")], [Name("i")])],
+                            comments=[Comment("-- 4"), Comment("-- 5")],
+                        ),
+                    )
+                ]
+            )
+        )
+        self.assertEqual(exp, tree)
+
     def test_just_comment(self):
         tree = ast.parse(
             textwrap.dedent(

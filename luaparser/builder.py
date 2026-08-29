@@ -159,13 +159,21 @@ class BuilderVisitor(LuaParserVisitor):
         ), ignore_left_double_nl=True, allow_right_ctx=True, ignore_right_nl=True)
 
     # Visit a parse tree produced by LuaParser#block.
-    def visitBlock(self, ctx: LuaParser.BlockContext):
+    def visitBlock(self, ctx: LuaParser.BlockContext, allow_right_ctx: bool = False,
+                   ignore_right_nl: bool = False):
         statements = [self.visit(stat) for stat in ctx.stat()]
         if ctx.retstat():
             statements.append(self.visit(ctx.retstat()))
         return self.add_context(ctx, Block(
             body=statements
-        ))
+        ), allow_right_ctx=allow_right_ctx, ignore_right_nl=ignore_right_nl)
+
+    def visitBlockEnd(self, ctx: LuaParser.BlockContext):
+        """Visit a block that is immediately followed by a closing keyword
+        (end/until/else/elseif), capturing standalone comments that sit
+        between the last statement and that keyword instead of losing them.
+        """
+        return self.visitBlock(ctx, allow_right_ctx=True, ignore_right_nl=True)
 
     # Visit a parse tree produced by LuaParser#stat_empty.
     def visitStat_empty(self, ctx: LuaParser.Stat_emptyContext):
@@ -196,19 +204,19 @@ class BuilderVisitor(LuaParserVisitor):
 
     # Visit a parse tree produced by LuaParser#stat_do.
     def visitStat_do(self, ctx: LuaParser.Stat_doContext):
-        return self.add_context(ctx, Do(body=self.visit(ctx.block())))
+        return self.add_context(ctx, Do(body=self.visitBlockEnd(ctx.block())))
 
     # Visit a parse tree produced by LuaParser#stat_while.
     def visitStat_while(self, ctx: LuaParser.Stat_whileContext):
         return self.add_context(ctx, While(
             test=self.visit(ctx.exp()),
-            body=self.visit(ctx.block()),
+            body=self.visitBlockEnd(ctx.block()),
         ))
 
     # Visit a parse tree produced by LuaParser#stat_repeat.
     def visitStat_repeat(self, ctx: LuaParser.Stat_repeatContext):
         return self.add_context(ctx, Repeat(
-            body=self.visit(ctx.block()),
+            body=self.visitBlockEnd(ctx.block()),
             test=self.visit(ctx.exp()),
         ))
 
@@ -219,7 +227,7 @@ class BuilderVisitor(LuaParserVisitor):
         nb_else_if = len(ctx.ELSEIF())
         if_stat = self.add_context(ctx, If(
             test=self.visit(expressions[0]),
-            body=self.visit(blocks[0]),
+            body=self.visitBlockEnd(blocks[0]),
             orelse=None,
         ))
 
@@ -227,7 +235,7 @@ class BuilderVisitor(LuaParserVisitor):
         if nb_else_if > 0:
             or_else_root = self.add_context([ctx.ELSEIF(0), blocks[1]], ElseIf(
                 test=self.visit(expressions[1]),
-                body=self.visit(blocks[1]),
+                body=self.visitBlockEnd(blocks[1]),
                 orelse=None,
             ))
 
@@ -235,7 +243,7 @@ class BuilderVisitor(LuaParserVisitor):
             for i in range(nb_else_if - 1):
                 or_else_leaf.orelse = self.add_context([ctx.ELSEIF(i + 1), blocks[i + 2]], ElseIf(
                     test=self.visit(expressions[i + 2]),
-                    body=self.visit(blocks[i + 2]),
+                    body=self.visitBlockEnd(blocks[i + 2]),
                     orelse=None,
                 ))
                 or_else_leaf = or_else_leaf.orelse
@@ -243,7 +251,7 @@ class BuilderVisitor(LuaParserVisitor):
             if_stat.orelse = or_else_root
 
         if ctx.ELSE():
-            block = self.visit(blocks[len(blocks) - 1])
+            block = self.visitBlockEnd(blocks[len(blocks) - 1])
             if if_stat.orelse is None:
                 if_stat.orelse = block
             else:
@@ -255,7 +263,7 @@ class BuilderVisitor(LuaParserVisitor):
     def visitStat_for(self, ctx: LuaParser.Stat_forContext):
         if ctx.IN():  # forin
             return self.add_context(ctx, Forin(
-                body=self.visit(ctx.block()),
+                body=self.visitBlockEnd(ctx.block()),
                 iter=self.visit(ctx.explist()),
                 targets=self.visit(ctx.namelist()),
             ))
@@ -265,7 +273,7 @@ class BuilderVisitor(LuaParserVisitor):
                 start=self.visit(ctx.exp(0)),
                 stop=self.visit(ctx.exp(1)),
                 step=self.visit(ctx.exp(2)) if ctx.exp(2) else 1,
-                body=self.visit(ctx.block()),
+                body=self.visitBlockEnd(ctx.block()),
             ))
 
     # Visit a parse tree produced by LuaParser#stat_function.
@@ -594,7 +602,7 @@ class BuilderVisitor(LuaParserVisitor):
     # Visit a parse tree produced by LuaParser#funcbody.
     def visitFuncbody(self, ctx: LuaParser.FuncbodyContext) -> Tuple[List[Expression], Block]:
         par_list = self.visitParlist(ctx.parlist())
-        block = self.visit(ctx.block())
+        block = self.visitBlockEnd(ctx.block())
         return par_list, block
 
     # Visit a parse tree produced by LuaParser#parlist.
