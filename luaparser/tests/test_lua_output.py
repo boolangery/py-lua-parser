@@ -179,3 +179,90 @@ class LuaOutputTestCase(tests.TestCase):
                 }'''
         )
         self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    # Regression tests for https://github.com/boolangery/py-lua-parser/issues/82
+    # (LuaOutputVisitor silently dropped every comment).
+
+    def test_comment_leading_before_statement(self):
+        source = textwrap.dedent(
+            """\
+            -- a comment
+            local x = 1"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_multiple_leading(self):
+        source = textwrap.dedent(
+            """\
+            -- first
+            -- second
+            local x = 1"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_leading_before_each_statement(self):
+        source = textwrap.dedent(
+            """\
+            -- first
+            local x = 1
+            -- second
+            x = 2"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_chunk_trailing(self):
+        source = textwrap.dedent(
+            """\
+            local x = 1
+            -- trailing comment"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_before_end_of_for_loop(self):
+        # Standalone comments right before the closing "end" of a block
+        # (see issue #81) must round-trip too, correctly indented.
+        source = textwrap.dedent(
+            """\
+            for i = 1, 2 do
+                p = i
+                -- 4
+                -- 5
+            end"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_in_table_field(self):
+        source = textwrap.dedent(
+            """\
+            local t = {
+                -- a comment
+                foo = bar,
+            }"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_duplicate_text_not_dropped(self):
+        # An inline comment and a standalone one with the same text must not
+        # be conflated: they used to be deduplicated by value equality
+        # instead of token position, silently dropping the second one.
+        source = textwrap.dedent(
+            """\
+            for i = 1, 2 do
+                local x = 1 -- dup
+                -- dup
+            end"""
+        )
+        self.assertEqual(source, ast.to_lua_source(ast.parse(source)))
+
+    def test_comment_on_node_without_tokens(self):
+        # A node built without parser tokens (e.g. hand-constructed, or
+        # produced by ASTTransformer) but carrying .comments must not crash
+        # to_lua_source, and should still emit its comment.
+        from luaparser.astnodes import Comment, LocalAssign, Name, Number
+
+        node = LocalAssign(
+            targets=[Name("x")],
+            values=[Number(1)],
+            comments=[Comment("-- hi")],
+        )
+        self.assertEqual("-- hi\nlocal x = 1", ast.to_lua_source(node))

@@ -199,9 +199,51 @@ class LuaOutputVisitor:
         self._level = 0
 
     def do_visit(self, node: Node) -> str:
+        output = self.visit(node)
         if isinstance(node, Expression) and node.wrapped:
-            return "(" + self.visit(node) + ")"
-        return self.visit(node)
+            output = "(" + output + ")"
+
+        if isinstance(node, Node) and node.comments:
+            # Comments are attributed to a node's .comments during parsing by
+            # scanning tokens strictly before its first_token (leading) or
+            # strictly after its last_token (trailing); reuse that same
+            # ordering here to place them back correctly. A comment (or node)
+            # without token positions can't be classified that way, so it
+            # defaults to leading rather than risk being dropped.
+            leading = []
+            trailing = []
+            for c in node.comments:
+                if (
+                        node.first_token is not None
+                        and node.last_token is not None
+                        and c.first_token is not None
+                        and c.first_token.tokenIndex > node.last_token.tokenIndex
+                ):
+                    trailing.append(c)
+                else:
+                    leading.append(c)
+
+            if leading:
+                output = "\n".join(c.s for c in leading) + "\n" + output
+
+            if trailing:
+                # A trailing comment on the same source line as the node's
+                # last token stays inline; any further ones were on their own
+                # line(s) after the node (e.g. before a block's closing
+                # keyword) and are re-emitted the same way, matching the
+                # indentation of the line they are appended to.
+                inline = [c for c in trailing if c.first_token.line == node.last_token.line]
+                afterward = [c for c in trailing if c.first_token.line != node.last_token.line]
+
+                if inline:
+                    output += " " + " ".join(c.s for c in inline)
+
+                if afterward:
+                    last_line = output.rsplit("\n", 1)[-1]
+                    indent_prefix = last_line[: len(last_line) - len(last_line.lstrip(" "))]
+                    output += "\n" + "\n".join(indent_prefix + c.s for c in afterward)
+
+        return output
 
     @multimethod
     def visit(self, node: Chunk) -> str:
