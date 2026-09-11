@@ -56,7 +56,7 @@ def get_token_stream(source: str) -> CommonTokenStream:
     return stream
 
 
-def walk(root: Node) -> Generator[None, Node, None]:
+def walk(root: Node) -> Generator[Node, None, None]:
     # base case:
     if root is None:
         return
