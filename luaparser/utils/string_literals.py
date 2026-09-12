@@ -78,9 +78,17 @@ def unescape_lua_string(s: str) -> bytes:
                     if not (s[i + 1].isspace() and s[i + 1].isascii()):
                         break
                     i += 1
+            elif escaped_char == "\r" or escaped_char == "\n":
+                unescaped_bytes.append(b"\n")
+                if (
+                        i + 1 < len(s)
+                        and s[i + 1] in "\r\n"
+                        and s[i + 1] != escaped_char
+                ):
+                    i += 1
             elif escaped_char == "x":
                 hex_code = int(s[i+1:i+3], 16)
-                unescaped_bytes.append(ucs_to_utf8(hex_code))
+                unescaped_bytes.append(bytes([hex_code]))
                 i += 2
             elif escaped_char.isdigit():
                 digits = [escaped_char]
@@ -91,7 +99,7 @@ def unescape_lua_string(s: str) -> bytes:
                         digits.append(s[i + 1])
                         i += 1
                 num = int("".join(digits))
-                unescaped_bytes.append(ucs_to_utf8(num))
+                unescaped_bytes.append(bytes([num]))
             elif escaped_char == "u":
                 i += 1
                 hex_chars = []

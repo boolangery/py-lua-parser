@@ -155,8 +155,8 @@ class TypesValuesTestCase(tests.TestCase):
         )
         exp = Chunk(
             Block([
-                Assign(targets=[Name("a")], values=[String(b"\nfour\n", "\nfour\n", delimiter=StringDelimiter.DOUBLE_SQUARE)]),
-                Assign(targets=[Name("b")], values=[String(b"\nfive\n", "\nfive\n", delimiter=StringDelimiter.DOUBLE_SQUARE)]),
+                Assign(targets=[Name("a")], values=[String(b"four\n", "\nfour\n", delimiter=StringDelimiter.DOUBLE_SQUARE)]),
+                Assign(targets=[Name("b")], values=[String(b"five\n", "\nfive\n", delimiter=StringDelimiter.DOUBLE_SQUARE)]),
             ])
         )
         self.assertEqual(exp, tree)

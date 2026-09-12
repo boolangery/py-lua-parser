@@ -285,9 +285,25 @@ class LuaOutputVisitor:
     @visit.register
     def visit(self, node: LocalAssign) -> str:
         res = self.do_visit(node.values)
+        prefix = "local "
+        if node.attribute is not None:
+            prefix += self.do_visit(node.attribute) + " "
         if res == '':
-            return "local " + self.do_visit(node.targets)
-        return "local " + self.do_visit(node.targets) + " = " + res
+            return prefix + self.do_visit(node.targets)
+        return prefix + self.do_visit(node.targets) + " = " + res
+
+    @visit.register
+    def visit(self, node: GlobalAssign) -> str:
+        prefix = "global"
+        if node.attribute is not None:
+            prefix += self.do_visit(node.attribute)
+        if node.wildcard:
+            return prefix + " *"
+        prefix += " "
+        res = self.do_visit(node.values)
+        if res == '':
+            return prefix + self.do_visit(node.targets)
+        return prefix + self.do_visit(node.targets) + " = " + res
 
     @visit.register
     def visit(self, node: While) -> str:
@@ -407,6 +423,18 @@ class LuaOutputVisitor:
         )
 
     @visit.register
+    def visit(self, node: GlobalFunction) -> str:
+        return (
+                "global function "
+                + self.do_visit(node.name)
+                + "("
+                + self.do_visit(node.args)
+                + ")\n"
+                + self.do_visit(node.body)
+                + "\nend"
+        )
+
+    @visit.register
     def visit(self, node: Method) -> str:
         return (
                 "function "
@@ -443,7 +471,8 @@ class LuaOutputVisitor:
         elif node.delimiter == StringDelimiter.DOUBLE_QUOTE:
             return '"' + self.do_visit(node.raw) + '"'
         else:
-            return "[[" + self.do_visit(node.raw) + "]]"
+            equals = "=" * node.long_bracket_level
+            return "[" + equals + "[" + self.do_visit(node.raw) + "]" + equals + "]"
 
     @visit.register
     def visit(self, node: Table):
@@ -578,7 +607,14 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: Name) -> str:
-        return self.do_visit(node.id)
+        output = self.do_visit(node.id)
+        if node.attribute is not None:
+            output += " " + self.do_visit(node.attribute)
+        return output
+
+    @visit.register
+    def visit(self, node: Attribute) -> str:
+        return "<" + self.do_visit(node.name) + ">"
 
     @visit.register
     def visit(self, node: Index) -> str:
@@ -589,7 +625,9 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: Varargs) -> str:
-        return "..."
+        if node.name is None:
+            return "..."
+        return "... " + self.do_visit(node.name)
 
     @visit.register
     def visit(self, node: Repeat) -> str:

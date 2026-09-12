@@ -65,3 +65,6 @@ class LuaLexerBase(Lexer):
         cs = self._input
         return cs.index == 1
 
+    def IsDecimalEscapeTerminated(self):
+        c = self._input.LA(1)
+        return c < ord('0') or c > ord('9')

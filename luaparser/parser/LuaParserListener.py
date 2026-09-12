@@ -152,12 +152,48 @@ class LuaParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by LuaParser#stat_global.
+    def enterStat_global(self, ctx:LuaParser.Stat_globalContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#stat_global.
+    def exitStat_global(self, ctx:LuaParser.Stat_globalContext):
+        pass
+
+
     # Enter a parse tree produced by LuaParser#stat_local.
     def enterStat_local(self, ctx:LuaParser.Stat_localContext):
         pass
 
     # Exit a parse tree produced by LuaParser#stat_local.
     def exitStat_local(self, ctx:LuaParser.Stat_localContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#globalstat_function.
+    def enterGlobalstat_function(self, ctx:LuaParser.Globalstat_functionContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#globalstat_function.
+    def exitGlobalstat_function(self, ctx:LuaParser.Globalstat_functionContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#globalstat_names.
+    def enterGlobalstat_names(self, ctx:LuaParser.Globalstat_namesContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#globalstat_names.
+    def exitGlobalstat_names(self, ctx:LuaParser.Globalstat_namesContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#globalstat_wildcard.
+    def enterGlobalstat_wildcard(self, ctx:LuaParser.Globalstat_wildcardContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#globalstat_wildcard.
+    def exitGlobalstat_wildcard(self, ctx:LuaParser.Globalstat_wildcardContext):
         pass
 
 
@@ -374,6 +410,15 @@ class LuaParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by LuaParser#parlist.
     def exitParlist(self, ctx:LuaParser.ParlistContext):
+        pass
+
+
+    # Enter a parse tree produced by LuaParser#varargparam.
+    def enterVarargparam(self, ctx:LuaParser.VarargparamContext):
+        pass
+
+    # Exit a parse tree produced by LuaParser#varargparam.
+    def exitVarargparam(self, ctx:LuaParser.VarargparamContext):
         pass
 
 
