@@ -21,15 +21,18 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
+    python_requires='>=3.10',
     install_requires=[
         'antlr4-python3-runtime==4.13.2',
-        'multimethod'
+        'multimethod>=2.0'
     ],
+    package_data={'luaparser.tests': ['lua55_corpus/*.lua', 'lua55_corpus/README.md']},
     entry_points={
         'console_scripts': [
             'luaparser = luaparser.__main__:main'
