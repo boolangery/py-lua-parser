@@ -20,7 +20,7 @@ The package can be installed through `pip`:
 
 .. code-block::
 
-    $ python3.6 -m pip install luaparser
+    $ python3 -m pip install luaparser
 
 It will install the shell command 'luaparser'.
 
@@ -165,7 +165,12 @@ Alternatively, you can use a node visitor:
 Rendering lua code
 ------------------------------------------------------------------------------
 
-.. warning:: Experimental feature
+``ast.to_lua_source`` renders a tree back to Lua. It is a pretty-printer, not a
+byte-for-byte reproduction of the original file: the output is re-indented (use
+the ``indent`` argument to pick the width) and blank lines are not preserved.
+What it does guarantee is that the code keeps its meaning, and that comments
+survive the trip. Parsing the output gives back the same tree, and rendering
+that tree again gives the exact same text.
 
 .. code-block:: python
 
@@ -286,7 +291,7 @@ Will output:
         }
     }
 
-Command line
+Documentation
 ==============================================================================
 
 Documentation can be built with Sphinx:
