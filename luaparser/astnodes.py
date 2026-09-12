@@ -65,7 +65,7 @@ class Node:
             return _equal_dicts(
                 self.__dict__,
                 other.__dict__,
-                ["_first_token", "_last_token", "_index"],
+                ["_first_token", "_last_token", "_index", "_long_bracket_level"],
             )
         return False
 
@@ -285,9 +285,33 @@ class LocalAssign(Assign):
         values: List of values.
     """
 
-    def __init__(self, targets: List[Name], values: List[Node], **kwargs):
+    def __init__(
+            self,
+            targets: List[Name],
+            values: List[Node],
+            attribute: Optional[Attribute] = None,
+            **kwargs
+    ):
         super().__init__(targets, values, **kwargs)
         self._name: str = "LocalAssign"
+        self.attribute: Optional[Attribute] = attribute
+
+
+class GlobalAssign(Assign):
+    """Lua 5.5 global declaration statement."""
+
+    def __init__(
+            self,
+            targets: Optional[List[Name]] = None,
+            values: Optional[List[Node]] = None,
+            attribute: Optional[Attribute] = None,
+            wildcard: bool = False,
+            **kwargs
+    ):
+        super().__init__(targets or [], values or [], **kwargs)
+        self._name: str = "GlobalAssign"
+        self.attribute: Optional[Attribute] = attribute
+        self.wildcard: bool = wildcard
 
 
 class While(Statement):
@@ -541,6 +565,14 @@ class LocalFunction(Statement):
         self.body: Block = body
 
 
+class GlobalFunction(Function):
+    """Lua 5.5 global function declaration statement."""
+
+    def __init__(self, name: Name, args: List[Expression], body: Block, **kwargs):
+        super().__init__(name, args, body, **kwargs)
+        self._name: str = "GlobalFunction"
+
+
 class Method(Statement):
     """Define the Lua Object Oriented function statement.
 
@@ -614,10 +646,11 @@ class Number(Expression):
 
 
 class Varargs(Expression):
-    """Define the Lua Varargs expression (...)."""
+    """Define a variadic parameter, optionally named in Lua 5.5."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, name: Optional[Name] = None, **kwargs):
         super(Varargs, self).__init__("Varargs", **kwargs)
+        self.name: Optional[Name] = name
 
 
 class StringDelimiter(Enum):
@@ -640,12 +673,18 @@ class String(Expression):
             s: bytes,
             raw: str,
             delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE,
+            long_bracket_level: int = 0,
             **kwargs
     ):
         super(String, self).__init__("String", **kwargs)
         self.s: bytes = s
         self.raw: str = raw
         self.delimiter: StringDelimiter = delimiter
+        self._long_bracket_level: int = long_bracket_level
+
+    @property
+    def long_bracket_level(self) -> int:
+        return self._long_bracket_level
 
 
 class Field(Expression):

@@ -21,3 +21,7 @@ class LuaParserBase(Parser):
         if la.type == self.OP:
             return False
         return True
+
+    def IsGlobal(self) -> bool:
+        """Treat ``global`` as a contextual keyword for Lua 5.4 compatibility."""
+        return self._input.LT(1).text == "global"

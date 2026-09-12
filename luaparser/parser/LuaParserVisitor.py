@@ -89,8 +89,28 @@ class LuaParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by LuaParser#stat_global.
+    def visitStat_global(self, ctx:LuaParser.Stat_globalContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by LuaParser#stat_local.
     def visitStat_local(self, ctx:LuaParser.Stat_localContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#globalstat_function.
+    def visitGlobalstat_function(self, ctx:LuaParser.Globalstat_functionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#globalstat_names.
+    def visitGlobalstat_names(self, ctx:LuaParser.Globalstat_namesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#globalstat_wildcard.
+    def visitGlobalstat_wildcard(self, ctx:LuaParser.Globalstat_wildcardContext):
         return self.visitChildren(ctx)
 
 
@@ -211,6 +231,11 @@ class LuaParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LuaParser#parlist.
     def visitParlist(self, ctx:LuaParser.ParlistContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LuaParser#varargparam.
+    def visitVarargparam(self, ctx:LuaParser.VarargparamContext):
         return self.visitChildren(ctx)
 
 

@@ -28,8 +28,20 @@ It will install the shell command 'luaparser'.
 Compatibility with Lua grammar
 ------------------------------------------------------------------------------
 
-3.2.1  =>  Lua 5.3 grammar
-3.2.1+ =>  Lua 5.4 grammar
+==================  =============================  ================================================
+Lua source version  Recommended ``luaparser``       Grammar support
+==================  =============================  ================================================
+Lua 5.1--5.3        ``luaparser>=3.2.1``            Supported
+Lua 5.4             ``luaparser>=3.3.0``            Supported
+Lua 5.5             Unreleased (after 4.2.0)        Supported
+==================  =============================  ================================================
+
+Use the newest ``luaparser`` release that satisfies your application's Python
+version requirements. Grammar support is backward compatible, so a newer
+release can parse source written for an older Lua version. ``luaparser`` does
+not enforce all compile-time semantic restrictions of a particular Lua
+version, so successful parsing is not a substitute for checking the source
+with that version's ``luac``.
 
 Options
 ------------------------------------------------------------------------------

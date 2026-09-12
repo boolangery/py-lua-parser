@@ -314,13 +314,40 @@ class BuilderVisitor(LuaParserVisitor):
     # Visit a parse tree produced by LuaParser#stat_local.
     def visitStat_local(self, ctx: LuaParser.Stat_localContext):
         att_name_list = self.visitAttnamelist(ctx.attnamelist())
+        attribute = self.visit(ctx.attnamelist().attrib()) if ctx.attnamelist().attrib() else None
 
         if ctx.EQ():
             exp_list = self.visitExplist(ctx.explist())
         else:
             exp_list = []
 
-        return self.add_context(ctx, LocalAssign(targets=att_name_list, values=exp_list))
+        return self.add_context(ctx, LocalAssign(
+            targets=att_name_list,
+            values=exp_list,
+            attribute=attribute,
+        ))
+
+    def visitStat_global(self, ctx: LuaParser.Stat_globalContext):
+        return self.visit(ctx.globalstat())
+
+    def visitGlobalstat_function(self, ctx: LuaParser.Globalstat_functionContext):
+        func_name = self.visit(ctx.NAME(1))
+        param_list, block = self.visitFuncbody(ctx.funcbody())
+        return self.add_context(ctx, GlobalFunction(func_name, param_list, block))
+
+    def visitGlobalstat_names(self, ctx: LuaParser.Globalstat_namesContext):
+        names = self.visitAttnamelist(ctx.attnamelist())
+        values = self.visitExplist(ctx.explist()) if ctx.explist() else []
+        attribute = self.visit(ctx.attnamelist().attrib()) if ctx.attnamelist().attrib() else None
+        return self.add_context(ctx, GlobalAssign(
+            targets=names,
+            values=values,
+            attribute=attribute,
+        ))
+
+    def visitGlobalstat_wildcard(self, ctx: LuaParser.Globalstat_wildcardContext):
+        attribute = self.visit(ctx.attrib()) if ctx.attrib() else None
+        return self.add_context(ctx, GlobalAssign(attribute=attribute, wildcard=True))
 
     # Visit a parse tree produced by LuaParser#functiondef.
     def visitFunctiondef(self, ctx: LuaParser.FunctiondefContext) -> AnonymousFunction:
@@ -630,9 +657,13 @@ class BuilderVisitor(LuaParserVisitor):
         else:
             name_list = []
 
-        if ctx.DDD():
-            name_list.append(Varargs())
+        if ctx.varargparam():
+            name_list.append(self.visit(ctx.varargparam()))
         return name_list
+
+    def visitVarargparam(self, ctx: LuaParser.VarargparamContext) -> Varargs:
+        name = self.visit(ctx.NAME()) if ctx.NAME() else None
+        return self.add_context(ctx, Varargs(name=name))
 
     # Visit a parse tree produced by LuaParser#tableconstructor.
     def visitTableconstructor(self, ctx: LuaParser.TableconstructorContext):
@@ -686,8 +717,11 @@ class BuilderVisitor(LuaParserVisitor):
         try:
             number = ast.literal_eval(number_text)
         except (ValueError, SyntaxError):
-            # exception occurs with leading zero number: 002
-            number = float(number_text)
+            if number_text.lower().startswith("0x"):
+                number = float.fromhex(number_text)
+            else:
+                # exception occurs with leading zero number: 002
+                number = float(number_text)
         return Number(
             number,
         )
@@ -695,6 +729,7 @@ class BuilderVisitor(LuaParserVisitor):
     # Visit a parse tree produced by LuaParser#string.
     def visitString(self, ctx: LuaParser.StringContext):
         lua_str = ctx.getText()
+        long_bracket_level = 0
 
         delimiter: StringDelimiter = StringDelimiter.SINGLE_QUOTE
 
@@ -710,11 +745,15 @@ class BuilderVisitor(LuaParserVisitor):
         else:
             m = LUA_DOUBLE_SQUARE_RE.match(lua_str)
             if m:
+                long_bracket_level = len(m.group("eq"))
                 lua_str = m.group("body")
                 delimiter = StringDelimiter.DOUBLE_SQUARE
 
         if delimiter == StringDelimiter.DOUBLE_QUOTE or delimiter == StringDelimiter.SINGLE_QUOTE:
             unescaped_str = unescape_lua_string(lua_str)
         else:
-            unescaped_str = lua_str.encode("utf-8")
-        return String(unescaped_str, lua_str, delimiter)
+            normalized_str = re.sub(r"\r\n|\n\r|\r", "\n", lua_str)
+            if normalized_str.startswith("\n"):
+                normalized_str = normalized_str[1:]
+            unescaped_str = normalized_str.encode("utf-8")
+        return String(unescaped_str, lua_str, delimiter, long_bracket_level)

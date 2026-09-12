@@ -45,11 +45,18 @@ stat
     | 'for' namelist 'in' explist 'do' block 'end'									# stat_for
     | 'function' funcname funcbody													# stat_function
     | 'local' 'function' NAME funcbody												# stat_localfunction
+    | globalstat																    # stat_global
     | 'local' attnamelist ('=' explist)?											# stat_local
     ;
 
+globalstat
+    : { self.IsGlobal() }? NAME 'function' NAME funcbody                # globalstat_function
+    | { self.IsGlobal() }? NAME attnamelist ('=' explist)?              # globalstat_names
+    | { self.IsGlobal() }? NAME attrib? '*'                             # globalstat_wildcard
+    ;
+
 attnamelist
-    : nameattrib (',' nameattrib)*
+    : attrib? nameattrib (',' nameattrib)*
     ;
 
 nameattrib
@@ -61,7 +68,7 @@ attrib
     ;
 
 retstat
-    : ('return' explist? | 'break' ) ';'?
+    : 'return' explist? ';'?
     ;
 
 label
@@ -159,9 +166,13 @@ funcbody
  * This means that parlist can derive empty.
  */
 parlist
-    : namelist (',' '...')?
-    | '...'
+    : namelist (',' varargparam)?
+    | varargparam
     |
+    ;
+
+varargparam
+    : '...' NAME?
     ;
 
 tableconstructor

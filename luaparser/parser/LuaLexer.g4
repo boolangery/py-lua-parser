@@ -69,20 +69,11 @@ SQEQ     : '~=';
 
 NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 
-NORMALSTRING: '"' ( EscapeSequence | ~('\\' | '"'))* '"';
+NORMALSTRING: '"' ( EscapeSequence | ~('\\' | '"' | '\r' | '\n'))* '"';
 
-CHARSTRING: '\'' ( EscapeSequence | ~('\'' | '\\'))* '\'';
+CHARSTRING: '\'' ( EscapeSequence | ~('\'' | '\\' | '\r' | '\n'))* '\'';
 
-LONGSTRING: '[' '=' '=' '=' '=' '=' '=' '=' '=' '[' .*? ']' '=' '=' '=' '=' '=' '=' '=' '=' ']'
-          | '[' '=' '=' '=' '=' '=' '=' '=' '[' .*? ']' '=' '=' '=' '=' '=' '=' '=' ']'
-          | '[' '=' '=' '=' '=' '=' '=' '[' .*? ']' '=' '=' '=' '=' '=' '=' ']'
-          | '[' '=' '=' '=' '=' '=' '[' .*? ']' '=' '=' '=' '=' '=' ']'
-          | '[' '=' '=' '=' '=' '[' .*? ']' '=' '=' '=' '=' ']'
-          | '[' '=' '=' '=' '[' .*? ']' '=' '=' '=' ']'
-          | '[' '=' '=' '[' .*? ']' '=' '=' ']'
-          | '[' '=' '[' .*? ']' '=' ']'
-          | '[' '[' .*? ']' ']'
-          ;
+LONGSTRING: '[' NESTED_STR ']';
 
 fragment NESTED_STR: '=' NESTED_STR '=' | '[' .*? ']';
 
@@ -103,8 +94,9 @@ fragment ExponentPart: [eE] [+-]? Digit+;
 fragment HexExponentPart: [pP] [+-]? Digit+;
 
 fragment EscapeSequence:
-    '\\' [abfnrtvz"'|$#\\] // World of Warcraft Lua additionally escapes |$# 
-    | '\\' '\r'? '\n'
+    '\\' [abfnrtv"'\\]
+    | '\\' 'z' [ \t\u000B\u000C\r\n]*
+    | '\\' ('\r' '\n'? | '\n' '\r'?)
     | DecimalEscape
     | HexEscape
     | UtfEscape
@@ -112,10 +104,10 @@ fragment EscapeSequence:
 
 fragment DecimalEscape:
     '\\'
-    ( Digit
-    | Digit Digit
-    | [0-1] Digit Digit
+    ( [0-1] Digit Digit
     | '2' ('5' [0-5] | [0-4] Digit)
+    | Digit Digit { self.IsDecimalEscapeTerminated() }?
+    | Digit { self.IsDecimalEscapeTerminated() }?
     )
 ;
 
@@ -155,8 +147,8 @@ LINE_COMMENT
     -> channel(2)
     ;
 
-WS: [ \t\u000C\r]+ -> channel(HIDDEN);
+WS: [ \t\u000B\u000C\r]+ -> channel(HIDDEN);
 
 NL: [\n] -> channel(1);
 
-SHEBANG: '#' { this.IsLine1Col0() }? '!'? SingleLineInputCharacter* -> channel(HIDDEN);
+SHEBANG: '#' { self.IsLine1Col0() }? '!'? SingleLineInputCharacter* -> channel(HIDDEN);
