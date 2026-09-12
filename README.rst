@@ -7,6 +7,8 @@ py-lua-parser
     :target: https://pypi.python.org/pypi/luaparser/
 .. image:: https://img.shields.io/pypi/pyversions/luaparser.svg
     :target: https://pypi.python.org/pypi/luaparser/
+.. image:: https://readthedocs.org/projects/py-lua-parser/badge/?version=latest
+    :target: https://py-lua-parser.readthedocs.io/en/latest/
 
 A Lua parser and AST builder written in Python.
 
@@ -294,7 +296,10 @@ Will output:
 Documentation
 ==============================================================================
 
-Documentation can be built with Sphinx:
+The API documentation is hosted at
+https://py-lua-parser.readthedocs.io/en/latest/
+
+It can also be built locally with Sphinx:
 
 .. code-block::
 

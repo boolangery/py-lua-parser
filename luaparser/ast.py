@@ -116,7 +116,7 @@ class ASTTransformer:
 
         class NumberDoubler(ASTTransformer):
             def visit_Number(self, node):
-                return Number(node.value * 2)
+                return Number(node.n * 2)
 
         tree = ast.parse("x = 5")
         new_tree = NumberDoubler().visit(tree)

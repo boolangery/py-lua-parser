@@ -1,5 +1,10 @@
-astnodes module
-******************************************************************************
+###############################################################################
+AST nodes
+###############################################################################
+
+Every class below lives in :mod:`luaparser.astnodes` and derives from
+:class:`~luaparser.astnodes.Node`. See :doc:`parsing` for what the common
+attributes mean.
 
 
 Root node
