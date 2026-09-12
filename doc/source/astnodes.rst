@@ -8,6 +8,15 @@ Root node
 .. autoclass:: luaparser.astnodes.Node
     :members:
 
+.. autoclass:: luaparser.astnodes.Statement
+    :members:
+
+.. autoclass:: luaparser.astnodes.Expression
+    :members:
+
+.. autoclass:: luaparser.astnodes.Comment
+    :members:
+
 
 Statements
 ===============================================================================
@@ -26,6 +35,12 @@ Assignment
     :members:
 
 .. autoclass:: luaparser.astnodes.LocalAssign
+    :members:
+
+.. autoclass:: luaparser.astnodes.GlobalAssign
+    :members:
+
+.. autoclass:: luaparser.astnodes.Attribute
     :members:
 
 
@@ -57,6 +72,9 @@ Control Structures
     :members:
 
 .. autoclass:: luaparser.astnodes.Return
+    :members:
+
+.. autoclass:: luaparser.astnodes.SemiColon
     :members:
 
 
@@ -92,6 +110,9 @@ Function declaration
 .. autoclass:: luaparser.astnodes.Method
     :members:
 
+.. autoclass:: luaparser.astnodes.GlobalFunction
+    :members:
+
 
 Expressions
 ===============================================================================
@@ -119,6 +140,12 @@ Types and values
     :members:
 
 .. autoclass:: luaparser.astnodes.Dots
+    :members:
+
+.. autoclass:: luaparser.astnodes.Varargs
+    :members:
+
+.. autoclass:: luaparser.astnodes.Field
     :members:
 
 .. autoclass:: luaparser.astnodes.AnonymousFunction
@@ -258,4 +285,20 @@ Left hand Side expression
     :members:
 
 .. autoclass:: luaparser.astnodes.Index
+    :members:
+
+
+Attribute enums
+===============================================================================
+
+These are not nodes; they are the enumerations used by the node attributes
+above.
+
+.. autoclass:: luaparser.astnodes.CallStyle
+    :members:
+
+.. autoclass:: luaparser.astnodes.StringDelimiter
+    :members:
+
+.. autoclass:: luaparser.astnodes.IndexNotation
     :members:

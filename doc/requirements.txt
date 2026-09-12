@@ -1,3 +1,2 @@
-sphinx
-sphinx_rtd_theme
-sphinxcontrib-napoleon
+sphinx>=7,<10
+sphinx_rtd_theme>=2,<4

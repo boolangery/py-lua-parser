@@ -2,7 +2,7 @@
 LuaParser
 ###############################################################################
 
-LuaParser is a Lua 5.3 parser with AST generation and visitor support.
+LuaParser is a Lua 5.5 parser with AST generation and visitor support.
 
 
 .. toctree::
