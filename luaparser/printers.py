@@ -194,14 +194,29 @@ class HTMLStyleVisitor:
 
 
 class LuaOutputVisitor:
+    # A newline inside a string literal is part of that literal's value, but
+    # indentation is applied with textwrap.indent, which prefixes every line of
+    # a statement's rendered text and would therefore alter the string. While
+    # visiting, such newlines stand in as this sentinel, which indent() sees as
+    # an ordinary character; to_source() puts them back once indenting is done.
+    _LITERAL_NEWLINE = "\ue000"
+
     def __init__(self, indent_size: int):
         self._indent_size = indent_size
         self._level = 0
 
-    def do_visit(self, node: Node) -> str:
+    def to_source(self, node: Node) -> str:
+        return self.do_visit(node).replace(self._LITERAL_NEWLINE, "\n")
+
+    def do_visit(self, node: Node, suffix: str = "") -> str:
         output = self.visit(node)
         if isinstance(node, Expression) and node.wrapped:
             output = "(" + output + ")"
+
+        # A separator such as a table field's comma belongs to the node itself,
+        # so it is appended here rather than by the caller: appending it after
+        # a trailing comment would leave it inside that comment.
+        output += suffix
 
         if isinstance(node, Node) and node.comments:
             # Comments are attributed to a node's .comments during parsing by
@@ -385,7 +400,7 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: Call) -> str:
-        return self.do_visit(node.func) + "(" + self.do_visit(node.args) + ")"
+        return self.do_visit(node.func) + self._call_args(node)
 
     @visit.register
     def visit(self, node: Invoke) -> str:
@@ -393,10 +408,18 @@ class LuaOutputVisitor:
                 self.do_visit(node.source)
                 + ":"
                 + self.do_visit(node.func)
-                + "("
-                + self.do_visit(node.args)
-                + ")"
+                + self._call_args(node)
         )
+
+    def _call_args(self, node) -> str:
+        # Lua allows the parentheses to be dropped when the only argument is a
+        # string or a table literal (print"x", f{...}); the parser records that
+        # as NO_PARENTHESIS, so reproduce it rather than normalising the call.
+        if node.style == CallStyle.NO_PARENTHESIS and len(node.args) == 1:
+            arg = node.args[0]
+            if isinstance(arg, (String, Table)) and not arg.wrapped:
+                return self.do_visit(arg)
+        return "(" + self.do_visit(node.args) + ")"
 
     @visit.register
     def visit(self, node: Function) -> str:
@@ -466,19 +489,20 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: String) -> str:
+        raw = self.do_visit(node.raw).replace("\n", self._LITERAL_NEWLINE)
         if node.delimiter == StringDelimiter.SINGLE_QUOTE:
-            return "'" + self.do_visit(node.raw) + "'"
+            return "'" + raw + "'"
         elif node.delimiter == StringDelimiter.DOUBLE_QUOTE:
-            return '"' + self.do_visit(node.raw) + '"'
+            return '"' + raw + '"'
         else:
             equals = "=" * node.long_bracket_level
-            return "[" + equals + "[" + self.do_visit(node.raw) + "]" + equals + "]"
+            return "[" + equals + "[" + raw + "]" + equals + "]"
 
     @visit.register
     def visit(self, node: Table):
         output = "{\n"
         for field in node.fields:
-            output += indent(self.do_visit(field) + ",\n", " " * self._indent_size)
+            output += indent(self.do_visit(field, ",") + "\n", " " * self._indent_size)
         output += "}"
         return output
 
@@ -591,7 +615,11 @@ class LuaOutputVisitor:
 
     @visit.register
     def visit(self, node: UMinusOp) -> str:
-        return "-" + self.do_visit(node.operand)
+        operand = self.do_visit(node.operand)
+        # "--" starts a comment, so a minus applied to something already
+        # rendered with a leading minus needs a space to stay an operator.
+        separator = " " if operand.startswith("-") else ""
+        return "-" + separator + operand
 
     @visit.register
     def visit(self, node: UBNotOp) -> str:
